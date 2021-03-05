@@ -4,11 +4,11 @@ Import, clean, and process CTD data.
 
 # Set up the directory
 
-This code copies data from a CTD directory and sets up processing files in your working directory. Processing files: hex, psa, xmlcon, and batch files.
-Run this code after connecting to the VPN. Tip: if you get "No emlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code. 
+This code copies data from a CTD directory and sets up processing files in your working directory. Processing files: hex, psa, xmlcon, and batch files.<br/>
+Run this code after connecting to the VPN. **Tip**: if you get "No emlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code. 
 
-devtools::install_github("sean-rohan-noaa/gapctd")
-library(gapctd)
+devtools::install_github("sean-rohan-noaa/gapctd")<br/>
+library(gapctd)<br/>
 gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2019/ebs/v162",
                                  output_dir = NA,
                                  ctd_unit = "sbe19")
