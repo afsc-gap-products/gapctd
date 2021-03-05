@@ -5,7 +5,7 @@ Import, clean, and process CTD data.
 # Set up the directory
 
 This code copies data from a CTD directory and sets up processing files in your working directory. Processing files: hex, psa, xmlcon, and batch files.<br/>
-Run this code after connecting to the VPN. **Tip**: if you get "No emlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code. 
+Run this code after connecting to the VPN. **Tip**: if you get "No xmlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code. 
 
 devtools::install_github("sean-rohan-noaa/gapctd")<br/>
 library(gapctd)<br/>
