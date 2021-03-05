@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Cell_Thermal_Mass >
+  <Version value="7.26.7.129" />
+  <ServerName value="Cell Thermal Mass" />
+  <InputDir value="" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="08_07_19000_test_test_filtered_alignCTD.cnv" />
+  </InputFileArray>
+  <OutputDir value="" />
+  <NameAppend value="_cell_thermal_mass" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <Primary >
+    <Correct value="1" />
+    <TempSensor value="0" />
+    <TA_Amplitude value="0.040000" />
+    <TA_TimeConstant value="8.000000" />
+  </Primary>
+  <Secondary >
+    <Correct value="0" />
+    <TempSensor value="1" />
+    <TA_Amplitude value="0.030000" />
+    <TA_TimeConstant value="7.000000" />
+  </Secondary>
+</Cell_Thermal_Mass>

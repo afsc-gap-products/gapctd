@@ -1,0 +1,20 @@
+Package: gapctd
+Type: Package
+Title: Process RACE/GAP CTD data and generate output.
+Version: 0.0.1
+Authors@R: c(person("Sean", "Rohan", 
+              email = "sean.rohan@noaa.gov", 
+              role = c("aut", "cre")),
+              person("Cecilia", "O'Leary", 
+              email = "cecilia.oleary@noaa.gov", 
+              role = c("aut")))
+Maintainer: Sean Rohan <sean.rohan@noaa.gov>
+Description: Package to process SBE19 CTD data for AFSC RACE/Groundfish Assessment Program bottom-trawl survey protocols.
+License: GPL (>=2)
+Encoding: UTF-8
+LazyData: false
+RoxygenNote: 7.1.1
+Imports: here
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

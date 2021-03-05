@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Align_CTD >
+  <Version value="7.26.7.129" />
+  <ServerName value="Align CTD" />
+  <InputDir value="" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="08_07_19000_test_test_filtered.cnv" />
+  </InputFileArray>
+  <OutputDir value="" />
+  <NameAppend value="_alignCTD" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <CalcArray Size="4" >
+    <CalcArrayItem index="0" CalcID="12" >
+      <Calc UnitID="58" Ordinal="0" >
+        <FullName value="Conductivity [S/m]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="1" CalcID="15" >
+      <Calc UnitID="11" Ordinal="0" >
+        <FullName value="Density [density, kg/m^3]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="2" CalcID="70" >
+      <Calc UnitID="49" Ordinal="0" >
+        <FullName value="Salinity, Practical [PSU]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="3" CalcID="81" >
+      <Calc UnitID="6" Ordinal="0" >
+        <FullName value="Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+  </CalcArray>
+  <ValArray size="4" >
+    <ValArrayItem index="0" value="0.000000" variable_name="Conductivity" />
+    <ValArrayItem index="1" value="0.000000" variable_name="Density" />
+    <ValArrayItem index="2" value="0.000000" variable_name="Salinity, Practical" />
+    <ValArrayItem index="3" value="0.500000" variable_name="Temperature" />
+  </ValArray>
+</Align_CTD>
