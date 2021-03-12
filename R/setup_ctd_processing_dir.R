@@ -5,9 +5,9 @@
 #' @param unit Character vector indicating model of the unit. Options = sbe19plus, sbe19. Won't run if the wrong unit is used.
 #' @export
 
-setup_ctd_processing_dir <- function(ctd_dir, 
-                           output_dir = NA,
-                           ctd_unit) {
+setup_ctd_processing_dir <- function(ctd_dir,
+                                     output_dir = NA,
+                                     ctd_unit) {
   
   # Verify that ctd unit is correct ----
   ctd_unit <- tolower(ctd_unit)
