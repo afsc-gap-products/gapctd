@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Split >
+  <Version value="7.26.7.129" />
+  <ServerName value="Split" />
+  <InputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
+  <InputFileArray size="45" GrowBy="-1" >
+    <ArrayItem index="0" value="08_07_19000_test.cnv" />
+    <ArrayItem index="1" value="08_07_19001_test.cnv" />
+    <ArrayItem index="2" value="08_07_19002_test.cnv" />
+    <ArrayItem index="3" value="08_07_19003_test.cnv" />
+    <ArrayItem index="4" value="08_07_19004_test.cnv" />
+    <ArrayItem index="5" value="08_08_19000_test.cnv" />
+    <ArrayItem index="6" value="08_08_19001_test.cnv" />
+    <ArrayItem index="7" value="08_08_19002_test.cnv" />
+    <ArrayItem index="8" value="08_08_19003_test.cnv" />
+    <ArrayItem index="9" value="08_08_19004_test.cnv" />
+    <ArrayItem index="10" value="08_08_19005_test.cnv" />
+    <ArrayItem index="11" value="08_08_19006_test.cnv" />
+    <ArrayItem index="12" value="08_08_19007_test.cnv" />
+    <ArrayItem index="13" value="08_08_19008_test.cnv" />
+    <ArrayItem index="14" value="08_09_19000_test.cnv" />
+    <ArrayItem index="15" value="08_09_19001_test.cnv" />
+    <ArrayItem index="16" value="08_09_19002_test.cnv" />
+    <ArrayItem index="17" value="08_10_19_000_test.cnv" />
+    <ArrayItem index="18" value="08_10_19_001_test.cnv" />
+    <ArrayItem index="19" value="08_10_19_002_test.cnv" />
+    <ArrayItem index="20" value="08_10_19_003_test.cnv" />
+    <ArrayItem index="21" value="08_11_19_000_test.cnv" />
+    <ArrayItem index="22" value="08_11_19_001_test.cnv" />
+    <ArrayItem index="23" value="08_11_19_002_test.cnv" />
+    <ArrayItem index="24" value="08_13_19_000_test.cnv" />
+    <ArrayItem index="25" value="08_13_19_001_test.cnv" />
+    <ArrayItem index="26" value="08_13_19_002_test.cnv" />
+    <ArrayItem index="27" value="08_13_19_003_test.cnv" />
+    <ArrayItem index="28" value="08_13_19_004_test.cnv" />
+    <ArrayItem index="29" value="08_14_19_000_test.cnv" />
+    <ArrayItem index="30" value="08_14_19_001_test.cnv" />
+    <ArrayItem index="31" value="08_14_19_002_test.cnv" />
+    <ArrayItem index="32" value="08_14_19_003_test.cnv" />
+    <ArrayItem index="33" value="08_14_19_004_test.cnv" />
+    <ArrayItem index="34" value="08_14_19_005_test.cnv" />
+    <ArrayItem index="35" value="08_15_19_000_test.cnv" />
+    <ArrayItem index="36" value="08_15_19_001_test.cnv" />
+    <ArrayItem index="37" value="08_15_19_002_test.cnv" />
+    <ArrayItem index="38" value="08_15_19_003_test.cnv" />
+    <ArrayItem index="39" value="08_15_19_004_test.cnv" />
+    <ArrayItem index="40" value="08_16_19_000_test.cnv" />
+    <ArrayItem index="41" value="08_16_19_002_test.cnv" />
+    <ArrayItem index="42" value="08_16_19_003_test.cnv" />
+    <ArrayItem index="43" value="08_17_19_000_test.cnv" />
+    <ArrayItem index="44" value="08_17_19_001_test.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
+  <NameAppend value="" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <OutputFiles value="0" high="1" low="0" initialValue="0" />
+  <ExcludeMarkedBad value="1" />
+</Split>

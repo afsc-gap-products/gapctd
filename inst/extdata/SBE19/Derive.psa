@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Derive >
+  <Version value="7.26.7.129" />
+  <ServerName value="Derive" />
+  <InstrumentPath value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
+  <InstrumentMatch value="0" />
+  <InputDir value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
+  <InputFileArray size="0" GrowBy="-1" />
+  <OutputDir value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
+  <NameAppend value="" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <CalcArray Size="0" />
+  <MiscellaneousDataForCalculations >
+    <Latitude value="0.000000" />
+    <Longitude value="0.000000" />
+    <DescentRateAndAcceleration >
+      <WindowSize value="2.000000" />
+    </DescentRateAndAcceleration>
+    <Oxygen >
+      <WindowSize value="2.000000" />
+      <ApplyHysteresisCorrection value="1" />
+      <ApplyTauCorrection value="1" />
+    </Oxygen>
+    <AverageSoundVelocity >
+      <MinimumPressure value="20.000000" />
+      <MinimumSalinity value="20.000000" />
+      <PressureWindowSize value="20.000000" />
+      <TimeWindowSize value="60.000000" />
+    </AverageSoundVelocity>
+    <PlumeAnomaly >
+      <ThetaB value="0.000000" />
+      <SalinityB value="0.000000" />
+      <ThetaZSalinityZRatio value="0.000000" />
+      <ReferencePressure value="0.000000" />
+    </PlumeAnomaly>
+    <PotentialTempAnomaly >
+      <A0 value="0.000000" />
+      <A1 value="0.000000" />
+      <A1Multiplier value="0" />
+    </PotentialTempAnomaly>
+  </MiscellaneousDataForCalculations>
+</Derive>

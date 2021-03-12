@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Derive_TEOS_10 >
+  <Version value="7.26.7.129" />
+  <ServerName value="Derive TEOS-10" />
+  <InputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
+  <InputFileArray size="3" GrowBy="-1" >
+    <ArrayItem index="0" value="08_16_19_003_test.cnv" />
+    <ArrayItem index="1" value="08_17_19_000_test.cnv" />
+    <ArrayItem index="2" value="08_17_19_001_test.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
+  <NameAppend value="" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <CalcArray Size="3" >
+    <CalcArrayItem index="0" CalcID="8000" >
+      <Calc UnitID="80" Ordinal="0" >
+        <FullName value="Absolute Salinity [g/kg]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="1" CalcID="8001" >
+      <Calc UnitID="6" Ordinal="0" >
+        <FullName value="Conservative Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="2" CalcID="8004" >
+      <Calc UnitID="11" Ordinal="0" >
+        <FullName value="density, TEOS-10 [density, kg/m^3]" />
+      </Calc>
+    </CalcArrayItem>
+  </CalcArray>
+  <!-- -1 = Other -->
+  <!-- 4 = SBE 21 Seacat Thermosalinograph -->
+  <!-- 6 = SBE 45 Micro TSG Thermosalinograph -->
+  <InstrumentType>-1</InstrumentType>
+  <!--  0 = values entered. -->
+  <!--  1 = text file. -->
+  <!-- Not applicable if NMEA data is present. -->
+  <SourceForLatitudeLongitude>0</SourceForLatitudeLongitude>
+  <Latitude>0.00000e+000</Latitude>
+  <Longitude>0.00000e+000</Longitude>
+  <!--  0 = values entered. -->
+  <!--  1 = .xmlcon file -->
+  <!--  2 = text file. -->
+  <!-- Not applicable if pressure column is present or instrument is a thermosalinograph -->
+  <SourceForMooredPressure>0</SourceForMooredPressure>
+  <MooredPressure>0.00000e+000</MooredPressure>
+</Derive_TEOS_10>
