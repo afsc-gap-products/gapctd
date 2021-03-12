@@ -9,14 +9,20 @@ Run this code after connecting to the VPN. **Tip**: if you get "No xmlcon file f
 
 devtools::install_github("sean-rohan-noaa/gapctd")<br/>
 library(gapctd)<br/>
+
+# Set up CTD files for batch processsing in a local directory
 gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2019/ebs/v162",
                                  output_dir = NA,
-                                 ctd_unit = "sbe19")
+                                 ctd_unit = "sbe19")<br/>
+                                 
+# Start batch processing in R
 
-# Batch processing
+1. Run run_sbe_batch() after setting up the CTD directory for batch processing as descrbed above.
+
+# Batch processing in Command Line
 
 1. Open Command Line/Powershell
 2. Navigate to the local directory in your command line that you set up for processing.
 3. Run the batch file by typing:
-    sbebatch sbe19.bat [working directory], where working directory is the local directory you have set up for processing (e.g., C:\user\work\ctd\ebs2019\162)
+    sbebatch sbe19.bat [working directory] [xmlcon filename], where working directory is the local directory you have set up for processing (e.g., C:\user\work\ctd\ebs2019\162) and xlmcon filename is the name of the .xmlcon file in the local /psa_xmlcon/ subdirectory (e.g., SBE19_2290.xmlcon).
 
