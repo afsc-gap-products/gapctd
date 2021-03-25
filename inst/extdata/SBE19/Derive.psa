@@ -2,17 +2,41 @@
 <Derive >
   <Version value="7.26.7.129" />
   <ServerName value="Derive" />
-  <InstrumentPath value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
+  <InstrumentPath value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\psa_xmlcon\SBE19_2290.xmlcon" />
   <InstrumentMatch value="0" />
-  <InputDir value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
-  <InputFileArray size="0" GrowBy="-1" />
-  <OutputDir value="C:\Program Files (x86)\Sea-Bird\SBEDataProcessing-Win32" />
-  <NameAppend value="" />
-  <OutputFile value="" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="u08_17_19_001_raw_align_wildedit_filter_loopedit_tmcorrect_split_binavg.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <NameAppend value="_eos80" />
+  <OutputFile value="u08_17_19_001_raw_align_wildedit_filter_loopedit_tmcorrect_split_binavg" />
   <LastProcessed value="0" />
-  <CalcArray Size="0" />
+  <CalcArray Size="4" >
+    <CalcArrayItem index="0" CalcID="15" >
+      <Calc UnitID="11" Ordinal="0" >
+        <FullName value="Density [density, kg/m^3]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="1" CalcID="17" >
+      <Calc UnitID="31" Ordinal="0" >
+        <FullName value="Depth [salt water, m]" />
+        <Latitude value="56.000000" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="2" CalcID="62" >
+      <Calc UnitID="6" Ordinal="0" >
+        <FullName value="Potential Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="3" CalcID="70" >
+      <Calc UnitID="49" Ordinal="0" >
+        <FullName value="Salinity, Practical [PSU]" />
+      </Calc>
+    </CalcArrayItem>
+  </CalcArray>
   <MiscellaneousDataForCalculations >
-    <Latitude value="0.000000" />
+    <Latitude value="56.000000" />
     <Longitude value="0.000000" />
     <DescentRateAndAcceleration >
       <WindowSize value="2.000000" />

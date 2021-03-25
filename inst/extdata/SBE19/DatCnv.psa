@@ -2,7 +2,7 @@
 <Data_Conversion >
   <Version value="7.26.7.129" />
   <ServerName value="Data Conversion" />
-  <InstrumentPath value="C:\Users\sean.rohan\Work\afsc\race_ctd\data\SBE19_2290.xmlcon" />
+  <InstrumentPath value="C:\SBE19_0001.xmlcon" />
   <InstrumentMatch value="0" />
   <InputDir value="" />
   <InputFileArray size="1" GrowBy="-1" >
@@ -24,7 +24,7 @@
   <ScanRangeDuration value="2.000000" />
   <StartTimeOption value="0" />
   <PromptForNoteAndOrStartTime value="0" />
-  <CalcArray Size="5" >
+  <CalcArray Size="6" >
     <CalcArrayItem index="0" CalcID="12" >
       <Calc UnitID="58" Ordinal="0" >
         <FullName value="Conductivity [S/m]" />
@@ -49,6 +49,11 @@
     <CalcArrayItem index="4" CalcID="81" >
       <Calc UnitID="6" Ordinal="0" >
         <FullName value="Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="5" CalcID="67" >
+      <Calc UnitID="3" Ordinal="0" >
+        <FullName value="Pressure, Strain Gauge [db]" />
       </Calc>
     </CalcArrayItem>
   </CalcArray>

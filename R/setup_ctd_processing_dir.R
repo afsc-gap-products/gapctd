@@ -33,6 +33,14 @@ setup_ctd_processing_dir <- function(ctd_dir,
     dir.create("cnv")
   }
   
+  if(!dir.exists("bad_cnv")) {
+    dir.create("bad_cnv")
+  }
+  
+  if(!dir.exists("final_cnv")) {
+    dir.create("final_cnv")
+  }
+  
   if(!dir.exists("output")) {
     dir.create("output")
   }

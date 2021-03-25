@@ -4,7 +4,7 @@
 \alias{run_sbe_batch}
 \title{Function to run SBE19 batch file}
 \usage{
-run_sbe_batch(xmlcon_file = NA, bat_file = NA)
+run_sbe_batch(xmlcon_file = NA, bat_file = NA, derive_file = NA)
 }
 \arguments{
 \item{xmlcon_file}{Optional character vector specifying the name of the .xmlcon file. Default NA automatically retrieves the filename from psa_xmlcon subdirectory of the working directory.}

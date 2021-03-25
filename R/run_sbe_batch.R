@@ -8,7 +8,8 @@
 
 
 run_sbe_batch <- function(xmlcon_file = NA,
-                          bat_file = NA) {
+                          bat_file = NA,
+                          derive_file = NA) {
   
   print(paste0("Batch processing in directory: ", getwd()))
   
@@ -25,9 +26,10 @@ run_sbe_batch <- function(xmlcon_file = NA,
     }
   }
   
+  # Get data, filter, loop edit, align ----
   if(is.na(bat_file)) {
-    print("Automatically selecting .bat file (no user-specified argument to bat_file)")
-    bat_file <- list.files(pattern = ".bat")
+    print("Automatically selecting getdata.bat file (no user-specified argument to bat_file)")
+    bat_file <- list.files(pattern = "getdata.bat")
     
     if(length(xmlcon_file) < 1) {
       stop(paste0("No .bat file found in ", getwd(), ". Must have a valid .bat file."))
@@ -38,7 +40,28 @@ run_sbe_batch <- function(xmlcon_file = NA,
     }
   }
   
-  print("Starting sbebatch")
+  print("Starting sbebatch to get data")
   system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_file))
+  
+  # Derive EOS80 and TEOS10 ----
+  if(is.na(derive_file)) {
+    print("Automatically selecting derive.bat file (no user-specified argument to bat_file)")
+    derive_file <- list.files(pattern = "derive.bat")
+    
+    if(length(xmlcon_file) < 1) {
+      stop(paste0("No .bat file found in ", getwd(), ". Must have a valid .bat file."))
+    } 
+  } else {
+    if(!file.exists(paste0(getwd(), "/", derive_file))) {
+      stop(paste0(derive_file, " file not found in ", getwd(), ". Must have a valid .bat file."))
+    }
+  }
+  
+  print("Starting sbebatch to derive EOS80 and TEOS10")
+  system(command = paste0("sbebatch ", getwd(), "/", derive_file, " ", getwd(), " ", xmlcon_file))
+  
+  # Remove cnv files without data ----
+  print("Removing bad cnv files")
+  gapctd::move_binned_cnv()
   
 }

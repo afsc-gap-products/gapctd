@@ -4,7 +4,7 @@
   <ServerName value="Align CTD" />
   <InputDir value="" />
   <InputFileArray size="1" GrowBy="-1" >
-    <ArrayItem index="0" value="08_07_19000_test_test_filtered.cnv" />
+    <ArrayItem index="0" value="test.cnv" />
   </InputFileArray>
   <OutputDir value="" />
   <NameAppend value="_alignCTD" />

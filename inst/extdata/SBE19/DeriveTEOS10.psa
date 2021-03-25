@@ -2,15 +2,13 @@
 <Derive_TEOS_10 >
   <Version value="7.26.7.129" />
   <ServerName value="Derive TEOS-10" />
-  <InputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
-  <InputFileArray size="3" GrowBy="-1" >
-    <ArrayItem index="0" value="08_16_19_003_test.cnv" />
-    <ArrayItem index="1" value="08_17_19_000_test.cnv" />
-    <ArrayItem index="2" value="08_17_19_001_test.cnv" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="u08_17_19_001_raw_align_wildedit_filter_loopedit_tmcorrect_split_binavg.cnv" />
   </InputFileArray>
-  <OutputDir value="C:\Users\cecilia.oleary\Desktop\CTD_test_data\data\2019\EBS\V162" />
-  <NameAppend value="" />
-  <OutputFile value="" />
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <NameAppend value="_teos10" />
+  <OutputFile value="u08_17_19_001_raw_align_wildedit_filter_loopedit_tmcorrect_split_binavg" />
   <LastProcessed value="0" />
   <CalcArray Size="3" >
     <CalcArrayItem index="0" CalcID="8000" >

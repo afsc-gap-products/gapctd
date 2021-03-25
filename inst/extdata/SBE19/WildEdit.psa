@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wild_Edit >
+  <Version value="7.26.7.129" />
+  <ServerName value="Wild Edit" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="2nd 08_07_19004000_raw_align.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
+  <NameAppend value="_wildedit_filter" />
+  <OutputFile value="2nd 08_07_19004000_raw_align" />
+  <LastProcessed value="0" />
+  <StdDevPassOne value="2.000000" />
+  <StdDevPassTwo value="20.000000" />
+  <ScansPerBlock value="100" />
+  <MinDelta value="0.000000" />
+  <ExcludeMarkedBad value="1" />
+  <CalcArray Size="6" >
+    <CalcArrayItem index="0" CalcID="12" >
+      <Calc UnitID="58" Ordinal="0" >
+        <FullName value="Conductivity [S/m]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="1" CalcID="15" >
+      <Calc UnitID="11" Ordinal="0" >
+        <FullName value="Density [density, kg/m^3]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="2" CalcID="17" >
+      <Calc UnitID="31" Ordinal="0" >
+        <FullName value="Depth [salt water, m]" />
+        <Latitude value="0.000000" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="3" CalcID="70" >
+      <Calc UnitID="49" Ordinal="0" >
+        <FullName value="Salinity, Practical [PSU]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="4" CalcID="81" >
+      <Calc UnitID="6" Ordinal="0" >
+        <FullName value="Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="5" CalcID="67" >
+      <Calc UnitID="3" Ordinal="0" >
+        <FullName value="Pressure, Strain Gauge [db]" />
+      </Calc>
+    </CalcArrayItem>
+  </CalcArray>
+  <SelectArray >
+    <ArrayItem index="0" value="1" />
+    <ArrayItem index="1" value="1" />
+    <ArrayItem index="2" value="1" />
+    <ArrayItem index="3" value="1" />
+    <ArrayItem index="4" value="1" />
+    <ArrayItem index="5" value="1" />
+  </SelectArray>
+</Wild_Edit>
