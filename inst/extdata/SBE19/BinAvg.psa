@@ -8,7 +8,7 @@
   <NameAppend value="_binavg" />
   <OutputFile value="" />
   <LastProcessed value="0" />
-  <BinType value="0" />
+  <BinType value="2" />
   <BinSize value="1.000000" />
   <IncludeNumberScans value="0" />
   <ExcludeMarkedBad value="1" />
