@@ -1,12 +1,11 @@
 # GAP CTD Data Processing
 
-Import, clean, and process CTD data.
+Import, clean, and process CTD data. Calculates absolute salinity, practical salinity, temperature, density.
 
 # Set up the directory
 
 This code copies data from a CTD directory and sets up processing files in your working directory. Processing files: hex, psa, xmlcon, and batch files.<br/>
-Run this code after connecting to the VPN. **Tip**: if you get "No xmlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code. 
-
+Run this code after connecting to the VPN. **Tip**: if you get "No xmlcon file found in the CTD directory" error message, you sometimes need to open that G drive folder before running code.
 devtools::install_github("sean-rohan-noaa/gapctd")<br/>
 library(gapctd)<br/>
 
@@ -15,9 +14,10 @@ gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2019/ebs/v162",
                                  output_dir = NA,
                                  ctd_unit = "sbe19")<br/>
                                  
-# Start batch processing in R
+# Automatically start batch processing in R
 
 1. Run run_sbe_batch() after setting up the CTD directory for batch processing as descrbed above.
+2. Run make_cast_plots() to generate plots for visual QA/QC inspection<br/>.
 
 # Batch processing in Command Line
 
