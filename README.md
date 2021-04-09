@@ -16,8 +16,9 @@ gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2019/ebs/v162",
                                  
 # Automatically start batch processing in R
 
-1. Run run_sbe_batch() after setting up the CTD directory for batch processing as descrbed above.
-2. Run make_cast_plots() to generate plots for visual QA/QC inspection<br/>.
+1. Set up a new directory and set it as the working directory. 
+2. Run run_sbe_batch() after setting up the CTD directory for batch processing as descrbed above.
+3. Run make_cast_plots() to generate plots for visual QA/QC inspection<br/>.
 
 # Batch processing in Command Line
 
