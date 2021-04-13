@@ -7,13 +7,16 @@
 create_NMEA_files()
 }
 \arguments{
-\item{oracle}{password Enter your personal oracle password to access RACEBASE.HAUL oracle data}
+\item{oracle_username}{Character. Enter your personal oracle username to access RACEBASE.HAUL oracle data}
 
-\item{survey}{year Specify the survey year of your CTD data. Prompted, no default.}
+\item{oracle_password}{Character. Enter your personal oracle password to access RACEBASE.HAUL oracle data}
+
+\item{survey_region}{Character. Specify the survey region of your CTD data (GOA, AI, BS). Prompted, no default.}
+
+\item{survey_year}{Character. Specify the survey year of your CTD data. Prompted, no default.}
 }
 \description{
-implement between derive.bat and getdata.bat
-requires VPN connection
-will prompt for oracle username, password, survey region (GOA, AI, BS), and survey year
-dependencies: getPass, RODBC, oce
+implement between derive.bat and getdata.bat. Requires a VPN connection to run. 
+Function will prompt for oracle username, oracle password, survey region (GOA, AI, BS), and survey year.
+Function dependencies: getPass, RODBC, oce
 }
