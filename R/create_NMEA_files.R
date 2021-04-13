@@ -5,10 +5,10 @@
 #' will prompt for oracle username, password, survey region (GOA, AI, BS), and survey year
 #' dependencies: getPass, RODBC, oce
 #'
-#' @param oracle username Enter your personal oracle username to access RACEBASE.HAUL oracle data
-#' @param oracle password Enter your personal oracle password to access RACEBASE.HAUL oracle data
-#' @param survey region Specify the survey region of your CTD data (GOA, AI, BS). Prompted, no default.
-#' @param survey year Specify the survey year of your CTD data. Prompted, no default.
+#' @param oracle_username Enter your personal oracle username to access RACEBASE.HAUL oracle data
+#' @param oracle_password Enter your personal oracle password to access RACEBASE.HAUL oracle data
+#' @param survey_region Specify the survey region of your CTD data (GOA, AI, BS). Prompted, no default.
+#' @param survey_year Specify the survey year of your CTD data. Prompted, no default.
 #' @export
 
 ##remotes::install_github("dankelley/oce", ref="develop")
