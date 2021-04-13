@@ -1,9 +1,16 @@
-## Function to pull in lat/lon from haul data that matches each .cnv to create NMEA files
-## between derive.bat and getdata.bat
-## requires VPN connection
-## will prompt for oracle username, password, survey region (GOA, AI, BS), and survey year
+#' Function to pull in lat/lon from bottom trawl racebase haul data that matches each .cnv to create NMEA files
+#'
+#' implement between derive.bat and getdata.bat
+#' requires VPN connection
+#' will prompt for oracle username, password, survey region (GOA, AI, BS), and survey year
+#' dependencies: getPass, RODBC, oce
+#'
+#' @param oracle username Enter your personal oracle username to access RACEBASE.HAUL oracle data
+#' @param oracle password Enter your personal oracle password to access RACEBASE.HAUL oracle data
+#' @param survey region Specify the survey region of your CTD data (GOA, AI, BS). Prompted, no default.
+#' @param survey year Specify the survey year of your CTD data. Prompted, no default.
+#' @export
 
-##dependencies: getPass, RODBC, oce
 ##remotes::install_github("dankelley/oce", ref="develop")
 
 create_NMEA_files <- function()
