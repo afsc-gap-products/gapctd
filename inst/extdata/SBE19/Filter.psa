@@ -4,14 +4,14 @@
   <ServerName value="Filter" />
   <InputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
   <InputFileArray size="1" GrowBy="-1" >
-    <ArrayItem index="0" value="08_07_19003_raw_window.cnv" />
+    <ArrayItem index="0" value="08_17_19_000_raw.cnv" />
   </InputFileArray>
   <OutputDir value="C:\Users\sean.rohan\Work\afsc\test_race_ctd\cnv" />
   <NameAppend value="_fil1" />
-  <OutputFile value="08_07_19003_raw_window" />
+  <OutputFile value="08_17_19_000_raw.cnv" />
   <LastProcessed value="0" />
-  <TimeConstFilterA value="0.030000" />
-  <TimeConstFilterB value="0.150000" />
+  <TimeConstFilterA value="0.500000" />
+  <TimeConstFilterB value="1.000000" />
   <CalcArray Size="3" >
     <CalcArrayItem index="0" CalcID="12" >
       <Calc UnitID="58" Ordinal="0" >
@@ -32,6 +32,6 @@
   <FilterTypeArray >
     <ArrayItem index="0" value="1" />
     <ArrayItem index="1" value="1" />
-    <ArrayItem index="2" value="1" />
+    <ArrayItem index="2" value="2" />
   </FilterTypeArray>
 </Filter>

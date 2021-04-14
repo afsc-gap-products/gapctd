@@ -2,21 +2,21 @@
 % Please edit documentation in R/create_NMEA_files.R
 \name{create_NMEA_files}
 \alias{create_NMEA_files}
-\title{Function to pull in lat/lon from bottom trawl racebase haul data that matches each .cnv to create NMEA files}
+\title{Create NMEA files with LAT/LON for Derive TEOS-10}
 \usage{
-create_NMEA_files()
+create_NMEA_files(rodbc_channel = NA, haul_csv = NA, vessel, region, year)
 }
 \arguments{
-\item{oracle_username}{Character. Enter your personal oracle username to access RACEBASE.HAUL oracle data}
+\item{rodbc_channel}{Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.}
 
-\item{oracle_password}{Character. Enter your personal oracle password to access RACEBASE.HAUL oracle data}
+\item{haul_csv}{Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE.}
 
-\item{survey_region}{Character. Specify the survey region of your CTD data (GOA, AI, BS). Prompted, no default.}
+\item{vessel}{Required. Vessel number as a numeric vector.}
 
-\item{survey_year}{Character. Specify the survey year of your CTD data. Prompted, no default.}
+\item{region}{Required. Region as a character vector. Either "bs", "ai", or "goa".}
+
+\item{year}{Required. Year as a numeric vector.}
 }
 \description{
-implement between derive.bat and getdata.bat. Requires a VPN connection to run. 
-Function will prompt for oracle username, oracle password, survey region (GOA, AI, BS), and survey year.
-Function dependencies: getPass, RODBC, oce
+Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce
 }
