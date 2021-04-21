@@ -49,6 +49,10 @@ setup_ctd_processing_dir <- function(ctd_dir,
     dir.create("plots")
   }
   
+  if(!dir.exists("metadata")) {
+    dir.create("metadata")
+  }
+  
   # Copy hex and xmlcon files to processing directory ---- 
   hex_files <- list.files(ctd_dir,
                           pattern = "*.hex", 

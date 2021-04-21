@@ -32,6 +32,13 @@ create_NMEA_files <- function(rodbc_channel = NA,
                         stringsAsFactors = FALSE)
   }
   
+  ###### create empty data frame for metadata storage ########
+  survey_metadata <- data.frame(matrix(ncol = 12, nrow = 0, dimnames=list(NULL, c("VESSEL","CRUISE","HAUL",
+                                                                                  "TIME_DIFF","START_LATITUDE","START_LONGITUDE",
+                                                                                  "END_LATITUDE","END_LONGITUDE","DATE",
+                                                                                  "tow_start_time","STATIONID","cnv_file_name"))))
+  
+  
   ###### ADD START_TIME STRING LENGTH CHECK and haul_df row check #######
   
   haul_df$YEAR <- floor(haul_df$CRUISE/100)
@@ -72,6 +79,22 @@ create_NMEA_files <- function(rodbc_channel = NA,
     second_line <- paste0("Longitude: ", nmea_longitude)
     third_line <- paste0("Latitude: ", nmea_latitude)
     
+    
+    ##write haul metadata to a .csv to be able to link to original cnv files
+    survey_metadata_tmp <- c()
+    end_longitude <- subset_haul[position, ]$END_LONGITUDE
+    end_latitude <- subset_haul[position, ]$END_LATITUDE
+    data_date <- subset_haul[position, ]$tow_date
+    tow_start_time <- subset_haul[position, ]$tow_start_time
+    station_id <- subset_haul[position, ]$STATIONID
+    
+    survey_metadata_tmp <- data.frame(cbind("VESSEL" = nmea_vessel, "CRUISE" = nmea_cruise, "HAUL" = nmea_haul, 
+                             "TIME_DIFF" = minimum_diff, "START_LATITUDE" = nmea_longitude, "START_LONGITUDE" = nmea_latitude,
+                             "END_LATITUDE" = end_latitude,"END_LONGITUDE" = end_longitude,"DATE" = data_date,
+                             "tow_start_time" = tow_start_time, "STATIONID" = station_id,"cnv_file_name" = cnv_files[i]))
+    
+    survey_metadata <- rbind(survey_metadata, survey_metadata_tmp)
+
     ##write the nmea txt files
     file_name <- gsub("\\..*","",cnv_files[i])
     
@@ -88,4 +111,6 @@ create_NMEA_files <- function(rodbc_channel = NA,
     #  print("Time zones between haul data and CTD data do not match, fix time zones")
     #    }
   }
+  write.csv(survey_metadata, file = paste0(getwd(), "/metadata/survey_metadata_",year,".csv"))
+  
 }
