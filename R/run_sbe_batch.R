@@ -28,7 +28,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
           stop(paste0(haul_csv, " does not exist!"))        
         }
       } else {
-        if(!(class(channel) == "RODBC")) {
+        if(!(class(rodbc_channel) == "RODBC")) {
           stop(paste0("Invalid channel. Not RODBC."))
         }
       }
