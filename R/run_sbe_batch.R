@@ -81,6 +81,28 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
                       year = year,
                       vessel = vessel,
                       region = region)
+  } else { # Added 6/8/2021 for underway CTD data
+    print("Generating NMEA proxy files with coordinates 57 N, -168 W")
+    cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_tmcorrect.cnv$")
+    for(i in 1:length(cnv_files)) {
+      ## paste info together for txt file output ----
+      first_line <- paste0("// VESSEL ", vessel, ", CRUISE NA", ", HAUL NA"," //")
+      second_line <- "Longitude: -168"
+      third_line <- "Latitude: 57"
+      
+      ##write the nmea txt files ----
+      file_name <- gsub("\\..*","",cnv_files[i])
+      
+      # Setup NMEA for no EOS80 ----
+      fileConn <- file(paste0(getwd(), "/cnv/", file_name, ".txt"))
+      writeLines(c(first_line, second_line, third_line), fileConn)
+      close(fileConn)
+      
+      # Setup NMEA with EOS80 ----
+      fileConn <- file(paste0(getwd(), "/cnv/", file_name, "_EOS80.txt"))
+      writeLines(c(first_line, second_line, third_line), fileConn)
+      close(fileConn)
+    }
   }
   
   # Derive EOS80 and TEOS10 ----
