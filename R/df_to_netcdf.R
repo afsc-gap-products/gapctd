@@ -34,11 +34,6 @@ df_to_ncdf <- function(x,
     dplyr::mutate(index = dplyr::row_number()) |>
     dplyr::inner_join(x)
   
-  # Dimensions for netCDF files
-  dim_xy <- length(unique(x$LAT))
-  dim_z <- length(unique(x$DEPTH))
-  dim_t <- length(unique(x$DATETIME))
-  
   # Create netCDF4 file
   ncout <- RNetCDF::create.nc(filename = output_filename,
                               format = "netcdf4")
