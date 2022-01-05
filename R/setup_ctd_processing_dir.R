@@ -3,11 +3,13 @@
 #' @param ctd_dir Character vector. indicating the filepath to the CTD directory.
 #' @param output_dir Character vector indicating directory for saving the output. Default NA uses the current directory.
 #' @param unit Character vector indicating model of the unit. Options = sbe19plus, sbe19. Won't run if the wrong unit is used.
+#' @param recursive Logical. Passed to 'recursive' argument in list.files, indicating whether to recurse into directories.
 #' @export
 
 setup_ctd_processing_dir <- function(ctd_dir,
                                      output_dir = NA,
-                                     ctd_unit) {
+                                     ctd_unit,
+                                     recursive = TRUE) {
   
   # Verify that ctd unit is correct ----
   ctd_unit <- tolower(ctd_unit)
@@ -56,11 +58,13 @@ setup_ctd_processing_dir <- function(ctd_dir,
   # Copy hex and xmlcon files to processing directory ---- 
   hex_files <- list.files(ctd_dir,
                           pattern = "*.hex", 
-                          full.names = TRUE)
+                          full.names = TRUE,
+                          recursive = recursive)
   
   xmlcon_file <- list.files(ctd_dir, 
                             pattern = "*.xmlcon", 
-                            full.names = TRUE)
+                            full.names = TRUE,
+                            recursive = recursive)
   
   # Error messages for hex and xmlcon files
   if(length(xmlcon_file) > 1) {
