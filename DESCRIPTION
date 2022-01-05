@@ -17,10 +17,11 @@ RoxygenNote: 7.1.1
 Imports: here, 
          RODBC,
          oce, 
-         getPass
+         getPass,
+         RNetCDF,
+         dplyr,
+         tidyr,
+         lubridate
 Suggests: knitr,
-    rmarkdown,
-    RNetCDF,
-    dplyr,
-    tidyr
+    rmarkdown
 VignetteBuilder: knitr
