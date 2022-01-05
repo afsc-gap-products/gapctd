@@ -81,7 +81,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
                       year = year,
                       vessel = vessel,
                       region = region)
-  } else { # Added 6/8/2021 for underway CTD data
+  } else {
     print("Generating NMEA proxy files with coordinates 57 N, -168 W")
     cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_tmcorrect.cnv$")
     for(i in 1:length(cnv_files)) {
