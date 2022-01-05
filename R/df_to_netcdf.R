@@ -1,6 +1,6 @@
 #' Data frame to netCDF (.nc) file
 #' 
-#' Write data from a data frame to a netCDF file.
+#' Write 2D and/or 3D data from a data frame to a netCDF version-4 file using the RNetCDF package.
 #' 
 #' @param x A data frame containing gridded data and metadata to add to write to a netCDF file.
 #' @param dim_names_2d A vector of names of 2D spatial and time dimensions (e.g., LATITUDE, LONGITUDE, DATETIME).
@@ -12,6 +12,46 @@
 #' @param var_names_3d A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).
 #' @param var_units_3d A vector of unit quantities for the 3D variables (e.g., 'degrees Celcius', 'Practical Salinity').
 #' @param global_attributes A list of global attributes (i.e., non-dimensional) as 1L character, numeric, or date vectors, where names of list objects are the names of attributes.
+#' @examples 
+#' # Create an NC file using 3D data from a data frame (with missing values)
+#' 
+#' df_ctd <- data.frame(STATIONID = c(rep("A-02", 10), rep("X-03", 5)),
+#' DEPTH = c(1:10, 1:4, 6),
+#' CAST = c(rep("upcast", 10), rep("downcast", 5)),
+#' TEMPERATURE = c(rep(6,4),3, rep(2,5), rep(5,4),4.5),
+#' SALINITY = c(rep(32.1,4),32.3, rep(32.7,5), seq(30.4,30.8,0.1)),
+#' DATETIME = c(rep(as.POSIXct("2021-06-05 13:15:21", tz = "America/Anchorage"), 10),
+#'              rep(as.POSIXct("2021-08-21 06:12:05", tz = "America/Anchorage"), 5)),
+#' VESSEL = c(rep(162,10), rep(94,5)),
+#' CRUISE = c(rep(202101,10), rep(202102,5)),
+#' HAUL = c(rep(10,10), rep(203,5)),
+#' LAT = c(rep(57,10), rep(56.1,5)),
+#' LON = c(rep(-163.2,10), rep(-162,5)))
+#' 
+#' gapctd::df_to_ncdf(x = df_ctd,
+#' output_filename = "ex_3d.nc",
+#' dim_names_2d = c("LAT", "LON"), #, "DATETIME")
+#' dim_units_2d = c("decimal degrees north", "decimal degrees east"), #, "seconds elapsed since 1970-01-01 GMT")
+#' var_names_2d = c("STATIONID", "CAST", "VESSEL", "CRUISE", "HAUL"),
+#' var_units_2d = c("Station ID", "Cast direction", "Vessel number", "Cruise number", "Haul number"),
+#' dim_names_3d = c("DEPTH"),
+#' dim_units_3d = c("meters"),
+#' dim_sort_3d = c(TRUE),
+#' var_names_3d = c("TEMPERATURE", "SALINITY"),
+#' var_units_3d = c("Degrees celcius", "Practical salinity units"),
+#' global_attributes = list(CITATION = "Doe (2022)",
+#'                       DATE_CREATED = as.character(Sys.Date())))
+#'                       
+#'                       
+#' # Create an NC file using only the 2D data from a data frame               
+#' gapctd::df_to_ncdf(x = df_ctd,
+#' output_filename = "ex_2d.nc",
+#' dim_names_2d = c("LAT", "LON"), #, "DATETIME")
+#' dim_units_2d = c("decimal degrees north", "decimal degrees east"), #, "seconds elapsed since 1970-01-01 GMT")
+#' var_names_2d = c("STATIONID", "CAST", "VESSEL", "CRUISE", "HAUL"),
+#' var_units_2d = c("Station ID", "Cast direction", "Vessel number", "Cruise number", "Haul number"),
+#' global_attributes = list(CITATION = "Doe (2022)",
+#'                          DATE_CREATED = as.character(Sys.Date())))
 #' @export
 
 df_to_ncdf <- function(x,
@@ -59,7 +99,7 @@ df_to_ncdf <- function(x,
         dim_vals <- sort(dim_vals)
       }
       
-      print(paste0("Adding 2D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii]))
+      print(paste0("Adding 3D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii]))
       
       RNetCDF::dim.def.nc(ncfile = ncout,
                           dimname = dim_names_3d[ii], 
