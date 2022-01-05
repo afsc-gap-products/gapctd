@@ -41,7 +41,7 @@ df_to_ncdf(
 \item{global_attributes}{A list of global attributes (i.e., non-dimensional) as 1L character, numeric, or date vectors, where names of list objects are the names of attributes.}
 }
 \description{
-Write data from a data frame to a netCDF file.
+Write 2D and/or 3D data from a data frame to a netCDF version-4 file using the RNetCDF package.
 }
 \examples{
 # Create an NC file using 3D data from a data frame (with missing values)
