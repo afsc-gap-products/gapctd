@@ -3,7 +3,7 @@
 #' Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce
 #'
 #' @param rodbc_channel Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.
-#' @param haul_csv Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE.
+#' @param haul_csv Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE, GEAR_TEMPERATURE, SURFACE_TEMPERATURE, GEAR_DEPTH, PERFORMANCE.
 #' @param vessel Required. Vessel number as a numeric vector.
 #' @param year Required. Year as a numeric vector. 
 #' @param region Required. Region as a character vector. Either "bs", "ai", or "goa".
@@ -31,7 +31,7 @@ create_NMEA_files <- function(rodbc_channel = NA,
   }
   
   ###### create empty data frame for metadata storage ----
-  survey_metadata <- data.frame(matrix(ncol = 12, 
+  survey_metadata <- data.frame(matrix(ncol = 16, 
                                        nrow = 0, 
                                        dimnames=list(NULL, c("VESSEL",
                                                              "CRUISE",
@@ -44,7 +44,11 @@ create_NMEA_files <- function(rodbc_channel = NA,
                                                              "DATE",
                                                              "tow_start_time",
                                                              "STATIONID",
-                                                             "cnv_file_name"))))
+                                                             "cnv_file_name",
+                                                             "GEAR_TEMPERATURE",
+                                                             "SURFACE_TEMPERATURE",
+                                                             "GEAR_DEPTH",
+                                                             "PERFORMANCE"))))
   
   
   ###### ADD START_TIME STRING LENGTH CHECK and haul_df row check ----
@@ -98,6 +102,11 @@ create_NMEA_files <- function(rodbc_channel = NA,
     data_date <- subset_haul[position, ]$tow_date
     tow_start_time <- subset_haul[position, ]$tow_start_time
     station_id <- subset_haul[position, ]$STATIONID
+    gear_temperature <- subset_haul[position, ]$GEAR_TEMPERATURE
+    surface_temperature <- subset_haul[position, ]$SURFACE_TEMPERATURE
+    gear_depth <- subset_haul[position, ]$GEAR_DEPTH
+    performance <- subset_haul[position, ]$PERFORMANCE
+    
     
     survey_metadata_tmp <- data.frame(cbind("VESSEL" = nmea_vessel, 
                                             "CRUISE" = nmea_cruise, 
@@ -110,7 +119,11 @@ create_NMEA_files <- function(rodbc_channel = NA,
                                             "DATE" = data_date,
                                             "tow_start_time" = tow_start_time, 
                                             "STATIONID" = station_id,
-                                            "cnv_file_name" = cnv_files[i]))
+                                            "cnv_file_name" = cnv_files[i],
+                                            "BT_GEAR_TEMPERATURE" = gear_temperature,
+                                            "BT_SURFACE_TEMPERATURE" = surface_temperature,
+                                            "BT_GEAR_DEPTH" = gear_depth,
+                                            "PERFORMANCE" = performance))
     
     survey_metadata <- rbind(survey_metadata, survey_metadata_tmp)
     
