@@ -19,5 +19,8 @@ Imports: here,
          oce, 
          getPass
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    RNetCDF,
+    dplyr,
+    tidyr
 VignetteBuilder: knitr
