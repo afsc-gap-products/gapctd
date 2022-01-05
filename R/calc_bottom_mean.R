@@ -57,7 +57,7 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
     out_df$CTD_MEAN_HAUL_DEPTH[i] <- mean(cast_dat@data$depth[start_index:end_index], na.rm = TRUE)
     out_df$CTD_MEAN_BOTTOM_TEMPERATURE_C[i] <- mean(cast_dat@data$temperature[start_index:end_index], na.rm = TRUE)
     out_df$CTD_MEAN_BOTTOM_SALINITY_SA[i] <- mean(cast_dat@data$gsw_saA0[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_MEAN_BOTTOM_SALINITY_PSU[i] <- mean(cast_dat@data$salinity[start_index:end_index], na.rm = TRUE)
+    out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- mean(cast_dat@data$salinity[start_index:end_index], na.rm = TRUE)
     out_df$CTD_N_BOTTOM_SAMPLE[i] <- end_index - start_index + 1
     out_df$CTD_TEMPERATURE_SN[i] <- cast_dat@metadata$serialNumberTemperature
     out_df$CTD_CONDUCTIVITY_SN[i] <- cast_dat@metadata$serialNumberConductivity

@@ -37,7 +37,7 @@ calc_surface_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/
       
       out_df$CTD_MEAN_SURFACE_TEMPERATURE_C[i] <- mean(cast_dat@data$temperature[cast_dat@data$depth >= depth_interval[1] & cast_dat@data$depth <= depth_interval[2]], na.rm = TRUE)
       out_df$CTD_MEAN_SURFACE_SALINITY_SA[i] <- mean(cast_dat@data$gsw_saA0[cast_dat@data$depth >= depth_interval[1] & cast_dat@data$depth <= depth_interval[2]], na.rm = TRUE)
-      out_df$CTD_MEAN_SURFACE_SALINITY_PSU[i] <- mean(cast_dat@data$salinity[cast_dat@data$depth >= depth_interval[1] & cast_dat@data$depth <= depth_interval[2]], na.rm = TRUE)
+      out_df$CTD_MEAN_SURFACE_SALINITY_SP[i] <- mean(cast_dat@data$salinity[cast_dat@data$depth >= depth_interval[1] & cast_dat@data$depth <= depth_interval[2]], na.rm = TRUE)
     }
     
   }
