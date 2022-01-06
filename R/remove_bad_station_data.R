@@ -46,7 +46,8 @@ remove_bad_station_data <- function(haul_metadata_path = list.files(paste0(getwd
   haul_dat <- haul_dat[-index_error,]
   
   write.csv(haul_dat, 
-            file = here::here("output", paste0("CTD_", region, "_", year, "_", vessel, ".csv")))
+            file = here::here("output", paste0("CTD_", region, "_", year, "_", vessel, ".csv")),
+            row.names = FALSE)
   
   return(haul_dat)
   
