@@ -21,7 +21,7 @@ run_sbe_batch(
 
 \item{year}{Required. Year as a numeric vector.}
 
-\item{region}{Required. Region as a character vector. Either "bs", "ai", or "goa".}
+\item{region}{Required. Region as a character vector. Either "BS", "AI", or "GOA".}
 
 \item{xmlcon_file}{Optional. Character vector specifying the name of the .xmlcon file. Default NA automatically retrieves the filename from psa_xmlcon subdirectory of the working directory.}
 

@@ -4,7 +4,7 @@
 #' 
 #' @param vessel Required. Vessel number as a numeric vector.
 #' @param year Required. Year as a numeric vector. 
-#' @param region Required. Region as a character vector. Either "bs", "ai", or "goa".
+#' @param region Required. Region as a character vector. Either "BS", "AI", or "GOA".
 #' @param xmlcon_file Optional. Character vector specifying the name of the .xmlcon file. Default NA automatically retrieves the filename from psa_xmlcon subdirectory of the working directory.
 #' @param bat_file Optional. Character vector specifying the name of the .bat file in the working directory to use to run data conversion, filter, alignment, cell thermal mass correction, and split. If not provided, defaults to *getdata.bat
 #' @param derive_file Optional. Character vectory specifying the .bat file for deriving EOS80 and TEOS-10. If not provided, defaults to *derive.bat

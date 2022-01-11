@@ -9,7 +9,7 @@ create_NMEA_files(rodbc_channel = NA, haul_csv = NA, vessel, region, year)
 \arguments{
 \item{rodbc_channel}{Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.}
 
-\item{haul_csv}{Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE.}
+\item{haul_csv}{Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE, GEAR_TEMPERATURE, SURFACE_TEMPERATURE, GEAR_DEPTH, PERFORMANCE.}
 
 \item{vessel}{Required. Vessel number as a numeric vector.}
 
