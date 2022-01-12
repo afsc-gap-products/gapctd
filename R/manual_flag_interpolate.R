@@ -38,6 +38,10 @@ manual_flag_interpolate <- function(file_paths = NULL,
   # start_index = 10
   # max_n = 11
   
+  if(!dir.exists(here::here("output", "manual_flag"))) {
+    dir.create(here::here("output", "manual_flag"))
+  }
+  
   if(is.null(file_paths)) {
     haul_metadata <- read.csv(file = haul_metadata_path, 
                               stringsAsFactors = FALSE)
@@ -180,6 +184,7 @@ manual_flag_interpolate <- function(file_paths = NULL,
               }
             }
             
+            assign(paste0("flag_", var[mm], "_", dir_vec[ii], "cast"), value = cast_index)
             
             # Interpolate missing values
             if(interpolation_method != "none") {
@@ -216,29 +221,24 @@ manual_flag_interpolate <- function(file_paths = NULL,
         }
         
         if(mm == 1) {
-          out_df <- binned_df
-          flag_df <- data.frame(var = var[mm],
-                                dir = dir[ii],
-                                index = cast_index,
-                                z = binned_df$zvar[cast_index])
+          out_df <- binned_df    
         } else {
           out_df <- out_df |> 
             dplyr::full_join(binned_df)
-          flag_df <- data.frame(var = var[mm],
-                                dir = dir[ii],
-                                index = cast_index,
-                                z = binned_df$zvar[cast_index]) |>
-            dplyr::bind_rows(flag_df)
         }
         
       }
       
       # Append file name 
       out_df$file <- deploy_id
-      # Write interpolated profile data (out_df)
       
-      print(out_df)
-      # Write interpolated data points
+      # Write interpolated data to csv file
+      write.csv(out_df, 
+                file = here::here("output", 
+                                  "manual_flag", 
+                                  paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv"),
+                                  row.names = FALSE))
+      
     } else {
       print(paste0("Insufficient or no data from ", deploy_id, " (index ", kk, " out of ", nrow(haul_metadata), ")"))
     }
