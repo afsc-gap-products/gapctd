@@ -180,7 +180,6 @@ manual_flag_interpolate <- function(file_paths = NULL,
               }
             }
             
-            assign(paste0("flag_", var[mm], "_", dir_vec[ii], "cast"), value = cast_index)
             
             # Interpolate missing values
             if(interpolation_method != "none") {
@@ -217,10 +216,19 @@ manual_flag_interpolate <- function(file_paths = NULL,
         }
         
         if(mm == 1) {
-          out_df <- binned_df    
+          out_df <- binned_df
+          flag_df <- data.frame(var = var[mm],
+                                dir = dir[ii],
+                                index = cast_index,
+                                z = binned_df$zvar[cast_index])
         } else {
           out_df <- out_df |> 
             dplyr::full_join(binned_df)
+          flag_df <- data.frame(var = var[mm],
+                                dir = dir[ii],
+                                index = cast_index,
+                                z = binned_df$zvar[cast_index]) |>
+            dplyr::bind_rows(flag_df)
         }
         
       }
