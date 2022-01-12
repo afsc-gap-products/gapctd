@@ -13,9 +13,9 @@ manual_flag_interpolate(
   z_var = "pressure",
   flag_filename = here::here("output", "manual_flag_points.csv"),
   start_index = NULL,
-  interpolate_missing = TRUE,
-  oce_interpolation_method = "unesco",
-  var_range_min = 0.1
+  interpolation_method = "unesco",
+  var_range_min = 0.1,
+  test_max_n = NULL
 )
 }
 \arguments{
@@ -35,9 +35,11 @@ manual_flag_interpolate(
 
 \item{start_index}{Numeric vector indicating which haul to start with.}
 
+\item{interpolation_method}{Method to use for interpolation. Options are "unesco" = oce::oceApprox(method = "unesco") "rr" = oce::oceApprox(method = "rr") in , "linear" = approx(method = "linear"), or "none" = no interpolation.}
+
 \item{var_range_min}{Numeric vector (1L) indicating the minimum x-axis range to use for plotting the selected variable.}
 
-\item{interpolation_method}{Method to use for interpolation. Options are "unesco" = oce::oceApprox(method = "unesco") "rr" = oce::oceApprox(method = "rr") in , "linear" = approx(method = "linear"), or "none" = no interpolation.}
+\item{test_max_n}{FOR TESTING. Maximum index value}
 }
 \description{
 Manually flag values from a cast for removal and interpolate removed/missing values.
