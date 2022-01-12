@@ -12,6 +12,7 @@
 #' @param start_index Numeric vector indicating which haul to start with.
 #' @param var_range_min Numeric vector (1L) indicating the minimum x-axis range to use for plotting the selected variable.
 #' @param interpolation_method Method to use for interpolation. Options are "unesco" = oce::oceApprox(method = "unesco") "rr" = oce::oceApprox(method = "rr") in , "linear" = approx(method = "linear"), or "none" = no interpolation.
+#' @param test_max_n FOR TESTING. Maximum index value
 #' @export
 
 manual_flag_interpolate <- function(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
@@ -22,32 +23,34 @@ manual_flag_interpolate <- function(haul_metadata_path = list.files(paste0(getwd
                                     z_var = "pressure",
                                     flag_filename = here::here("output", "manual_flag_points.csv"),
                                     start_index = NULL,
-                                    interpolate_missing = TRUE,
-                                    oce_interpolation_method = "unesco",
-                                    var_range_min = 0.1) {
+                                    interpolation_method = "unesco",
+                                    var_range_min = 0.1,
+                                    test_max_n = NULL) {
   
-  haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE)
-  cast_dir_filepath = here::here("cnv")
-  pattern = here::here("tmcorrect.cnv")
-  var = c("salinity", "temperature")
-  z_var = "pressure"
-  start_index = NULL
-  year = 2021
-  var_range_min = 0.1
-  interpolate_missing = TRUE
-  interpolation_method = "linear"
-  kk = 10
+  # haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE)
+  # cast_dir_filepath = here::here("cnv")
+  # pattern = here::here("tmcorrect.cnv")
+  # var = c("salinity", "temperature")
+  # z_var = "pressure"
+  # year = 2021
+  # var_range_min = 0.1
+  # interpolate_missing = TRUE
+  # interpolation_method = "linear"
+  # start_index = 10
+  # max_n = 11
   
   haul_metadata <- read.csv(file = haul_metadata_path, 
                             stringsAsFactors = FALSE)
   
   if(is.null(start_index)) {
-    start_index <- 0
+    start_index <- 1
+  } 
+  
+  if(is.null(test_max_n)) {
+    test_max_n <- nrow(haul_metadata)
   }
   
-  for(kk in (1 + start_index):nrow(haul_metadata)) {
-    
-    print(paste0("Flagging data from from ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk]), " (index ", kk, " out of ", nrow(haul_metadata), ")"))
+  for(kk in (0 + start_index):test_max_n) { #nrow(haul_metadata)
     
     f_list <- list.files(here::here("data", "tm_correct"), 
                          pattern = sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk]), 
@@ -62,38 +65,43 @@ manual_flag_interpolate <- function(haul_metadata_path = list.files(paste0(getwd
     down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
     up_pres <- try(diff(range(upcast@data$pressure)) < 9, silent = TRUE)
     
-    for(mm in 1:length(var)) {
+    if(class(down_pres) == "try-error") {down_pres <- TRUE}    
+    if(class(up_pres) == "try-error") {up_pres <- TRUE}
+    if(down_pres) {downcast <- "try-error"}
+    if(up_pres) { upcast <- "try-error"}
+    
+    if(down_pres+up_pres <= 1) {
       
-      if(class(down_pres) == "try-error") {down_pres <- TRUE}    
-      if(class(up_pres) == "try-error") {up_pres <- TRUE}
-      if(down_pres) {downcast <- "try-error"}
-      if(up_pres) { upcast <- "try-error"}
+      print(paste0("Flagging data from ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk]), " (index ", kk, " out of ", nrow(haul_metadata), ")"))
       
-      if(!down_pres) {
-        down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
-                                            z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
-                             by = list(z_bin = ceiling(eval(parse(text = paste0("downcast@data$", z_var))))), 
+      for(mm in 1:length(var)) {
+        
+        
+        
+        if(!down_pres) {
+          down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
+                                              z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
+                               by = list(z_bin = ceiling(eval(parse(text = paste0("downcast@data$", z_var))))), 
+                               FUN = mean)
+        }
+        
+        if(!up_pres) {
+          up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
+                                            z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
+                             by = list(z_bin = ceiling(eval(parse(text = paste0("upcast@data$", z_var))))), 
                              FUN = mean)
-      }
-      
-      if(!up_pres) {
-        up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
-                                          z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
-                           by = list(z_bin = ceiling(eval(parse(text = paste0("upcast@data$", z_var))))), 
-                           FUN = mean)
-      }
-      
-      if(!down_pres & !up_pres) {
-        binned_df <- dplyr::full_join(down_df, 
-                                      up_df, 
-                                      by = "z_bin")
-      } else if(!down_pres & up_pres) {
-        binned_df <- down_df
-      } else if(down_pres & !up_pres) {
-        binned_df <- up_df
-      }
-      
-      if(!is.null(binned_df)) {
+        }
+        
+        if(!down_pres & !up_pres) {
+          binned_df <- dplyr::full_join(down_df, 
+                                        up_df, 
+                                        by = "z_bin")
+        } else if(!down_pres & up_pres) {
+          binned_df <- down_df
+        } else if(down_pres & !up_pres) {
+          binned_df <- up_df
+        }
+        
         names(binned_df)[which(names(binned_df) == "var_up")] <- paste0(var[mm], "_up")
         names(binned_df)[which(names(binned_df) == "var_down")] <- paste0(var[mm], "_down")
         
@@ -196,13 +204,18 @@ manual_flag_interpolate <- function(haul_metadata_path = list.files(paste0(getwd
           out_df <- out_df |> 
             dplyr::full_join(binned_df)
         }
-        # Append file name 
-        out_df$file <- sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk])
         
-        # Write interpolated profile data (out_df)
         
-        # Write interpolated data points
       }
+      
+      # Append file name 
+      out_df$file <- sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk])
+      # Write interpolated profile data (out_df)
+      
+      print(out_df)
+      # Write interpolated data points
+    } else {
+      print(paste0("Insufficient or no data from ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk]), " (index ", kk, " out of ", nrow(haul_metadata), ")"))
     }
   }
 }
