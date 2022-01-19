@@ -106,7 +106,9 @@ ctm_adjust <- function(alpha = 0.04,
       by = "pressure_bin") |>
     dplyr::filter(pressure_bin >= min_pressure_bin)
   
-  obj <- sum(abs(updown_df$salinity_down[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)]-updown_df$salinity_up[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)]))
+  obj <- mean(abs(updown_df$salinity_down[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)] - 
+                    updown_df$salinity_up[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)]),
+              na.rm = TRUE)
   
   if(min_obj) {
     return(obj)
