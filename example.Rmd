@@ -7,11 +7,11 @@ output: html_document
 
 *WARNING: Knitting this document will not process the data. Please run code blocks one at a time.*
 
-# Introduction
+## Introduction
 
-This R Markdown document demonstrates how to use the gapctd pacakge to process CTD data collected on RACE Groundfish Surveys and generated data products. This process was developed for use with SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands. Use of this package requires a connection to the AFSC RACEBASE and RACE_DATA data tables or comma separated value tables provided by AFSC staff.
+This document demonstrates how to use the gapctd package to process CTD data collected on RACE Groundfish Surveys and generate data products. This process was developed for use with SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands. Use of this package requires a connection to the AFSC RACEBASE and RACE_DATA data tables or comma separated value tables provided by AFSC staff.
 
-# 1. Installation
+## 1. Installation
 
 This package requires an installation of SBE Data Processing software (available through manufacturer) and the gapctd package. The latest version of the gapctd package can be installed from GitHub as follows:
 
@@ -20,7 +20,7 @@ devtools::install_github("sean-rohan-noaa/gapctd")
 ```
 
 
-# 2. Load package, define global variables, and connect to Oracale
+## 2. Load package, define global variables, and connect to Oracale
 
 Load the gapctd package. Assign vessel, year, and region (BS, GOA, or AI) variables and establish a connection to Oracle using the RODBC package.
 
@@ -36,14 +36,17 @@ region <- "BS"
 channel <- gapctd::get_connected(schema = "AFSC")
 ```
 
-# 3. Setup processing directory
+## 3. Setup processing directory
 
-Data processing is conducted within a directory that contains CTD data files, configuration files, batch (.bat) files that provide instructions for running modules in SBE Data Processing, and Program Setup Files (.psa) that specify the parameters for batch processing modules. The setup_ctd_processing_dir function sets up data processing in your working directory by: 
-- (a) Setting up a directory structure used for data processing.
-- (b) Copying hexadecimal data (.hex) files to subdirectory 'data'. 
-- (c) Copying configuration (.xmlcon) files from the user-specified directory (e.g., "G:/RACE_CTD/data/2021/ebs/v162") to subdirectory 'psa_xmlcon'.
-- (d) Copying batch (.bat) processing routine files for the selected CTD model (e.g., ctd_unit = "sbe19plus") that are included in the gapctd package to the root of your working directory.
-- (e) Copying program setup files (.psa) for the specified CTD model to the subdirectory 'psa_xmlcon'.
+Data processing is conducted within a directory that contains CTD data files, configuration files, batch (.bat) files that provide instructions for running modules in SBE Data Processing, and Program Setup Files (.psa) that specify the parameters for batch processing modules. The setup_ctd_processing_dir function sets up data processing in your working directory by:
+
+<ol type = "1">
+<li>Setting up a directory structure used for data processing.</li>
+<li>Copying hexadecimal data (.hex) files to subdirectory 'data'.</li>
+<li>Copying configuration (.xmlcon) files from the user-specified directory (e.g., "G:/RACE_CTD/data/2021/ebs/v162") to subdirectory 'psa_xmlcon'.</li>
+<li>Copying batch (.bat) processing routine files for the selected CTD model (e.g., ctd_unit = "sbe19plus") that are included in the gapctd package to the root of your working directory.</li>
+<li>Copying program setup files (.psa) for the specified CTD model to the subdirectory 'psa_xmlcon'.</li>
+</ol>
 
 ```{r setup, include=TRUE, eval=FALSE}
 # Move files from storage to local directory
@@ -52,7 +55,7 @@ gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162",
                                  recursive = TRUE) # TRUE ensures files are copied from nested subdirectories
 ```
 
-# 4. Batch process hex files
+## 4. Batch process hex files
 
 Modules in the SBE Data Processing software are used to convert .hex data files to a human-readable format, apply filters and corrections to the data, and derive physical variables (e.g., Practical Salinity (PSS-78), density) from filtered and corrected instrument measurements. The run_sbe_batch function runs batch (.bat) files in command line to run SBE modules on data from each haul, retrieves haul metadata from RACEBASE, matches CTD data to georeferenced haul metadata, and creates NMEA files that are used for deriving TEOS-10 variables using SBE Data Processing (using gapctd::create_NMEA_files).
 
@@ -66,7 +69,7 @@ gapctd::run_sbe_batch(vessel = vessel,
 ```
 
 
-# 5. Retrieve on-bottom and off-bottom times
+## 5. Retrieve on-bottom and off-bottom times
 
 GAP's CTD data product includes averages of on-bottom physical variables (e.g., PSS-78, temperature) for each haul while the trawl was on-bottom. To calculate these on-bottom averages, it is necessary to subset the on-bottom scans from each deployment. The get_haul_events function retrieves on-bottom, marked event, haul back, and off-bottom events from RACE_DATA tables and joins them with haul metadata from the survey_metadata_[year].csv file. 
 
@@ -75,61 +78,93 @@ gapctd::get_haul_events(channel = channel,
                         append_haul_metadata = TRUE)
 ```
 
-# 6. Calculate mean bottom temperature and salinity from each deployment
+## 6. Calculate mean bottom temperature and salinity from each deployment
 
 The calc_bottom_mean function uses on-bottom and off-bottom times to calculate average bottom temperature and salinity from each deployment's file with derived quantities (e.g., pattern = "TEOS10.cnv" for cnv files with derived TEOS-10 variables). A time buffer in seconds (e.g., time_buffer = 30) is added to each on-bottom time and off-bottom time. Mean bottom temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE. 
 
 ```{r avg_bottom, include=TRUE, eval=FALSE}
-gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
+gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
+                                                         full.names = TRUE),
                              pattern = "TEOS10.cnv",
                              timezone = "America/Anchorage",
                              time_buffer = 30,
                              append_haul_metadata = TRUE)
 ```
 
-# 7. Calculate surface temperature and salinity from each downcast
+## 7. Calculate surface temperature and salinity from each downcast
 
 The calc_surface_mean function calculates mean temperature and salinity from downcast files in the final_cnv subdirectory. Means are calculated for a specified depth interval with the default being 2 m &lte; z &lte; 5 m (i.e., depth_interval = c(2,5)). We recommend not using the 1-m depth bin due to salinity spikes. Mean surface temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE.
 
 ```{r avg_surface, include=TRUE, eval=FALSE}
-gapctd::calc_surface_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
+gapctd::calc_surface_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
+                                                          full.names = TRUE),
                               depth_interval = c(2,5),
                               append_haul_metadata = TRUE)
 ```
 
-# 8. Move bad station data to bad_cnv directory
+## 8. Move bad station data to bad_cnv directory
 
 In some cases, the CTD was turned on at the surface without being deployed or was shut off during the middle of a downcast during a deployment. The remove_bad_station_data function facilitates identification of such files and moves all cnv files from such files to the bad_cnv subdirectory. Arguments in the remove_bad_station_data function specify:
-- max_diff_bt_ctd_depth: The maximum allowable difference between RACEBASE.GEAR_DEPTH while and mean CTD depth while on-bottom. This criteria handles cases where the CTD stopped collecting data during the downcast.
-- min_ctd_depth: The minimum depth for a deployment to be valid. This criteria handles cases where the CTD was turned on at the surface.
+
+<ul>
+<li><i>max_diff_bt_ctd_depth</i>: The maximum allowable difference between RACEBASE.GEAR_DEPTH while and mean CTD depth while on-bottom. This criteria handles cases where the CTD stopped collecting data during the downcast.</li>
+<li><i>min_ctd_depth</i>: The minimum depth for a deployment to be valid. This criteria handles cases where the CTD was turned on at the surface.</li>
+</ul>
 
 ```{r remove_bad_stn, include=TRUE, eval=FALSE}
 gapctd::remove_bad_station_data(vessel = vessel,
                                 year = year,
                                 region = region,
-                                haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
+                                haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
+                                                                full.names = TRUE),
                                 max_diff_bt_ctd_depth = 10,
                                 min_ctd_depth = 5)
 ```
 
-# 9. Manually flag and remove bad data 
+## 9. Manually flag and remove bad data 
 
-Filtering and correcting data using pre-specified batch processing modules fixes some sampling artifacts in the data but some problems tend to persist. For example, the thermal mass correction module despikes salinity by applying a thermal mass correction to conductivity measurements that to account for the temperature-gradient-dependent lag of the conductivity cell response, but is not always effective because different temperature gradients can lead to different response times (and therefore different corrections).
+Using pre-specified batch processing modules to filter and correct data fixes sampling artifacts in the data but some problems tend to persist. For example, the thermal mass correction module despikes salinity by applying a temperature-gradient-dependent correction formula using parameters recommended by the manufacturer to account for the lag between the temperature and conductivity cell responses, but it's efficacy varies because different temperature gradients cause different lags.
+
+The manual point flagging procedure allows users to flag 'bad' data, which are then removed and interpolated from the remaining data using an interpolation method of the user's choice. Users can either specify which files to review using the 'file_paths' argument or retrieve all downcasts and upcasts and downcasts from a directory based on the files listed in the haul metadata csv in the 'metadata' subdirectory.
 
 
 
 ```{r manual_edit, include=TRUE, eval=FALSE}
-gapctd::manual_flag_interpolate()
+gapctd::manual_flag_interpolate(file_paths = NULL,
+                                haul_metadata_path = list.files(here::here("metadata"), 
+                                                                full.names = TRUE),
+                                cast_dir_filepath = here::here("data", "tm_correct"),
+                                year = year,
+                                var = c("salinity", "temperature"),
+                                z_var = "pressure",
+                                flag_filename = here::here("output", "manual_flag_points.csv"),
+                                start_index = NULL,
+                                interpolation_method = "unesco",
+                                var_range_min = 0.1)
 ```
 
-# Make plots
+Bad data are flagged using a rudimentary graphical user interface (GUI) that relies on plot() and identify() functions in base R. 
+
+To flag and remove points on the plots:
+
+<ol type = "1">
+  <li> Click on each point that should be flagged for removal.</li>
+  <li>Press Esc when points have been flagged</li>
+  <li>Enter a response to the prompt in the console indicating whether to accept the profile or remove more points ("Accept profile (y) or remove additional points (n)?:"). *VERY IMPORTANT: If any points were flagged for removal, select the 'remove additional points (n)' option an additional time to the regenerate the plot without the flagged points to verify that additional points do not need to be flagged.*.</li>
+  <li>Repeat #1-3 for every profile and variable.</li>
+</ol>
+
+After removal, flagged or missing data are interpolated using the method specified by the user (e.g., interpolation_method = "unesco"; see function documentation for details).
+
+
+## Make plots
 
 ```{r plot, include=TRUE, eval=FALSE}
 gapctd::make_cast_plots()
 ```
 
-# Disclaimer 
+## Disclaimer 
 
 Reference in this document to trade names does not imply endorsement by the National Marine Fisheries Service, NOAA.
 
-# References
+## References
