@@ -90,19 +90,17 @@ manual_flag_interpolate <- function(file_paths = NULL,
       
       for(mm in 1:length(var)) {
         
-        
-        
         if(!down_pres) {
           down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
                                               z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
-                               by = list(z_bin = ceiling(eval(parse(text = paste0("downcast@data$", z_var))))), 
+                               by = list(z_bin = round(eval(parse(text = paste0("downcast@data$", z_var))))), 
                                FUN = mean)
         }
         
         if(!up_pres) {
           up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
                                             z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
-                             by = list(z_bin = ceiling(eval(parse(text = paste0("upcast@data$", z_var))))), 
+                             by = list(z_bin = round(eval(parse(text = paste0("upcast@data$", z_var))))), 
                              FUN = mean)
         }
         
@@ -125,7 +123,9 @@ manual_flag_interpolate <- function(file_paths = NULL,
         loop_flag <- 0
         
         if(length(dir_vec) >= 1) {
+          
           for(ii in 1:length(dir_vec)) {
+            
             print(paste0("Start flagging ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk], " ", dir_vec[ii], "cast")))
             cast_index <- numeric(length = 0L)
             
