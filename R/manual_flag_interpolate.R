@@ -171,7 +171,7 @@ manual_flag_interpolate <- function(file_paths = NULL,
               binned_df[cast_index, col_index] <- NA
               
               # User input
-              if(tolower(readline("Accept profile (y) or step through again (n)?:")) == "y") {
+              if(tolower(readline("Accept profile (y) or remove additional points (n)?:")) == "y") {
                 loop_flag <- 1  
               }
             }
