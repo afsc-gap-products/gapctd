@@ -27,10 +27,13 @@ remove_bad_station_data <- function(haul_metadata_path = list.files(paste0(getwd
   # Load haul metadata file
   haul_dat <- read.csv(file = haul_metadata_path, 
                        stringsAsFactors = FALSE)
+  haul_dat$flag <- 0
   
   index_error <- unique(c(which(haul_dat$CTD_MEAN_HAUL_DEPTH < 5), 
                           which(abs(haul_dat$BT_GEAR_DEPTH - haul_dat$CTD_MEAN_HAUL_DEPTH) > 7), 
                           which(is.na(haul_dat$CTD_MEAN_HAUL_DEPTH))))
+  haul_dat$flag[index_error] <- -1
+  
   bad_files <- sub("\\_raw.*", "", haul_dat$cnv_file_name[index_error])
   
   # Move bad cnv files
