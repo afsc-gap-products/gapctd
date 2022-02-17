@@ -91,18 +91,7 @@ gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metad
                              append_haul_metadata = TRUE)
 ```
 
-## 7. Calculate surface temperature and salinity from each downcast
-
-The calc_surface_mean function calculates mean temperature and salinity from downcast files in the final_cnv subdirectory. Means are calculated for a specified depth interval with the default being 2 m &lte; z &lte; 5 m (i.e., depth_interval = c(2,5)). We recommend not using the 1-m depth bin due to salinity spikes. Mean surface temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE.
-
-```{r avg_surface, include=TRUE, eval=FALSE}
-gapctd::calc_surface_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
-                                                          full.names = TRUE),
-                              depth_interval = c(2,5),
-                              append_haul_metadata = TRUE)
-```
-
-## 8. Move bad station data to bad_cnv directory
+## 7. Move bad station data to bad_cnv directory
 
 In some cases, the CTD was turned on at the surface without being deployed or was shut off during the middle of a downcast during a deployment. The remove_bad_station_data function facilitates identification of such files and moves all cnv files from such files to the bad_cnv subdirectory. Arguments in the remove_bad_station_data function specify:
 
@@ -121,7 +110,7 @@ gapctd::remove_bad_station_data(vessel = vessel,
                                 min_ctd_depth = 5)
 ```
 
-## 9. Manually flag and remove bad data 
+## 8. Manually flag and remove bad data 
 
 Using pre-specified batch processing modules to filter and correct data fixes sampling artifacts in the data but some problems tend to persist. For example, the thermal mass correction module despikes salinity by applying a temperature-gradient-dependent correction formula using parameters recommended by the manufacturer to account for the lag between the temperature and conductivity cell responses, but it's efficacy varies because different temperature gradients cause different lags.
 
@@ -155,6 +144,17 @@ To flag and remove points on the plots:
 </ol>
 
 After removal, flagged or missing data are interpolated using the method specified by the user (e.g., interpolation_method = "unesco"; see function documentation for details).
+
+## 9. Calculate surface temperature and salinity from each upcast
+
+The calc_surface_mean function calculates mean temperature and salinity from upcast files in the final_cnv subdirectory. Mean surface temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE.
+
+```{r avg_surface, include=TRUE, eval=FALSE}
+gapctd::calc_surface_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
+                                                          full.names = TRUE),
+                              depth_interval = c(1,2),
+                              append_haul_metadata = TRUE)
+```
 
 
 ## Make plots
