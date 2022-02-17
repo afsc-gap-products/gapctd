@@ -52,8 +52,6 @@ manual_flag_interpolate <- function(file_paths = NULL,
   }
   
   for(kk in (0 + start_index):test_max_n) {
-    
-    if(!file.exists(here::here("output", "manual_flag", paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")))) {
       
       binned_df <- NULL
       
@@ -85,6 +83,8 @@ manual_flag_interpolate <- function(file_paths = NULL,
         
         up_pres <- TRUE
       }
+      
+      if(!file.exists(here::here("output", "manual_flag", paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")))) {
       
       if(down_pres+up_pres <= 1) {
         
