@@ -53,188 +53,193 @@ manual_flag_interpolate <- function(file_paths = NULL,
   
   for(kk in (0 + start_index):test_max_n) {
     
-    binned_df <- NULL
-    
-    if(is.null(file_paths)) {
-      # Working from the directory
-      deploy_id <- sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk])
-      f_list <- list.files(cast_dir_filepath, 
-                           pattern = deploy_id, 
-                           full.names = TRUE)
+    if(!file.exists(here::here("output", "manual_flag", paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")))) {
       
-      # Ignore bad casts
-      downcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("d", year), x = f_list)]), silent = TRUE)
-      upcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("u", year), x = f_list)]), silent = TRUE)
+      binned_df <- NULL
       
-      down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
-      up_pres <- try(diff(range(upcast@data$pressure)) < 9, silent = TRUE)
+      if(is.null(file_paths)) {
+        # Working from the directory
+        deploy_id <- sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk])
+        f_list <- list.files(cast_dir_filepath, 
+                             pattern = deploy_id, 
+                             full.names = TRUE)
+        
+        # Ignore bad casts
+        downcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("d", year), x = f_list)]), silent = TRUE)
+        upcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("u", year), x = f_list)]), silent = TRUE)
+        
+        down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
+        up_pres <- try(diff(range(upcast@data$pressure)) < 9, silent = TRUE)
+        
+        if(class(down_pres) == "try-error") {down_pres <- TRUE}    
+        if(class(up_pres) == "try-error") {up_pres <- TRUE}
+        if(down_pres) {downcast <- "try-error"}
+        if(up_pres) { upcast <- "try-error"}
+      } else {
+        # Working with a list of files
+        deploy_id <- file_paths[kk]
+        
+        downcast <- try(oce::read.ctd(file = file_paths[kk]), silent = TRUE)
+        down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
+        if(class(down_pres) == "try-error") {down_pres <- TRUE}
+        
+        up_pres <- TRUE
+      }
       
-      if(class(down_pres) == "try-error") {down_pres <- TRUE}    
-      if(class(up_pres) == "try-error") {up_pres <- TRUE}
-      if(down_pres) {downcast <- "try-error"}
-      if(up_pres) { upcast <- "try-error"}
-    } else {
-      # Working with a list of files
-      deploy_id <- file_paths[kk]
-      
-      downcast <- try(oce::read.ctd(file = file_paths[kk]), silent = TRUE)
-      down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
-      if(class(down_pres) == "try-error") {down_pres <- TRUE}
-      
-      up_pres <- TRUE
-    }
-    
-    if(down_pres+up_pres <= 1) {
-      
-      print(paste0("Flagging data from ", deploy_id, " (index ", kk, " out of ", nrow(haul_metadata), ")"))
-      
-      for(mm in 1:length(var)) {
+      if(down_pres+up_pres <= 1) {
         
-        if(!down_pres) {
-          down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
-                                              z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
-                               by = list(z_bin = round(eval(parse(text = paste0("downcast@data$", z_var))))), 
-                               FUN = mean)
-        }
+        print(paste0("Flagging data from ", deploy_id, " (index ", kk, " out of ", nrow(haul_metadata), ")"))
         
-        if(!up_pres) {
-          up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
-                                            z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
-                             by = list(z_bin = round(eval(parse(text = paste0("upcast@data$", z_var))))), 
-                             FUN = mean)
-        }
-        
-        if(!down_pres & !up_pres) {
-          binned_df <- dplyr::full_join(down_df, 
-                                        up_df, 
-                                        by = "z_bin")
-        } else if(!down_pres & up_pres) {
-          binned_df <- down_df
-        } else if(down_pres & !up_pres) {
-          binned_df <- up_df
-        }
-        
-        names(binned_df)[which(names(binned_df) == "var_up")] <- paste0(var[mm], "_up")
-        names(binned_df)[which(names(binned_df) == "var_down")] <- paste0(var[mm], "_down")
-        
-        binned_df <- binned_df[, -which(names(binned_df) %in% c("z_down", "z_up"))]
-        
-        dir_vec <- c("down", "up")[c(!(class(downcast) == "try-error"), !(class(upcast) == "try-error"))]
-        loop_flag <- 0
-        
-        if(length(dir_vec) >= 1) {
+        for(mm in 1:length(var)) {
           
-          for(ii in 1:length(dir_vec)) {
+          if(!down_pres) {
+            down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
+                                                z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
+                                 by = list(z_bin = round(eval(parse(text = paste0("downcast@data$", z_var))))), 
+                                 FUN = mean)
+          }
+          
+          if(!up_pres) {
+            up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
+                                              z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
+                               by = list(z_bin = round(eval(parse(text = paste0("upcast@data$", z_var))))), 
+                               FUN = mean)
+          }
+          
+          if(!down_pres & !up_pres) {
+            binned_df <- dplyr::full_join(down_df, 
+                                          up_df, 
+                                          by = "z_bin")
+          } else if(!down_pres & up_pres) {
+            binned_df <- down_df
+          } else if(down_pres & !up_pres) {
+            binned_df <- up_df
+          }
+          
+          names(binned_df)[which(names(binned_df) == "var_up")] <- paste0(var[mm], "_up")
+          names(binned_df)[which(names(binned_df) == "var_down")] <- paste0(var[mm], "_down")
+          
+          binned_df <- binned_df[, -which(names(binned_df) %in% c("z_down", "z_up"))]
+          
+          dir_vec <- c("down", "up")[c(!(class(downcast) == "try-error"), !(class(upcast) == "try-error"))]
+          loop_flag <- 0
+          
+          if(length(dir_vec) >= 1) {
             
-            print(paste0("Start flagging ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk], " ", dir_vec[ii], "cast")))
-            cast_index <- numeric(length = 0L)
-            
-            col_index <- which(names(binned_df) == paste0(var[mm], "_", dir_vec[ii]))
-            
-            while(loop_flag == 0) {
+            for(ii in 1:length(dir_vec)) {
               
-              # Set plot x limits ----
-              var_range <- diff(
-                range(
-                  eval(
-                    parse(
-                      text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
-                    )
-                  ), 
-                  na.rm = TRUE)
-              )
+              print(paste0("Start flagging ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk], " ", dir_vec[ii], "cast")))
+              cast_index <- numeric(length = 0L)
               
-              if(var_range < var_range_min) {
-                set_xlim <- mean(var_range, na.rm = TRUE) + c(var_range - var_range_min/2, var_range + var_range_min/2)
-              } else {
-                set_xlim <- NULL
-              }
+              col_index <- which(names(binned_df) == paste0(var[mm], "_", dir_vec[ii]))
               
-              # Plot and flag points ----
-              plot(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
-                   y = binned_df$z_bin*-1, 
-                   xlab = var[mm], 
-                   ylab = z_var, 
-                   type = 'l',
-                   xlim = NULL, 
-                   main = "Left-click on all points to be removed then press 'Esc'")
-              points(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
+              while(loop_flag == 0) {
+                
+                # Set plot x limits ----
+                var_range <- diff(
+                  range(
+                    eval(
+                      parse(
+                        text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
+                      )
+                    ), 
+                    na.rm = TRUE)
+                )
+                
+                if(var_range < var_range_min) {
+                  set_xlim <- mean(var_range, na.rm = TRUE) + c(var_range - var_range_min/2, var_range + var_range_min/2)
+                } else {
+                  set_xlim <- NULL
+                }
+                
+                # Plot and flag points ----
+                plot(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
                      y = binned_df$z_bin*-1, 
                      xlab = var[mm], 
-                     ylab = z_var,
-                     xlim = NULL)
-              new_flags <- identify(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
-                                    binned_df$z_bin*-1, 
-                                    labels = row.names(binned_df))
-              
-              cast_index <- c(cast_index, new_flags)
-              binned_df[cast_index, col_index] <- NA
-              
-              # User input
-              if(tolower(readline("Accept profile (y) or remove additional points (n)?:")) == "y") {
-                loop_flag <- 1  
+                     ylab = z_var, 
+                     type = 'l',
+                     xlim = NULL, 
+                     main = "Left-click on all points to be removed then press 'Esc'")
+                points(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
+                       y = binned_df$z_bin*-1, 
+                       xlab = var[mm], 
+                       ylab = z_var,
+                       xlim = NULL)
+                new_flags <- identify(eval(parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii]))), 
+                                      binned_df$z_bin*-1, 
+                                      labels = row.names(binned_df))
+                
+                cast_index <- c(cast_index, new_flags)
+                binned_df[cast_index, col_index] <- NA
+                
+                # User input
+                if(tolower(readline("Accept profile (y) or remove additional points (n)?:")) == "y") {
+                  loop_flag <- 1  
+                }
               }
-            }
-            
-            assign(paste0("flag_", var[mm], "_", dir_vec[ii], "cast"), value = cast_index)
-            
-            # Interpolate missing values
-            if(interpolation_method != "none") {
-              print(paste0("Interpolating missing ", var[mm],  " values for ", deploy_id, " ", dir_vec[ii], "cast"))
-              na_index <- which(
-                is.na(
-                  eval(
-                    parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
+              
+              assign(paste0("flag_", var[mm], "_", dir_vec[ii], "cast"), value = cast_index)
+              
+              # Interpolate missing values
+              if(interpolation_method != "none") {
+                print(paste0("Interpolating missing ", var[mm],  " values for ", deploy_id, " ", dir_vec[ii], "cast"))
+                na_index <- which(
+                  is.na(
+                    eval(
+                      parse(text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
+                      )
                     )
                   )
                 )
-              )
-              
-              if(interpolation_method %in% c("rr", "unesco")) {
-                binned_df[na_index, col_index] <- oce::oceApprox(x = binned_df$z_bin, 
-                                                                 y = eval(
-                                                                   parse(
-                                                                     text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
-                                                                   )
-                                                                 ),
-                                                                 method = interpolation_method)[na_index]
-              } else if(interpolation_method == "linear") {
-                binned_df[na_index, col_index] <- approx(x = binned_df$z_bin, 
-                                                         y = eval(
-                                                           parse(
-                                                             text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
-                                                           )
-                                                         ),
-                                                         method = interpolation_method)$y[na_index]
+                
+                if(interpolation_method %in% c("rr", "unesco")) {
+                  binned_df[na_index, col_index] <- oce::oceApprox(x = binned_df$z_bin, 
+                                                                   y = eval(
+                                                                     parse(
+                                                                       text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
+                                                                     )
+                                                                   ),
+                                                                   method = interpolation_method)[na_index]
+                } else if(interpolation_method == "linear") {
+                  binned_df[na_index, col_index] <- approx(x = binned_df$z_bin, 
+                                                           y = eval(
+                                                             parse(
+                                                               text = paste0("binned_df$", var[mm], "_", dir_vec[ii])
+                                                             )
+                                                           ),
+                                                           method = interpolation_method)$y[na_index]
+                }
               }
+              loop_flag <- 0
             }
-            loop_flag <- 0
           }
+          
+          names(binned_df)[names(binned_df) == "z_bin"] <- z_var
+          
+          if(mm == 1) {
+            out_df <- binned_df    
+          } else {
+            out_df <- out_df |> 
+              dplyr::full_join(binned_df)
+          }
+          
         }
         
-        names(binned_df)[names(binned_df) == "z_bin"] <- z_var
+        # Append file name 
+        out_df$file <- deploy_id
         
-        if(mm == 1) {
-          out_df <- binned_df    
-        } else {
-          out_df <- out_df |> 
-            dplyr::full_join(binned_df)
-        }
+        # Write interpolated data to csv file
+        out_path <- write.csv(out_df, 
+                              file = here::here("output", 
+                                                "manual_flag", 
+                                                paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")),
+                              row.names = FALSE)
         
+      } else {
+        print(paste0("Insufficient or no data from ", deploy_id, " (index ", kk, " out of ", nrow(haul_metadata), ")"))
       }
-      
-      # Append file name 
-      out_df$file <- deploy_id
-      
-      # Write interpolated data to csv file
-      out_path <- write.csv(out_df, 
-                            file = here::here("output", 
-                                              "manual_flag", 
-                                              paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")),
-                            row.names = FALSE)
-      
     } else {
-      print(paste0("Insufficient or no data from ", deploy_id, " (index ", kk, " out of ", nrow(haul_metadata), ")"))
+      print(paste0("Skipping ", here::here("output", "manual_flag", paste0(sub("\\_raw.*", "", deploy_id), "_flag_interp.csv")), " because it already exists."))
     }
   }
 }
