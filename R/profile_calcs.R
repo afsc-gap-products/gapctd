@@ -147,8 +147,8 @@ profile_mld_from_t <- function(temperature,
 #'
 #' @param rho Numeric vector of density
 #' @param z Numeric vector of depths
-#' @mld Mixed layer depth
-#' @ref.depth Reference depth for upper layer density
+#' @param mld Mixed layer depth
+#' @param ref.depth Reference depth for upper layer density
 #' @export 
 
 profile_pycnocline <- function(rho, z, mld = NULL, ref.depth = 5) {

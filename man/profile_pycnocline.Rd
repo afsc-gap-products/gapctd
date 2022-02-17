@@ -10,6 +10,10 @@ profile_pycnocline(rho, z, mld = NULL, ref.depth = 5)
 \item{rho}{Numeric vector of density}
 
 \item{z}{Numeric vector of depths}
+
+\item{mld}{Mixed layer depth}
+
+\item{ref.depth}{Reference depth for upper layer density}
 }
 \description{
 Find the depth of the pycnocline as the depth where density is changing the fastest
