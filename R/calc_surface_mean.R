@@ -29,7 +29,7 @@ calc_surface_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/
     
     fpath <- list.files(here::here("final_cnv"), pattern = sub("\\_raw.*", "", haul_metadata$cnv_file_name[i]), 
                         full.names = TRUE)
-    fpath <- fpath[grepl(pattern = paste0("d", sub("\\_raw.*", "", haul_metadata$cnv_file_name[i])), fpath, fixed = TRUE)]
+    fpath <- fpath[grepl(pattern = paste0("u", sub("\\_raw.*", "", haul_metadata$cnv_file_name[i])), fpath, fixed = TRUE)]
     
     if(length(fpath) == 1) {
       
