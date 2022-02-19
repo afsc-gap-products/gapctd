@@ -8,14 +8,11 @@ manual_flag_interpolate(
   file_paths = NULL,
   haul_metadata_path = list.files(here::here("metadata"), full.names = TRUE),
   cast_dir_filepath = here::here("data", "tm_correct"),
-  year,
   var = "salinity",
   z_var = "pressure",
   flag_filename = here::here("output", "manual_flag_points.csv"),
-  start_index = NULL,
   interpolation_method = "unesco",
-  var_range_min = 0.1,
-  test_max_n = NULL
+  var_range_min = 0.1
 )
 }
 \arguments{
@@ -25,21 +22,17 @@ manual_flag_interpolate(
 
 \item{cast_dir_filepath}{Cast directory file path. ONLY USED IF file_paths = NULL.}
 
-\item{year}{Year as a numeric vector (1L).}
-
 \item{var}{Variable to search for point removal}
 
 \item{z_var}{Character vector indicating which variable to use for the vertical dimension ("depth" or "pressure")}
 
 \item{flag_filename}{Character vector indicating where to store information about the flagged data for each cast.}
 
-\item{start_index}{Numeric vector indicating which haul to start with.}
-
 \item{interpolation_method}{Method to use for interpolation. Options are "unesco" = oce::oceApprox(method = "unesco") "rr" = oce::oceApprox(method = "rr") in , "linear" = approx(method = "linear"), or "none" = no interpolation.}
 
 \item{var_range_min}{Numeric vector (1L) indicating the minimum x-axis range to use for plotting the selected variable.}
 
-\item{test_max_n}{FOR TESTING. Maximum index value}
+\item{start_index}{Numeric vector indicating which haul to start with.}
 }
 \description{
 Manually flag values from a cast for removal and interpolate removed/missing values.
