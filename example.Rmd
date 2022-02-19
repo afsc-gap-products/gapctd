@@ -112,13 +112,11 @@ gapctd::remove_bad_station_data(vessel = vessel,
 
 ## 8. Manually flag and remove bad data 
 
-Using pre-specified batch processing modules to filter and correct data fixes sampling artifacts in the data but some problems tend to persist. For example, the thermal mass correction module despikes salinity by applying a temperature-gradient-dependent correction formula using parameters recommended by the manufacturer to account for the lag between the temperature and conductivity cell responses, but it's efficacy varies because different temperature gradients cause different lags.
-
-The manual point flagging procedure allows users to flag 'bad' data, which are then removed and interpolated from the remaining data using an interpolation method of the user's choice. Users can either specify which files to review using the 'file_paths' argument or retrieve all downcasts and upcasts and downcasts from a directory based on the files listed in the haul metadata csv in the 'metadata' subdirectory.
+Although batch processing fixes some sampling artifacts, other problems tend to persist. In the manual point flagging step, 'bad' data are flagged, removed, and estimated via interpolation from the remaining data. Users can either specify which files to review using the 'file_paths' argument or retrieve all downcasts and upcasts and downcasts from a directory. Interpolation is performed using the method specified by the user (e.g., interpolation_method = "unesco"; see function documentation for details).
 
 
-
-```{r manual_edit, include=TRUE, eval=FALSE}
+```{r manual_flag, include=TRUE, eval=FALSE}
+# NOTE: This code block cannot be run as a chunk in an Rmd file because base graphic interfaces do not work within an R Markdown document.
 gapctd::manual_flag_interpolate(file_paths = NULL,
                                 haul_metadata_path = list.files(here::here("metadata"), 
                                                                 full.names = TRUE),
@@ -132,20 +130,31 @@ gapctd::manual_flag_interpolate(file_paths = NULL,
                                 var_range_min = 0.1)
 ```
 
-Bad data are flagged using a rudimentary graphical user interface (GUI) that relies on plot() and identify() functions in base R. 
+Bad data are flagged using base R's graphical user interface (GUI) plot() and identify() functions. 
 
 To flag and remove points on the plots:
 
 <ol type = "1">
   <li> Click on each point that should be flagged for removal.</li>
-  <li>Press Esc when points have been flagged</li>
-  <li>Enter a response to the prompt in the console indicating whether to accept the profile or remove more points ("Accept profile (y) or remove additional points (n)?:"). *VERY IMPORTANT: If any points were flagged for removal, select the 'remove additional points (n)' option an additional time to the regenerate the plot without the flagged points to verify that additional points do not need to be flagged.*.</li>
+  <li>Press 'Esc' when points have been flagged</li>
+  <li>Enter a response to the prompt in the console indicating whether to accept the profile or remove more points ("Accept profile (y) or remove additional points (n)?:"). *RECOMMENDATION: If any points were flagged for removal, select the 'remove additional points (n)' option an additional time to the regenerate the plot without the flagged points to verify that additional points do not need to be flagged.*.</li>
   <li>Repeat #1-3 for every profile and variable.</li>
 </ol>
 
-After removal, flagged or missing data are interpolated using the method specified by the user (e.g., interpolation_method = "unesco"; see function documentation for details).
+The manual_flag_interpolate() function searches the output directory for a flagged date file prior to opening the GUI for a cast and *does not* overwrite data. Therefore, the function can be stopped and will restart at the next file.  
 
-## 9. Calculate surface temperature and salinity from each upcast
+## 9. Review flagged and interpolated profiles
+
+After manually reconciling sampling artifacts in the data, profiles are visually inspected on a haul-by-haul basis using the manual_flag_review() function to assess whether there are any remaining problems with the data. Hauls with remaining problems are removed and can be reprocessed manually using manual_flag_interpolate(), i.e., step #8.
+
+```{r manual_review, include=TRUE, eval=FALSE}
+
+
+```
+
+
+
+## 10. Calculate surface temperature and salinity from each upcast
 
 The calc_surface_mean function calculates mean temperature and salinity from upcast files in the final_cnv subdirectory. Mean surface temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE.
 
