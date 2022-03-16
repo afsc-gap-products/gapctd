@@ -1,7 +1,6 @@
 ---
 title: "Process CTD data using gapctd"
 author: "Sean Rohan"
-date: "1/19/2022"
 output: html_document
 ---
 
@@ -38,7 +37,9 @@ channel <- gapctd::get_connected(schema = "AFSC")
 
 ## 3. Setup processing directory
 
-Data processing is conducted within a directory that contains CTD data files, configuration files, batch (.bat) files that provide instructions for running modules in SBE Data Processing, and Program Setup Files (.psa) that specify the parameters for batch processing modules. The setup_ctd_processing_dir function sets up data processing in your working directory by:
+The gapctd package processes data within a directory that contains binary CTD data files (.hex), configuration files (.xmlcon), batch files (.bat) that provide instructions for running modules in SBE Data Processing, and Program Setup Files (.psa) that specify the parameters for batch processing modules. The package produces converted CTD data files (.cnv) and CSV files that contain summary haul data. To set up the directory, run the setup_ctd_processing_dir function in your working directory. Arguments that must be provided to the setup_ctd_processing_dir function are the directory that contains binary CTD data files (.hex) and configuration files (.xmlcon) and the type of CTD unit (i.e, "sbe19plus") that was used to collect the data.
+
+The function does the 
 
 <ol type = "1">
 <li>Setting up a directory structure used for data processing.</li>
