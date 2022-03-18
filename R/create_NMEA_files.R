@@ -139,9 +139,6 @@ create_NMEA_files <- function(rodbc_channel = NA,
     fileConn <- file(paste0(getwd(), "/cnv/", file_name, "_EOS80.txt"))
     writeLines(c(first_line, second_line, third_line), fileConn)
     close(fileConn)
-    #  }else{
-    #  print("Time zones between haul data and CTD data do not match, fix time zones")
-    #    }
   }
   write.csv(survey_metadata, 
             file = paste0(getwd(), "/metadata/survey_metadata_", year, ".csv"),
