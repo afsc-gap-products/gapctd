@@ -122,8 +122,4 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
   print("Starting sbebatch to derive EOS80 and TEOS10")
   system(command = paste0("sbebatch ", getwd(), "/", derive_file, " ", getwd(), " ", xmlcon_file))
   
-  # Remove cnv files without data ----
-  # print("Removing bad cnv files")
-  # gapctd::move_binned_cnv()
-  
 }
