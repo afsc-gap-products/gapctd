@@ -49,6 +49,10 @@ manual_flag_interpolate <- function(file_paths = NULL,
           next
         }
         
+        if(file.exists(here::here("output", "accepted_profiles", paste0(sub("\\_raw.*", "", deploy_id), "_accepted.csv")))) {
+          next
+        }
+        
         # Ignore bad casts
         downcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("_downcast"), x = f_list)]), silent = TRUE)
         upcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("_upcast"), x = f_list)]), silent = TRUE)
@@ -80,15 +84,15 @@ manual_flag_interpolate <- function(file_paths = NULL,
         for(mm in 1:length(var)) {
           
           if(!down_pres) {
-            down_df <- aggregate(x = data.frame(var_down = eval(parse(text = paste0("downcast@data$", var[mm]))),
-                                                z_down = eval(parse(text = paste0("downcast@data$", z_var)))), 
+            down_df <- aggregate(x = data.frame(var_downcast = eval(parse(text = paste0("downcast@data$", var[mm]))),
+                                                z_downcast = eval(parse(text = paste0("downcast@data$", z_var)))), 
                                  by = list(z_bin = round(eval(parse(text = paste0("downcast@data$", z_var))))), 
                                  FUN = mean)
           }
           
           if(!up_pres) {
-            up_df <- aggregate(x = data.frame(var_up = eval(parse(text = paste0("upcast@data$", var[mm]))),
-                                              z_up = eval(parse(text = paste0("upcast@data$", z_var)))), 
+            up_df <- aggregate(x = data.frame(var_upcast = eval(parse(text = paste0("upcast@data$", var[mm]))),
+                                              z_upcast = eval(parse(text = paste0("upcast@data$", z_var)))), 
                                by = list(z_bin = round(eval(parse(text = paste0("upcast@data$", z_var))))), 
                                FUN = mean)
           }
@@ -103,22 +107,30 @@ manual_flag_interpolate <- function(file_paths = NULL,
             binned_df <- up_df
           }
           
-          names(binned_df)[which(names(binned_df) == "var_up")] <- paste0(var[mm], "_up")
-          names(binned_df)[which(names(binned_df) == "var_down")] <- paste0(var[mm], "_down")
+          names(binned_df)[which(names(binned_df) == "var_upcast")] <- paste0(var[mm], "_upcast")
+          names(binned_df)[which(names(binned_df) == "var_downcast")] <- paste0(var[mm], "_downcast")
           
-          binned_df <- binned_df[, -which(names(binned_df) %in% c("z_down", "z_up"))]
+          binned_df <- binned_df[, -which(names(binned_df) %in% c("z_downcast", "z_upcast"))]
           
-          dir_vec <- c("down", "up")[c(!(class(downcast) == "try-error"), !(class(upcast) == "try-error"))]
+          dir_vec <- c("downcast", "upcast")[c(!(class(downcast) == "try-error"), !(class(upcast) == "try-error"))]
           loop_flag <- 0
           
           if(length(dir_vec) >= 1) {
             
             for(ii in 1:length(dir_vec)) {
               
-              print(paste0("Start flagging ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk], " ", dir_vec[ii], "cast")))
+              print(paste0("Start flagging ", sub("\\_raw.*", "", haul_metadata$cnv_file_name[kk], " ", dir_vec[ii])))
               cast_index <- numeric(length = 0L)
               
               col_index <- which(names(binned_df) == paste0(var[mm], "_", dir_vec[ii]))
+              
+              # Skip if column doesn't exist
+              if(length(col_index) < 1) {
+                next
+              }
+              
+              # Z bins to ignore because they are deeper than the maximum for a cast
+              out_of_range <- which(is.na(binned_df[,col_index]))
               
               while(loop_flag == 0) {
                 
@@ -165,11 +177,11 @@ manual_flag_interpolate <- function(file_paths = NULL,
                 }
               }
               
-              assign(paste0("flag_", var[mm], "_", dir_vec[ii], "cast"), value = cast_index)
+              assign(paste0("flag_", var[mm], "_", dir_vec[ii]), value = cast_index)
               
               # Interpolate missing values
               if(interpolation_method != "none") {
-                print(paste0("Interpolating missing ", var[mm],  " values for ", deploy_id, " ", dir_vec[ii], "cast"))
+                print(paste0("Interpolating missing ", var[mm],  " values for ", deploy_id, " ", dir_vec[ii]))
                 na_index <- which(
                   is.na(
                     eval(
@@ -178,6 +190,8 @@ manual_flag_interpolate <- function(file_paths = NULL,
                     )
                   )
                 )
+                
+                na_index <- na_index[!(na_index %in% out_of_range)]
                 
                 if(interpolation_method %in% c("rr", "unesco")) {
                   binned_df[na_index, col_index] <- oce::oceApprox(x = binned_df$z_bin, 

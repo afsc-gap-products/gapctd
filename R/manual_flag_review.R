@@ -20,10 +20,12 @@ manual_flag_review <- function(var = c("salinity", "temperature"),
     dat <- read.csv(file = flag_files[ii])
     
     dat <- dat |>
-      tidyr::pivot_longer(cols = c(paste0(var, "_up"), paste0(var, "_down"))) |>
+      tidyr::pivot_longer(cols = c(paste0(var, "_upcast"), paste0(var, "_downcast"))) |>
       dplyr::mutate(variable = stringr::str_split(name, "_", simplify = TRUE)[,1],
                     direction = stringr::str_split(name, "_", simplify = TRUE)[,2]) |>
       dplyr::arrange(pressure)
+    
+    plot_title <- dat$file[1]
     
     print(
       ggplot2::ggplot(data = dat,
@@ -37,13 +39,20 @@ manual_flag_review <- function(var = c("salinity", "temperature"),
         ggplot2::scale_x_continuous(name = "Value") +
         ggplot2::scale_linetype(name = "Direction") +
         ggplot2::scale_color_manual(name = "Direction", values = c("#4E79A7", "#F28E2B")) +
+        ggplot2::ggtitle(paste0("Deployment: ",  plot_title)) +
         ggplot2::theme_bw())
     
     keep <- c(TRUE, FALSE)[match(tolower(readline(paste0("Accept profile (", ii, " out of ", length(flag_files), ") -- y or n?:"))), c("y", "n"))]
     
     if(!keep) {
+      # Delete file
       file.remove(flag_files[ii])
       print(paste0("Removing ", flag_files[ii]))
+    } else {
+      # Move to output/accepted_profiles
+      new_name <- gsub(pattern = "manual_flag", "accepted_profiles", x = flag_files[ii])
+      new_name <- gsub(pattern = "flag_interp", "accepted", x = new_name)
+      file.rename(from = flag_files[ii], new_name)
     }
   }
   
