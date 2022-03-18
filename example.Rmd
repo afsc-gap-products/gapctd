@@ -97,15 +97,17 @@ gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metad
 The make_cast_sections function uses the SBE Data Processing 'section' module to extract upcast and downcast data from CTD files. This is used instead of the SBE 'split' module to ensure profiles don't contain data collected while the trawl was being towed (which often results in bottom spikes in profiles due to changes in temperature and salinity along the bottom).
 
 ```{r split_casts, include=TRUE, eval=FALSE}
-make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
-                   pattern = "TEOS10.cnv", 
-                   xmlcon_file = NA,
-                   bat_file = NA) 
+gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
+                           pattern = "TEOS10.cnv", 
+                           xmlcon_file = NA,
+                           section_bat = NA,
+                           binavg_bat = NA, 
+                           pressure_bat = NA) 
 ```
 
 ## 8. Move bad station data to bad_cnv directory
 
-In some cases, the CTD was turned on at the surface without being deployed or was shut off during the middle of a downcast during a deployment. The remove_bad_station_data function facilitates identification of such files and moves all cnv files from such files to the bad_cnv subdirectory. Arguments in the remove_bad_station_data function specify:
+In some cases, the CTD was turned on at the surface and wasn't deployed or the unit shut off during the middle of a deployment. The remove_bad_station_data function facilitates identification of such files and moves all cnv files from such files to the bad_cnv subdirectory. Arguments in the remove_bad_station_data function specify:
 
 <ul>
 <li><i>max_diff_bt_ctd_depth</i>: The maximum allowable difference between RACEBASE.GEAR_DEPTH while and mean CTD depth while on-bottom. This criteria handles cases where the CTD stopped collecting data during the downcast.</li>
@@ -155,11 +157,13 @@ The manual_flag_interpolate() function searches the output directory for a flagg
 
 ## 10. Review flagged and interpolated profiles
 
-After manually reconciling sampling artifacts in the data, profiles are visually inspected on a haul-by-haul basis using the manual_flag_review() function to assess whether there are any remaining problems with the data. Hauls with remaining problems are removed and can be reprocessed manually using manual_flag_interpolate(), i.e., step #8.
+After manually reconciling sampling artifacts in the data, profiles are visually inspected on a haul-by-haul basis using the manual_flag_review() function to assess whether there are any remaining problems with the data. Hauls with problems remaining are removed and can be reprocessed manually using manual_flag_interpolate(), i.e., step #8.
 
 ```{r manual_review, include=TRUE, eval=FALSE}
-```
+gapctd::manual_flag_review(var = c("salinity", "temperature"), 
+                           flag_dir = here::here("output", "manual_flag"))
 
+```
 
 
 ## 11. Calculate surface temperature and salinity from each upcast
@@ -167,10 +171,10 @@ After manually reconciling sampling artifacts in the data, profiles are visually
 The calc_surface_mean function calculates mean temperature and salinity from upcast files in the final_cnv subdirectory. Mean surface temperature and salinity are written to the haul metadata csv file when argument append_haul_metadata is set to TRUE.
 
 ```{r avg_surface, include=TRUE, eval=FALSE}
-gapctd::calc_surface_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
-                                                          full.names = TRUE),
-                              depth_interval = c(1,2),
-                              append_haul_metadata = TRUE)
+gapctd::calc_bin_value(accepted_dir = here::here("output", "accepted_profiles"),
+                       z_var = "pressure",
+                       z_range = 1,
+                       agg_fun = mean)
 ```
 
 
