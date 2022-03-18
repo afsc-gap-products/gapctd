@@ -17,7 +17,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
   
   # Check for rodbc_channel or haul_csv ----
   if(make_NMEA) {
-    if(is.na(rodbc_channel) & is.na(haul_csv)) {
+    if(!(class(rodbc_channel) == "RODBC") & is.na(haul_csv)) {
       stop("Must pass either rodbc_channel or haul_csv")
     } else {
       if(!is.na(rodbc_channel) & !is.na(haul_csv)) {
@@ -76,11 +76,11 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
   
   if(make_NMEA) {
     print("Generating NMEA files")
-    create_NMEA_files(rodbc_channel = rodbc_channel,
-                      haul_csv = haul_csv,
-                      year = year,
-                      vessel = vessel,
-                      region = region)
+    gapctd::create_NMEA_files(rodbc_channel = rodbc_channel,
+                              haul_csv = haul_csv,
+                              year = year,
+                              vessel = vessel,
+                              region = region)
   } else {
     print("Generating NMEA proxy files with coordinates 57 N, -168 W")
     cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_tmcorrect.cnv$")
@@ -123,7 +123,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
   system(command = paste0("sbebatch ", getwd(), "/", derive_file, " ", getwd(), " ", xmlcon_file))
   
   # Remove cnv files without data ----
-  print("Removing bad cnv files")
-  gapctd::move_binned_cnv()
+  # print("Removing bad cnv files")
+  # gapctd::move_binned_cnv()
   
 }

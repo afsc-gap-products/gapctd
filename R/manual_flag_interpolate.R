@@ -50,8 +50,8 @@ manual_flag_interpolate <- function(file_paths = NULL,
         }
         
         # Ignore bad casts
-        downcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("/d2"), x = f_list)]), silent = TRUE)
-        upcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("/u2"), x = f_list)]), silent = TRUE)
+        downcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("_downcast"), x = f_list)]), silent = TRUE)
+        upcast <- try(oce::read.ctd(file = f_list[grepl(pattern = paste0("_upcast"), x = f_list)]), silent = TRUE)
         
         down_pres <- try(diff(range(downcast@data$pressure)) < 9, silent = TRUE)
         up_pres <- try(diff(range(upcast@data$pressure)) < 9, silent = TRUE)

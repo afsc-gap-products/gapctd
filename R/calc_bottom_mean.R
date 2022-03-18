@@ -36,6 +36,7 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
                         full.names = TRUE)
     fpath <- fpath[grepl(pattern = pattern, fpath, fixed = TRUE)]
     
+    # Get cast_start time
     cast_dat <- suppressWarnings(oce::read.ctd.sbe(file = fpath))
     cast_start <- as.POSIXct(cast_dat@metadata$startTime)
     cast_start <- lubridate::force_tz(cast_start, tzone = timezone)
@@ -62,8 +63,19 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
     out_df$CTD_TEMPERATURE_SN[i] <- cast_dat@metadata$serialNumberTemperature
     out_df$CTD_CONDUCTIVITY_SN[i] <- cast_dat@metadata$serialNumberConductivity
     out_df$CTD_CAST_START[i] <- as.character(cast_start)
+    out_df$DOWNCAST_END_SECONDS[i] <- cast_dat@data$timeS[start_index] # Downcast end time in seconds elapsed
+    out_df$DOWNCAST_END_INDEX[i] <- start_index
+    out_df$UPCAST_START_SECONDS[i] <- cast_dat@data$timeS[end_index] # Upcast start time in seconds elapsed
+    out_df$UPCAST_START_INDEX[i] <- end_index
     
   }
+  
+  # Handle cases that don't correspond with hauls
+  out_df$DOWNCAST_END_SECONDS[out_df$DOWNCAST_END_SECONDS <= 0] <- NA
+  out_df$UPCAST_START_SECONDS[out_df$UPCAST_START_SECONDS <= 0] <- NA
+  out_df$DOWNCAST_END_INDEX[is.na(out_df$DOWNCAST_END_SECONDS)] <- NA
+  out_df$UPCAST_START_INDEX[is.na(out_df$UPCAST_START_SECONDS)] <- NA
+  
   
   if(append_haul_metadata) {
     write.csv(x = out_df, 
