@@ -2,16 +2,16 @@
 <Window_Filter >
   <Version value="7.26.7.129" />
   <ServerName value="Window Filter" />
-  <InputDir value="C:\Users\sean.rohan\Work\afsc\WIP\cnv" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\WIP\testctd\cnv" />
   <InputFileArray size="1" GrowBy="-1" >
-    <ArrayItem index="0" value="2021_06_01_0001_raw.cnv" />
+    <ArrayItem index="0" value="2021_06_01_0001_raw_fil1_loopedit_tmcorrect.cnv" />
   </InputFileArray>
-  <OutputDir value="C:\Users\sean.rohan\Work\afsc\WIP\cnv" />
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\WIP\testctd\cnv" />
   <NameAppend value="_wfil" />
-  <OutputFile value="2021_06_01_0001_raw" />
+  <OutputFile value="2021_06_01_0001_raw_fil1_loopedit_tmcorrect.cnv" />
   <LastProcessed value="0" />
   <ExcludeMarkedBad value="1" />
-  <CalcArray Size="3" >
+  <CalcArray Size="4" >
     <CalcArrayItem index="0" CalcID="97" >
       <Calc UnitID="6" Ordinal="0" >
         <FullName value="Temperature [ITS-90, deg C]" />
@@ -27,23 +27,35 @@
         <FullName value="Conductivity [S/m]" />
       </Calc>
     </CalcArrayItem>
+    <CalcArrayItem index="3" CalcID="18" >
+      <Calc UnitID="32" Ordinal="0" >
+        <FullName value="Descent Rate [m/s]" />
+        <WindowSize value="2.000000" />
+      </Calc>
+    </CalcArrayItem>
   </CalcArray>
-  <FilterParamArray size="3" >
+  <FilterParamArray size="4" >
     <ArrayItem index="0" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="9" />
+      <WindowSize value="11" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>
     <ArrayItem index="1" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="9" />
+      <WindowSize value="11" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>
     <ArrayItem index="2" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="9" />
+      <WindowSize value="11" />
+      <HalfWidth value="1.000000" />
+      <Offset value="0.000000" />
+    </ArrayItem>
+    <ArrayItem index="3" >
+      <FilterType value="0" name="NO_FILTER" />
+      <WindowSize value="5" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>

@@ -39,16 +39,16 @@ setup_ctd_processing_dir <- function(ctd_dir,
     dir.create("bad_cnv")
   }
   
-  if(!dir.exists("final_cnv")) {
-    dir.create("final_cnv")
-  }
-  
   if(!dir.exists("output")) {
     dir.create("output")
   }
   
   if(!dir.exists(here::here("output", "manual_flag"))) {
     dir.create(here::here("output", "manual_flag"))
+  }
+  
+  if(!dir.exists(here::here("output", "accepted_profiles"))) {
+    dir.create(here::here("output", "accepted_profiles"))
   }
   
   if(!dir.exists("plots")) {
