@@ -17,7 +17,7 @@ create_NMEA_files <- function(rodbc_channel = NA,
 {
   
   ## Load cnv files ----
-  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_tmcorrect.cnv$")
+  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_wfil.cnv$")
   print(paste0("CNV files found: ", length(cnv_files)))
   
   ###### ADD cnv_files check ----
