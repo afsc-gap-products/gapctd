@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bin_Average >
+  <Version value="7.26.7.129" />
+  <ServerName value="Bin Average" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
+  <InputFileArray size="4" GrowBy="-1" >
+    <ArrayItem index="0" value="dSBE19_CTD8106_Hauls_Test1_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80_teos10_split.cnv" />
+    <ArrayItem index="1" value="dSBE19_CTD8106_Hauls_Test2_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80_teos10_split.cnv" />
+    <ArrayItem index="2" value="uSBE19_CTD8106_Hauls_Test1_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80_teos10_split.cnv" />
+    <ArrayItem index="3" value="uSBE19_CTD8106_Hauls_Test2_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80_teos10_split.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
+  <NameAppend value="_binavg" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <BinType value="2" />
+  <BinSize value="1.000000" />
+  <IncludeNumberScans value="0" />
+  <ExcludeMarkedBad value="1" />
+  <ScansToSkip value="0" />
+  <ScansToOmit value="0" />
+  <MinScansPerBin value="1" />
+  <MaxScansPerBin value="2147483647" />
+  <CastToProcess value="0" high="2" low="0" initialValue="0" />
+  <IncludeSurfaceBin value="0" />
+  <SurfaceBinMinVal value="0.000000" />
+  <SurfaceBinMaxVal value="0.000000" />
+  <SurfaceBinVal value="0.000000" />
+</Bin_Average>
