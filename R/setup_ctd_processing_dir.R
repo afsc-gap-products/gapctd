@@ -14,9 +14,9 @@ setup_ctd_processing_dir <- function(ctd_dir,
   # Verify that ctd unit is correct ----
   ctd_unit <- tolower(ctd_unit)
   
-  # if(!(ctd_unit %in% c("sbe19", "sbe19plus"))) {
-  #   stop("ctd_unit must be specified as either 'sbe19' or 'sbe19plus'")
-  # }
+  if(!(ctd_unit %in% tolower(list.files(system.file("extdata", package = "gapctd"))))) {
+    stop(paste0("ctd_unit must be one of: ", paste0(paste0("\'", list.files(system.file("extdata", package = "gapctd")), collapse = "\', "),"\'")))
+  }
   
   # Setup processing directory structure ----
   if(is.na(output_dir)) {
