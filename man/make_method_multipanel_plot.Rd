@@ -4,7 +4,12 @@
 \alias{make_method_multipanel_plot}
 \title{Multipanel plots to compare methods}
 \usage{
-make_method_multipanel_plot(prefix, processing_method, method_labels = NULL)
+make_method_multipanel_plot(
+  prefix,
+  processing_method,
+  method_labels = NULL,
+  return_output = FALSE
+)
 }
 \arguments{
 \item{prefix}{Character vector to include before output plots.}
@@ -12,6 +17,8 @@ make_method_multipanel_plot(prefix, processing_method, method_labels = NULL)
 \item{processing_method}{Character vector denoting the name of the processing method, corresponding with names of folders in /output/ that contain processed cnv files.}
 
 \item{method_labels}{Character vector denoting titles to use on multipanel plots. Must be the same length as processing_method. Default (NULL) uses processing_method character vector for plot titles.}
+
+\item{return_output}{Logical. If true, returns output in a data.frame.}
 }
 \description{
 Make multipanel plots to compare methods/workflows for processing CTD data.

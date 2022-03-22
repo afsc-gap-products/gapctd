@@ -5,12 +5,14 @@
 #' @param prefix Character vector to include before output plots.
 #' @param processing_method Character vector denoting the name of the processing method, corresponding with names of folders in /output/ that contain processed cnv files.
 #' @param method_labels Character vector denoting titles to use on multipanel plots. Must be the same length as processing_method. Default (NULL) uses processing_method character vector for plot titles.
+#' @param return_output Logical. If true, returns output in a data.frame.
 #' @export
 
 
 make_method_multipanel_plot <- function(prefix,
                                         processing_method,
-                                        method_labels = NULL) {
+                                        method_labels = NULL,
+                                        return_output = FALSE) {
   
   
   make_ud_plot <- function(dat_d, dat_u) {
@@ -18,15 +20,13 @@ make_method_multipanel_plot <- function(prefix,
     down_df <- data.frame(temperature = dat_d@data$temperature[!is.na(dat_d@data$flag)],
                           salinity = dat_d@data$salinity[!is.na(dat_d@data$flag)],
                           pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
-                          dir = "down") 
+                          direction = "downcast") 
     up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
                         salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
                         pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
-                        dir = "up")
+                        direction = "upcast")
     
-    comb_df <- dplyr::bind_rows(down_df, up_df)
-    
-    table(comb_df$dir)
+    comb_df <- dplyr::bind_rows(down_df, up_df, by = "method")
     
     temp_plot <- ggplot() +
       geom_path(data = comb_df, 
@@ -90,6 +90,8 @@ make_method_multipanel_plot <- function(prefix,
     ), perl = TRUE) %in% n_files$id_vec)])
   }
   
+  out_df <- data.frame()
+  
   for(kk in 1:nrow(n_files)) {
     
     comb_df <- data.frame()
@@ -102,27 +104,30 @@ make_method_multipanel_plot <- function(prefix,
       down_df <- data.frame(temperature = dat_d@data$temperature[!is.na(dat_d@data$flag)],
                             salinity = dat_d@data$salinity[!is.na(dat_d@data$flag)],
                             pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
-                            dir = "down") 
+                            delta_s = mean(abs(diff(dat_d@data$salinity))),
+                            direction = "down") 
       up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
                           salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
                           pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
-                          dir = "up")
+                          delta_s = mean(abs(diff(dat_d@data$salinity))),
+                          direction = "up")
       
       comb_df <- dplyr::bind_rows(down_df, up_df) |>
         dplyr::mutate(method = processing_method[mm]) |>
-        dplyr::bind_rows(comb_df)
+        dplyr::bind_rows(comb_df) |>
+        dplyr::filter(pressure > 1)
       
     }
     
     comb_df <- comb_df |>
-      dplyr::inner_join(plot_labels_df)
+      dplyr::inner_join(plot_labels_df, by = "method")
     
     png(file = here::here("plots", paste0(prefix, "_salinity_", kk, ".png")), width = 8, height = 8, units = "in", res = 300)
     print(ggplot() +
             geom_path(data = comb_df, 
                       aes(x = salinity, 
                           y = pressure, 
-                          color = dir)) +
+                          color = direction)) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
@@ -134,13 +139,22 @@ make_method_multipanel_plot <- function(prefix,
             geom_path(data = comb_df, 
                       aes(x = temperature, 
                           y = pressure, 
-                          color = dir)) +
+                          color = direction)) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
             theme_bw())
     dev.off()
     
+    if(return_output) {
+      comb_df$index <- kk
+      comb_df$file <-  sub(paste0(".*/", processing_method[mm]), "", sub("_raw.*", "", eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
+      out_df <- dplyr::bind_rows(out_df, comb_df)
+    }
+    
   }
   
+  if(return_output) {
+    return(out_df)
+  }
 }
