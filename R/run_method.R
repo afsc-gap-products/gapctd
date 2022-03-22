@@ -27,7 +27,7 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
   
   message(paste0("Preparing to delete files from working directory:\n", 
                  length(cnv_files), " cnv\n", 
-                 length(bad_cnv), " bad_cnv\n", 
+                 length(bad_cnv_files), " bad_cnv\n", 
                  length(meta_files), " metadata\n", 
                  length(data_files), " .hex data\n",
                  length(psa_files), " .psa\n",
@@ -38,7 +38,7 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
   
   if(tolower(rm_files) == "y") {
     file.remove(cnv_files)
-    file.remove(bad_cnv)
+    file.remove(bad_cnv_files)
     file.remove(meta_files)
     file.remove(data_files)
     file.remove(psa_files)
