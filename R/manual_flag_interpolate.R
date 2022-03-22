@@ -15,7 +15,7 @@
 
 manual_flag_interpolate <- function(file_paths = NULL,
                                     haul_metadata_path = list.files(here::here("metadata"), full.names = TRUE),
-                                    cast_dir_filepath = here::here("data", "tm_correct"),
+                                    cast_dir_filepath = here::here("final_cnv"),
                                     var = "salinity",
                                     z_var = "pressure",
                                     flag_filename = here::here("output", "manual_flag_points.csv"),

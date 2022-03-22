@@ -8,9 +8,10 @@
 #' @param channel RODBC channel. Passed to gapctd::run_sbe_batch(), and gapctd::get_haul_events(), gapctd::remove_bad_station_data()
 #' @param processing_method Character vector indicating which processing method to use. Passed to gapctd::setup_ctd_processing_dir
 #' @param ctd_dir Directory containing CTD data. Passed to gapctd::setup_ctd_processing_dir
+#' @param rm_files Character vector indicating if files should be removed ("y").
 #' @export
 
-run_method <- function(vessel, year, region, channel, processing_method, ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162") {
+run_method <- function(vessel, year, region, channel, processing_method, ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", rm_files = NULL) {
   
   if(!dir.exists(here::here("output", processing_method))) {
     dir.create(here::here("output", processing_method))
@@ -34,7 +35,9 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
                  length(xmlcon_files), " .xmlcon\n",
                  length(bat_files), " .bat\n"))
   
-  rm_files <- readline(prompt = "Proceed with deletion? ('y' or 'n'): ")
+  if(is.null(rm_files)) {
+    rm_files <- readline(prompt = "Proceed with deletion? ('y' or 'n'): ")
+  }
   
   if(tolower(rm_files) == "y") {
     file.remove(cnv_files)

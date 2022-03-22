@@ -1,6 +1,6 @@
-#' Multipanel plots to compare methods
+#' Compare methods based on spikes and make multipanel plots
 #' 
-#' Make multipanel plots to compare methods/workflows for processing CTD data.
+#' Compare processing methods based on spikiness of profiles and make multipanel plots to compare methods/workflows for processing CTD data.
 #' 
 #' @param prefix Character vector to include before output plots.
 #' @param processing_method Character vector denoting the name of the processing method, corresponding with names of folders in /output/ that contain processed cnv files.
@@ -9,7 +9,7 @@
 #' @export
 
 
-make_method_multipanel_plot <- function(prefix,
+compare_methods <- function(prefix,
                                         processing_method,
                                         method_labels = NULL,
                                         return_output = FALSE) {
@@ -91,6 +91,7 @@ make_method_multipanel_plot <- function(prefix,
   }
   
   out_df <- data.frame()
+  best_df <- data.frame()
   
   for(kk in 1:nrow(n_files)) {
     
@@ -109,11 +110,12 @@ make_method_multipanel_plot <- function(prefix,
       up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
                           salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
                           pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
-                          delta_s = mean(abs(diff(dat_d@data$salinity))),
+                          delta_s = mean(abs(diff(dat_u@data$salinity))),
                           direction = "up")
       
       comb_df <- dplyr::bind_rows(down_df, up_df) |>
-        dplyr::mutate(method = processing_method[mm]) |>
+        dplyr::mutate(method = processing_method[mm],
+                      method_index = mm) |>
         dplyr::bind_rows(comb_df) |>
         dplyr::filter(pressure > 1)
       
@@ -148,13 +150,31 @@ make_method_multipanel_plot <- function(prefix,
     
     if(return_output) {
       comb_df$index <- kk
-      comb_df$file <-  sub(paste0(".*/", processing_method[mm]), "", sub("_raw.*", "", eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
+      comb_df$deploy <-  sub(paste0(".*/", processing_method[mm], "/"), "", sub("_raw.*", "", eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
       out_df <- dplyr::bind_rows(out_df, comb_df)
+      
+      # List best files to move
+      summary_df <- comb_df |>
+        dplyr::select(direction, method, label, deploy, method_index, index, delta_s) |>
+        unique()
+      
+      summary_df <- summary_df |>
+        dplyr::group_by(direction) |>
+        dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
+        dplyr::inner_join(summary_df) |>
+        dplyr::mutate(move = NA)
+      
+      summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
+      summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
+      
+      best_df <- dplyr::bind_rows(summary_df, best_df)
+    
     }
     
   }
   
   if(return_output) {
-    return(out_df)
+    return(list(compare_df = out_df,
+                best_df = best_df))
   }
 }

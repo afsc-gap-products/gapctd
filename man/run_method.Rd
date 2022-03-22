@@ -10,7 +10,8 @@ run_method(
   region,
   channel,
   processing_method,
-  ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162"
+  ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162",
+  rm_files = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ run_method(
 \item{processing_method}{Character vector indicating which processing method to use. Passed to gapctd::setup_ctd_processing_dir}
 
 \item{ctd_dir}{Directory containing CTD data. Passed to gapctd::setup_ctd_processing_dir}
+
+\item{rm_files}{Character vector indicating if files should be removed ("y").}
 }
 \description{
 Function to run a batch processing workflow and save output. Useful for comparing batch processing workflows using different sets of SBE data processing modules.
