@@ -24,7 +24,7 @@ create_NMEA_files <- function(rodbc_channel = NA,
   
   print("Running query")
   if(!is.na(rodbc_channel)) {
-    haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 198700")
+    haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 200700")
   } else if(!is.na(haul_csv)) {
     haul_df <- read.csv(file = haul_csv, 
                         stringsAsFactors = FALSE)
