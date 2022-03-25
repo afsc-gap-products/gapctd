@@ -97,7 +97,8 @@ gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metad
 The make_cast_sections function uses the SBE Data Processing 'section' module to extract upcast and downcast data from CTD files. This is used instead of the SBE 'split' module to ensure profiles don't contain data collected while the trawl was being towed (which often results in bottom spikes in profiles due to changes in temperature and salinity along the bottom).
 
 ```{r split_casts, include=TRUE, eval=FALSE}
-gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),
+gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
+                                                           full.names = TRUE),
                            pattern = "TEOS10.cnv", 
                            xmlcon_file = NA,
                            section_bat = NA,
@@ -134,7 +135,7 @@ Batch processing routines do not handle all cases of salinity spikes. In this st
 gapctd::manual_flag_interpolate(file_paths = NULL,
                                 haul_metadata_path = list.files(here::here("metadata"), 
                                                                 full.names = TRUE),
-                                cast_dir_filepath = here::here("data", "tm_correct"),
+                                cast_dir_filepath = here::here("final_cnv"),
                                 var = c("salinity", "temperature"),
                                 z_var = "pressure",
                                 flag_filename = here::here("output", "manual_flag_points.csv"),

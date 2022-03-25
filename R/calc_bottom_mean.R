@@ -37,7 +37,28 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
     fpath <- fpath[grepl(pattern = pattern, fpath, fixed = TRUE)]
     
     # Get cast_start time
-    cast_dat <- suppressWarnings(oce::read.ctd.sbe(file = fpath))
+    cast_dat <- suppressWarnings(try(oce::read.ctd.sbe(file = fpath), silent = TRUE))
+    
+    if(class(cast_dat) == "try-error") {
+      
+      warning("try-error in ", fpath)
+      
+      out_df$CTD_MEAN_HAUL_DEPTH[i] <- NA
+      out_df$CTD_MEAN_BOTTOM_TEMPERATURE_C[i] <- NA
+      out_df$CTD_MEAN_BOTTOM_SALINITY_SA[i] <- NA
+      out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- NA
+      out_df$CTD_N_BOTTOM_SAMPLE[i] <- NA
+      out_df$CTD_TEMPERATURE_SN[i] <- NA
+      out_df$CTD_CONDUCTIVITY_SN[i] <- NA
+      out_df$CTD_CAST_START[i] <- NA
+      out_df$DOWNCAST_END_SECONDS[i] <- NA
+      out_df$DOWNCAST_END_INDEX[i] <- NA
+      out_df$UPCAST_START_SECONDS[i] <- NA
+      out_df$UPCAST_START_INDEX[i] <- NA
+      
+      next
+    }
+    
     cast_start <- as.POSIXct(cast_dat@metadata$startTime)
     cast_start <- lubridate::force_tz(cast_start, tzone = timezone)
     
