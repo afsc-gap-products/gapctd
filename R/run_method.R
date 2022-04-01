@@ -8,10 +8,10 @@
 #' @param channel RODBC channel. Passed to gapctd::run_sbe_batch(), and gapctd::get_haul_events(), gapctd::remove_bad_station_data()
 #' @param processing_method Character vector indicating which processing method to use. Passed to gapctd::setup_ctd_processing_dir
 #' @param ctd_dir Directory containing CTD data. Passed to gapctd::setup_ctd_processing_dir
-#' @param rm_files Character vector indicating if files should be removed ("y").
+#' @param rm_files Logical. Should be removed from the directory before starting processing
 #' @export
 
-run_method <- function(vessel, year, region, channel, processing_method, ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", rm_files = NULL) {
+run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", rm_files = TRUE) {
   
   if(!dir.exists(here::here("output", processing_method))) {
     dir.create(here::here("output", processing_method))
@@ -26,20 +26,18 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
   xmlcon_files <- list.files(path = here::here("psa_xmlcon"), full.names = TRUE, pattern = ".xmlcon")
   bat_files <- list.files(path = here::here(), full.names = TRUE, pattern = ".bat")
   
-  message(paste0("Preparing to delete files from working directory:\n", 
-                 length(cnv_files), " cnv\n", 
-                 length(bad_cnv_files), " bad_cnv\n", 
-                 length(meta_files), " metadata\n", 
-                 length(data_files), " .hex data\n",
-                 length(psa_files), " .psa\n",
-                 length(xmlcon_files), " .xmlcon\n",
-                 length(bat_files), " .bat\n"))
+
   
-  if(is.null(rm_files)) {
-    rm_files <- readline(prompt = "Proceed with deletion? ('y' or 'n'): ")
-  }
-  
-  if(tolower(rm_files) == "y") {
+  if(rm_files) {
+    message(paste0("Deleting files from working directory:\n", 
+                   length(cnv_files), " cnv\n", 
+                   length(bad_cnv_files), " bad_cnv\n", 
+                   length(meta_files), " metadata\n", 
+                   length(data_files), " .hex data\n",
+                   length(psa_files), " .psa\n",
+                   length(xmlcon_files), " .xmlcon\n",
+                   length(bat_files), " .bat\n"))
+    
     file.remove(cnv_files)
     file.remove(bad_cnv_files)
     file.remove(meta_files)
@@ -47,14 +45,12 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
     file.remove(psa_files)
     file.remove(xmlcon_files)
     file.remove(bat_files)
-  } else {
-    stop("Must remove previously processed files before proceeding!")
   }
 
   
   gapctd::setup_ctd_processing_dir(ctd_dir = ctd_dir,
                                    ctd_unit = processing_method,
-                                   recursive = TRUE) # TRUE ensures files are copied from nested subdirectories
+                                   recursive = TRUE)
   
   gapctd::run_sbe_batch(vessel = vessel,
                         year = year,
@@ -66,14 +62,14 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
   
   gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
                                                            full.names = TRUE),
-                           pattern = "TEOS10.cnv",
+                           pattern = last_pattern,
                            timezone = "America/Anchorage",
                            time_buffer = 30,
                            append_haul_metadata = TRUE)
   
   gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
                                                              full.names = TRUE),
-                             pattern = "TEOS10.cnv", 
+                             pattern = last_pattern, 
                              xmlcon_file = NA,
                              section_bat = NA,
                              binavg_bat = NA, 
@@ -90,21 +86,15 @@ run_method <- function(vessel, year, region, channel, processing_method, ctd_dir
   # Move files to method directory
   dc_files <- list.files(here::here("cnv"), pattern = "downcast", full.names = TRUE)
   uc_files <- list.files(here::here("cnv"), pattern = "upcast", full.names = TRUE)
-  eos80_files <- list.files(here::here("cnv"), pattern = "EOS80.cnv", full.names = TRUE)
   
-  file.rename(dc_files,
+  file.copy(dc_files,
               gsub(pattern = "/cnv/", 
                    replacement = paste0("/output/", processing_method, "/"),
                    x = dc_files))
   
-  file.rename(uc_files,
+  file.copy(uc_files,
               gsub(pattern = "/cnv/", 
                    replacement = paste0("/output/", processing_method, "/"),
                    x = uc_files))
-  
-  file.rename(eos80_files,
-              gsub(pattern = "/cnv/", 
-                   replacement = paste0("/output/", processing_method, "/"),
-                   x = eos80_files))
   
 }

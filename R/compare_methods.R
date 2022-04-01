@@ -6,13 +6,17 @@
 #' @param processing_method Character vector denoting the name of the processing method, corresponding with names of folders in /output/ that contain processed cnv files.
 #' @param method_labels Character vector denoting titles to use on multipanel plots. Must be the same length as processing_method. Default (NULL) uses processing_method character vector for plot titles.
 #' @param return_output Logical. If true, returns output in a data.frame.
+#' @param pattern_upcast Character vector pattern for upcast file.
+#' @param pattern_downcast Character vector pattern for downcast file.
 #' @export
 
 
 compare_methods <- function(prefix,
-                                        processing_method,
-                                        method_labels = NULL,
-                                        return_output = FALSE) {
+                            processing_method,
+                            method_labels = NULL,
+                            return_output = FALSE,
+                            pattern_downcast = "downcast.cnv",
+                            pattern_upcast = "upcast.cnv") {
   
   
   make_ud_plot <- function(dat_d, dat_u) {
@@ -58,8 +62,8 @@ compare_methods <- function(prefix,
   id_vec <- character(length = 0L)
   
   for(ii in 1:length(processing_method)) {
-    assign(paste0("u_listcnv_",processing_method[ii]), list.files(path = here::here("output", processing_method[ii]), pattern = "upcast", full.names = TRUE))
-    assign(paste0("d_listcnv_",processing_method[ii]), list.files(path = here::here("output", processing_method[ii]), pattern = "downcast", full.names = TRUE))
+    assign(paste0("u_listcnv_",processing_method[ii]), list.files(path = here::here("output", processing_method[ii]), pattern =  pattern_upcast, full.names = TRUE))
+    assign(paste0("d_listcnv_",processing_method[ii]), list.files(path = here::here("output", processing_method[ii]), pattern = pattern_downcast, full.names = TRUE))
     id_vec <- c(id_vec, gsub("[^\\d]+", "", gsub(paste0(".*output/", processing_method[ii]), "", eval(parse(text = paste0("d_listcnv_", processing_method[ii])))), perl=TRUE))
     id_vec <- c(id_vec, gsub("[^\\d]+", "", gsub(paste0(".*output/", processing_method[ii]), "", eval(parse(text = paste0("u_listcnv_", processing_method[ii])))), perl=TRUE))
     
@@ -113,6 +117,22 @@ compare_methods <- function(prefix,
                           delta_s = mean(abs(diff(dat_u@data$salinity))),
                           direction = "up")
       
+      max_pressure <- min(c(max(down_df$pressure, na.rm = TRUE),  max(up_df$pressure, na.rm = TRUE)))
+      
+      ts_area <- dplyr::bind_rows(down_df |> dplyr::select(pressure, salinity, temperature), 
+                                    up_df |> dplyr::select(pressure, salinity, temperature)) |>
+        dplyr::filter(pressure > 2, pressure < max_pressure)
+      
+      ts_area <- dplyr::bind_rows(ts_area, ts_area[1,]) |>
+        sf::st_as_sf(coords = c("salinity", "temperature")) |>
+        dplyr::group_by(ID = 1) |>
+        summarise(do_union = FALSE) |>
+        sf::st_cast(to = "POLYGON") |> 
+        sf::st_area()
+      
+      down_df$area_ts <- ts_area
+      up_df$area_ts <- ts_area
+      
       comb_df <- dplyr::bind_rows(down_df, up_df) |>
         dplyr::mutate(method = processing_method[mm],
                       method_index = mm) |>
@@ -124,12 +144,53 @@ compare_methods <- function(prefix,
     comb_df <- comb_df |>
       dplyr::inner_join(plot_labels_df, by = "method")
     
+    if(return_output) {
+      comb_df$index <- kk
+      comb_df$deploy <-  sub(paste0(".*/", processing_method[mm], "/"), "", sub("_raw.*", "", eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
+      out_df <- dplyr::bind_rows(out_df, comb_df)
+      
+      # List best files to move
+      summary_df <- comb_df |>
+        dplyr::select(direction, method, label, deploy, method_index, index, delta_s, area_ts) |>
+        unique()
+    
+      summary_df <- summary_df |>
+        dplyr::group_by(method) |>
+        dplyr::summarise(delta_s = mean(delta_s, na.rm = TRUE)) |>
+        dplyr::filter(delta_s == min(delta_s, na.rm = TRUE)) |>
+        dplyr::select(method) |>
+        dplyr::inner_join(summary_df, by = c("method")) |>
+        dplyr::mutate(move = NA)
+      
+      # summary_df <- summary_df |>
+      #   dplyr::group_by(direction) |>
+      #   dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
+      #   dplyr::inner_join(summary_df, by = c("direction", "delta_s")) |>
+      #   dplyr::mutate(move = NA)
+      
+      summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
+      summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
+      
+      # return(summary_df)
+      
+      best_df <- dplyr::bind_rows(summary_df, best_df)
+      
+    }
+    
+    best_profiles_df <- comb_df |> 
+      dplyr::inner_join(summary_df, by = c("delta_s", "direction", "method", "method_index", "label", "index", "deploy"))
+    
     png(file = here::here("plots", paste0(prefix, "_salinity_", kk, ".png")), width = 8, height = 8, units = "in", res = 300)
     print(ggplot() +
             geom_path(data = comb_df, 
                       aes(x = salinity, 
                           y = pressure, 
                           color = direction)) +
+            geom_path(data = best_profiles_df, 
+                      aes(x = salinity, 
+                          y = pressure, 
+                          color = direction),
+                      size = rel(1.4)) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
@@ -142,34 +203,18 @@ compare_methods <- function(prefix,
                       aes(x = temperature, 
                           y = pressure, 
                           color = direction)) +
+            geom_path(data = best_profiles_df, 
+                      aes(x = temperature, 
+                          y = pressure, 
+                          color = direction),
+                      size = rel(1.4)) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
             theme_bw())
     dev.off()
     
-    if(return_output) {
-      comb_df$index <- kk
-      comb_df$deploy <-  sub(paste0(".*/", processing_method[mm], "/"), "", sub("_raw.*", "", eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
-      out_df <- dplyr::bind_rows(out_df, comb_df)
-      
-      # List best files to move
-      summary_df <- comb_df |>
-        dplyr::select(direction, method, label, deploy, method_index, index, delta_s) |>
-        unique()
-      
-      summary_df <- summary_df |>
-        dplyr::group_by(direction) |>
-        dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
-        dplyr::inner_join(summary_df) |>
-        dplyr::mutate(move = NA)
-      
-      summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
-      summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
-      
-      best_df <- dplyr::bind_rows(summary_df, best_df)
-    
-    }
+
     
   }
   
