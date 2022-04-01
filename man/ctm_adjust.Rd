@@ -14,9 +14,9 @@ ctm_adjust(
   up_temperature,
   up_pressure,
   up_conductivity,
-  min_pressure_bin = 2,
-  buffer_bottom_pressure_bin = 3,
-  min_obj = TRUE
+  min_pressure_bin = 0,
+  buffer_bottom_pressure_bin = 0,
+  obj_fn = NULL
 )
 }
 \arguments{
@@ -38,10 +38,10 @@ ctm_adjust(
 
 \item{buffer_bottom_pressure_bin}{Numeric vector (1L). Buffer for excluding near-bottom pressure bins to minimize effects of depth changes on objective function.}
 
-\item{min_obj}{Logical. Return the objective function instead of corrected conductivity, temperature, etc.}
+\item{obj_fn}{Logical. Return the objective function instead of corrected conductivity, temperature, etc.}
 
 \item{alpha_beta}{Numeric vector (2L). Log-transformed alpha and beta parameters in thermal mass correction algorithm (alpha default = 0.04 and beta default = 0.125 for SBE19plus), passed to ctm_par_a() and ctm_par_b()}
 }
 \description{
-Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument min_obj = TRUE, the function is used to calculate and return the value of an objective function which is mean absolute difference in salinity (PSS-78 scale) between upcast and downcast from the means of 1 dbar bins. If min_obj = FALSE, the function returns a data frame containing corrected values averaged by 1 dbar bins.
+Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument obj_fn is set to difference or area, the function is used to calculate and return the value of an objective function which is mean absolute difference in salinity (PSS-78 scale) between upcast and downcast from the means of 1 dbar bins. If min_obj = FALSE, the function returns a data frame containing corrected values averaged by 1 dbar bins.
 }

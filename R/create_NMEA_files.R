@@ -7,27 +7,30 @@
 #' @param vessel Required. Vessel number as a numeric vector.
 #' @param year Required. Year as a numeric vector. 
 #' @param region Required. Region as a character vector. Either "bs", "ai", or "goa".
+#' @param use_rds If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.
 #' @export
 
 create_NMEA_files <- function(rodbc_channel = NA, 
                               haul_csv = NA,
                               vessel,
                               region,
-                              year)
+                              year, 
+                              use_rds = FALSE)
 {
   
   ## Load cnv files ----
-  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_wfil.cnv$")
+  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_loopedit.cnv$")
   print(paste0("CNV files found: ", length(cnv_files)))
   
   ###### ADD cnv_files check ----
   
-  print("Running query")
-  if(!is.na(rodbc_channel)) {
-    haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 200700")
-  } else if(!is.na(haul_csv)) {
-    haul_df <- read.csv(file = haul_csv, 
-                        stringsAsFactors = FALSE)
+  if(!use_rds) {
+    print("Running query")
+    if(!is.na(rodbc_channel)) {
+      haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 200700")
+    }
+  } else{
+    haul_df <- readRDS(here::here("data", "haul_dat.rds"))
   }
   
   ###### create empty data frame for metadata storage ----
@@ -112,8 +115,8 @@ create_NMEA_files <- function(rodbc_channel = NA,
                                             "CRUISE" = nmea_cruise, 
                                             "HAUL" = nmea_haul, 
                                             "TIME_DIFF_MINUTES" = minimum_diff, 
-                                            "START_LATITUDE" = nmea_longitude, 
-                                            "START_LONGITUDE" = nmea_latitude,
+                                            "START_LATITUDE" = nmea_latitude, 
+                                            "START_LONGITUDE" = nmea_longitude,
                                             "END_LATITUDE" = end_latitude,
                                             "END_LONGITUDE" = end_longitude,
                                             "DATE" = data_date,

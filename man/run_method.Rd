@@ -10,6 +10,7 @@ run_method(
   region,
   channel,
   processing_method,
+  last_pattern = "TEOS10.cnv",
   ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162",
   rm_files = NULL
 )

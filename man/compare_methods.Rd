@@ -8,7 +8,9 @@ compare_methods(
   prefix,
   processing_method,
   method_labels = NULL,
-  return_output = FALSE
+  return_output = FALSE,
+  pattern_downcast = "downcast.cnv",
+  pattern_upcast = "upcast.cnv"
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ compare_methods(
 \item{method_labels}{Character vector denoting titles to use on multipanel plots. Must be the same length as processing_method. Default (NULL) uses processing_method character vector for plot titles.}
 
 \item{return_output}{Logical. If true, returns output in a data.frame.}
+
+\item{pattern_downcast}{Character vector pattern for downcast file.}
+
+\item{pattern_upcast}{Character vector pattern for upcast file.}
 }
 \description{
 Compare processing methods based on spikiness of profiles and make multipanel plots to compare methods/workflows for processing CTD data.

@@ -64,7 +64,7 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
   
   if(is.na(binavg_bat)) {
     print("Automatically selecting binavg.bat file (no user-specified argument to binavg_bat)")
-    binvg_bat <- list.files(pattern = "bin.bat")
+    binavg_bat <- list.files(pattern = "bin.bat")
     
     if(length(xmlcon_file) < 1) {
       stop(paste0("No .bat file found in ", getwd(), ". Must have a valid .bat file."))

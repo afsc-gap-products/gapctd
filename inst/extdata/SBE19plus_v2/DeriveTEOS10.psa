@@ -2,14 +2,13 @@
 <Derive_TEOS_10 >
   <Version value="7.26.7.129" />
   <ServerName value="Derive TEOS-10" />
-  <InputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
-  <InputFileArray size="2" GrowBy="-1" >
-    <ArrayItem index="0" value="SBE19_CTD8106_Hauls_Test1_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80.cnv" />
-    <ArrayItem index="1" value="SBE19_CTD8106_Hauls_Test2_Saltwater_24March2021_raw_window_fil1_alignCTD_tmcorrect_eos80.cnv" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\package_testing\gapctd\cnv" />
+  <InputFileArray size="1" GrowBy="-1" >
+    <ArrayItem index="0" value="2021_06_01_0001_raw_fil1_align_tmcorrect_loopedit_wfil_EOS80.cnv" />
   </InputFileArray>
-  <OutputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\package_testing\gapctd\cnv" />
   <NameAppend value="_teos10" />
-  <OutputFile value="" />
+  <OutputFile value="2021_06_01_0001_raw_fil1_align_tmcorrect_loopedit_wfil_EOS80.cnv" />
   <LastProcessed value="0" />
   <CalcArray Size="2" >
     <CalcArrayItem index="0" CalcID="8000" >

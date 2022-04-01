@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Align_CTD >
+  <Version value="7.26.7.129" />
+  <ServerName value="Align CTD" />
+  <InputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
+  <InputFileArray size="2" GrowBy="-1" >
+    <ArrayItem index="0" value="SBE19_CTD8106_Hauls_Test1_Saltwater_24March2021_raw_window_fil1.cnv" />
+    <ArrayItem index="1" value="SBE19_CTD8106_Hauls_Test2_Saltwater_24March2021_raw_window_fil1.cnv" />
+  </InputFileArray>
+  <OutputDir value="C:\Users\sean.rohan\Work\afsc\dev_gapctd\cnv" />
+  <NameAppend value="_alignCTD" />
+  <OutputFile value="" />
+  <LastProcessed value="0" />
+  <CalcArray Size="3" >
+    <CalcArrayItem index="0" CalcID="97" >
+      <Calc UnitID="6" Ordinal="0" >
+        <FullName value="Temperature [ITS-90, deg C]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="1" CalcID="95" >
+      <Calc UnitID="3" Ordinal="0" >
+        <FullName value="Pressure, Strain Gauge [db]" />
+      </Calc>
+    </CalcArrayItem>
+    <CalcArrayItem index="2" CalcID="12" >
+      <Calc UnitID="58" Ordinal="0" >
+        <FullName value="Conductivity [S/m]" />
+      </Calc>
+    </CalcArrayItem>
+  </CalcArray>
+  <ValArray size="3" >
+    <ValArrayItem index="0" value="0.500000" variable_name="Temperature" />
+    <ValArrayItem index="1" value="0.000000" variable_name="Pressure, Strain Gauge" />
+    <ValArrayItem index="2" value="-0.050000" variable_name="Conductivity" />
+  </ValArray>
+</Align_CTD>

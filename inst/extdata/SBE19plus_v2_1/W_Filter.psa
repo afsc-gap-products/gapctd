@@ -31,19 +31,19 @@
   <FilterParamArray size="3" >
     <ArrayItem index="0" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="11" />
+      <WindowSize value="5" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>
     <ArrayItem index="1" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="11" />
+      <WindowSize value="5" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>
     <ArrayItem index="2" >
       <FilterType value="4" name="MEDIAN" />
-      <WindowSize value="11" />
+      <WindowSize value="5" />
       <HalfWidth value="1.000000" />
       <Offset value="0.000000" />
     </ArrayItem>
