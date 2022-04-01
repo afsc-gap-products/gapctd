@@ -12,7 +12,7 @@ run_method(
   processing_method,
   last_pattern = "TEOS10.cnv",
   ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162",
-  rm_files = NULL
+  rm_files = TRUE
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ run_method(
 
 \item{ctd_dir}{Directory containing CTD data. Passed to gapctd::setup_ctd_processing_dir}
 
-\item{rm_files}{Character vector indicating if files should be removed ("y").}
+\item{rm_files}{Logical. Should be removed from the directory before starting processing}
 }
 \description{
 Function to run a batch processing workflow and save output. Useful for comparing batch processing workflows using different sets of SBE data processing modules.

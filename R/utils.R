@@ -63,7 +63,7 @@ get_haul_events <- function(haul_metadata_path = list.files(paste0(getwd(), "/me
     unique()
   
   events_df <- data.frame()
-  for(i in 1:length(unique_vessel_cruise)) {
+  for(i in 1:nrow(unique_vessel_cruise)) {
     
     events_df <- 
       RODBC::sqlQuery(channel = channel, 

@@ -55,6 +55,14 @@ setup_ctd_processing_dir <- function(ctd_dir,
     dir.create(here::here("output", "accepted_profiles"))
   }
   
+  if(!dir.exists(here::here("output", "binavg"))) {
+    dir.create(here::here("output", "binavg"))
+  }
+  
+  if(!dir.exists(here::here("output", "raw"))) {
+    dir.create(here::here("output", "raw"))
+  }
+  
   if(!dir.exists("plots")) {
     dir.create("plots")
   }
