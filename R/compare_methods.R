@@ -10,7 +10,6 @@
 #' @param pattern_downcast Character vector pattern for downcast file.
 #' @export
 
-
 compare_methods <- function(prefix,
                             processing_method,
                             method_labels = NULL,
@@ -162,16 +161,8 @@ compare_methods <- function(prefix,
         dplyr::inner_join(summary_df, by = c("method")) |>
         dplyr::mutate(move = NA)
       
-      # summary_df <- summary_df |>
-      #   dplyr::group_by(direction) |>
-      #   dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
-      #   dplyr::inner_join(summary_df, by = c("direction", "delta_s")) |>
-      #   dplyr::mutate(move = NA)
-      
       summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
       summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
-      
-      # return(summary_df)
       
       best_df <- dplyr::bind_rows(summary_df, best_df)
       
