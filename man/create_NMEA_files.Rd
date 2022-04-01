@@ -4,7 +4,14 @@
 \alias{create_NMEA_files}
 \title{Create NMEA files with LAT/LON for Derive TEOS-10}
 \usage{
-create_NMEA_files(rodbc_channel = NA, haul_csv = NA, vessel, region, year)
+create_NMEA_files(
+  rodbc_channel = NA,
+  haul_csv = NA,
+  vessel,
+  region,
+  year,
+  use_rds = FALSE
+)
 }
 \arguments{
 \item{rodbc_channel}{Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.}
@@ -16,6 +23,8 @@ create_NMEA_files(rodbc_channel = NA, haul_csv = NA, vessel, region, year)
 \item{region}{Required. Region as a character vector. Either "bs", "ai", or "goa".}
 
 \item{year}{Required. Year as a numeric vector.}
+
+\item{use_rds}{If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.}
 }
 \description{
 Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce

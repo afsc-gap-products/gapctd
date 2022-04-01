@@ -12,8 +12,8 @@ run_sbe_batch(
   bat_file = NA,
   derive_file = NA,
   rodbc_channel = NA,
-  haul_csv = NA,
-  make_NMEA = TRUE
+  make_NMEA = TRUE,
+  use_rds = FALSE
 )
 }
 \arguments{
@@ -27,13 +27,13 @@ run_sbe_batch(
 
 \item{bat_file}{Optional. Character vector specifying the name of the .bat file in the working directory to use to run data conversion, filter, alignment, cell thermal mass correction, and split. If not provided, defaults to *getdata.bat}
 
-\item{derive_file}{Optional. Character vectory specifying the .bat file for deriving EOS80 and TEOS-10. If not provided, defaults to *derive.bat}
+\item{derive_file}{Optional. Character vector specifying the .bat file for deriving EOS80 and TEOS-10. If not provided, defaults to *derive.bat}
 
 \item{rodbc_channel}{Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.}
 
-\item{haul_csv}{Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE.}
-
 \item{make_NMEA}{Required. Should NMEA files be generated? Default = TRUE.}
+
+\item{use_rds}{See documentation for create_NMEA_files. Used to efficiently test thermal mass correction parameters.}
 }
 \description{
 Wrapper function to run SBE DataProcessing on Windows using command line in the local directory. Run after gapctd::setup_ctd_processing_dir().
