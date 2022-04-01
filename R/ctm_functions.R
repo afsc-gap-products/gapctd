@@ -8,7 +8,7 @@
 #' @export
 
 ctm_par_a <- function(alpha = 0.04, inv_beta, f_n = 0.25) {
-  return(2 * alpha / (f_n * inv_beta^-1 + 2))
+  return(2 * alpha / (f_n * (inv_beta^-1) + 2))
 }
 
 #' Conductivity thermal inertia correction parameter b
@@ -43,7 +43,7 @@ ctm_correct_c_t <- function(a, b, temperature) {
 
 #' Perform conductivity cell thermal intertia correction and compare upcasts to downcasts
 #' 
-#' Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument min_obj = TRUE, the function is used to calculate and return the value of an objective function which is mean absolute difference in salinity (PSS-78 scale) between upcast and downcast from the means of 1 dbar bins. If min_obj = FALSE, the function returns a data frame containing corrected values averaged by 1 dbar bins.
+#' Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument obj_fn is set to difference or area, the function is used to calculate and return the value of an objective function which is mean absolute difference in salinity (PSS-78 scale) between upcast and downcast from the means of 1 dbar bins. If min_obj = FALSE, the function returns a data frame containing corrected values averaged by 1 dbar bins.
 #' 
 #' @param alpha_beta Numeric vector (2L). Log-transformed alpha and beta parameters in thermal mass correction algorithm (alpha default = 0.04 and beta default = 0.125 for SBE19plus), passed to ctm_par_a() and ctm_par_b()
 #' @param f_n Numeric vector (1L). Scan interval in seconds. Default = 0.25 for SBE19plus default 4 Hz scan interval.
@@ -55,7 +55,7 @@ ctm_correct_c_t <- function(a, b, temperature) {
 #' @param up_conductivity Numeric vector of upcast conductivity in S/m.
 #' @param min_pressure_bin Numeric vector (1L) indicating the minimum depth bin to use for calculating the objective function. Default = 2 dbar to minimize surface artifacts.
 #' @param buffer_bottom_pressure_bin Numeric vector (1L). Buffer for excluding near-bottom pressure bins to minimize effects of depth changes on objective function.
-#' @param min_obj Logical. Return the objective function instead of corrected conductivity, temperature, etc.
+#' @param obj_fn Logical. Return the objective function instead of corrected conductivity, temperature, etc.
 #' @export
 
 ctm_adjust <- function(alpha = 0.04,
@@ -67,9 +67,9 @@ ctm_adjust <- function(alpha = 0.04,
                        up_temperature,
                        up_pressure,
                        up_conductivity,
-                       min_pressure_bin = 2,
-                       buffer_bottom_pressure_bin = 3,
-                       min_obj = TRUE) {
+                       min_pressure_bin = 0,
+                       buffer_bottom_pressure_bin = 0,
+                       obj_fn = NULL) {
   
   inv_beta <- 1/beta
   
@@ -92,27 +92,47 @@ ctm_adjust <- function(alpha = 0.04,
   
   updown_df <- aggregate(x = data.frame(conductivity_down = down_conductivity,
                                         conductivity_corr_down = downcast_c_corr,
-                                        temperature = down_temperature,
+                                        temperature_down = down_temperature,
                                         salinity_down = downcast_salinity_psu), 
                          by = list(pressure_bin = ceiling(down_pressure)), 
                          FUN = mean) |>
-    dplyr::inner_join(
+    dplyr::full_join(
       aggregate(x = data.frame(conductivity_up = up_conductivity,
                                conductivity_corr_up = upcast_c_corr,
                                temperature_up = up_temperature,
                                salinity_up = upcast_salinity_psu), 
                 by = list(pressure_bin = ceiling(up_pressure)), 
                 FUN = mean),
-      by = "pressure_bin") |>
-    dplyr::filter(pressure_bin >= min_pressure_bin)
+      by = "pressure_bin")
   
-  obj <- mean(abs(updown_df$salinity_down[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)] - 
-                    updown_df$salinity_up[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)]),
-              na.rm = TRUE)
+  if(obj_fn == "difference") {
+    
+    obj <- mean(abs(updown_df$salinity_down[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)] - 
+                      updown_df$salinity_up[updown_df$pressure_bin < (max(updown_df$pressure_bin)-buffer_bottom_pressure_bin)]),
+                na.rm = TRUE)
+    
+  } else if(obj_fn == "area") {
+    
+    comb_df <- data.frame(salinity = c(updown_df$salinity_down, rev(updown_df$salinity_up), updown_df$salinity_down[1]),
+                      temperature = c(updown_df$temperature_down, rev(updown_df$temperature_down), updown_df$temperature_down[1])) |>
+      dplyr::filter(!is.na(salinity),
+                    !is.na(temperature)) 
+    
+    obj <- try(comb_df |>
+      sf::st_as_sf(coords = c("salinity", "temperature")) |>    
+      dplyr::group_by(ID = 1) |>
+      summarise(do_union = FALSE) |>
+      sf::st_cast(to = "POLYGON") |> 
+      sf::st_area(), silent = TRUE)
+    
+    if(class(obj) == "try-error") {
+      return(comb_df)
+    }
+  }
   
-  if(min_obj) {
-    return(obj)
-  } else {
+  if(obj_fn == "none") {
     return(updown_df)
+  } else {
+    return(obj)
   }
 }
