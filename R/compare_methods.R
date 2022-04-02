@@ -17,6 +17,14 @@ compare_methods <- function(prefix,
                             pattern_downcast = "downcast.cnv",
                             pattern_upcast = "upcast.cnv") {
   
+  if(!dir.exists(here::here("plots", "binavg"))) {
+    dir.create(here::here("plots", "binavg"))
+  }
+  
+  if(!dir.exists(here::here("plots", "raw"))) {
+    dir.create(here::here("plots", "raw"))
+  }
+  
   
   make_ud_plot <- function(dat_d, dat_u) {
     
@@ -123,6 +131,7 @@ compare_methods <- function(prefix,
         dplyr::filter(pressure > 2, pressure < max_pressure)
       
       ts_area <- dplyr::bind_rows(ts_area, ts_area[1,]) |>
+        dplyr::filter(!is.na(salinity), !is.na(temperature)) |>
         sf::st_as_sf(coords = c("salinity", "temperature")) |>
         dplyr::group_by(ID = 1) |>
         summarise(do_union = FALSE) |>
@@ -154,12 +163,18 @@ compare_methods <- function(prefix,
         unique()
     
       summary_df <- summary_df |>
-        dplyr::group_by(method) |>
-        dplyr::summarise(delta_s = mean(delta_s, na.rm = TRUE)) |>
-        dplyr::filter(delta_s == min(delta_s, na.rm = TRUE)) |>
-        dplyr::select(method) |>
-        dplyr::inner_join(summary_df, by = c("method")) |>
+        dplyr::group_by(direction) |>
+        dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
+        dplyr::inner_join(summary_df) |>
         dplyr::mutate(move = NA)
+      
+      # summary_df <- summary_df |>
+      #   dplyr::group_by(method) |>
+      #   dplyr::summarise(delta_s = mean(delta_s, na.rm = TRUE)) |>
+      #   dplyr::filter(delta_s == min(delta_s, na.rm = TRUE)) |>
+      #   dplyr::select(method) |>
+      #   dplyr::inner_join(summary_df, by = c("method")) |>
+      #   dplyr::mutate(move = NA)
       
       summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
       summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
@@ -204,8 +219,6 @@ compare_methods <- function(prefix,
             scale_color_manual(values = c("red", "black")) +
             theme_bw())
     dev.off()
-    
-
     
   }
   
