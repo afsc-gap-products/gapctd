@@ -5,13 +5,13 @@
 \title{Flag density inversion and correct}
 \usage{
 correct_density_inversion(
-  threshold = -1e-05,
+  threshold = NULL,
   threshold_method = "bv",
   correct_inversion = TRUE
 )
 }
 \arguments{
-\item{threshold}{Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is for buoyancy frequency.}
+\item{threshold}{Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.}
 
 \item{threshold_method}{Character. "density" to flag inversions based on density anomalies, "bv" for Brunt-Vaisala buoyancy frequency}
 

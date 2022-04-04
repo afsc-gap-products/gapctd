@@ -116,12 +116,12 @@ compare_methods <- function(prefix,
       down_df <- data.frame(temperature = dat_d@data$temperature[!is.na(dat_d@data$flag)],
                             salinity = dat_d@data$salinity[!is.na(dat_d@data$flag)],
                             pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
-                            delta_s = mean(abs(diff(dat_d@data$salinity))),
+                            delta_s = mean(abs(diff(dat_d@data$salinity[dat_d@data$pressure > 2]))),
                             direction = "down") 
       up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
                           salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
                           pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
-                          delta_s = mean(abs(diff(dat_u@data$salinity))),
+                          delta_s = mean(abs(diff(dat_u@data$salinity[dat_d@data$pressure > 2]))),
                           direction = "up")
       
       max_pressure <- min(c(max(down_df$pressure, na.rm = TRUE),  max(up_df$pressure, na.rm = TRUE)))
