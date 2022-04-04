@@ -12,35 +12,9 @@ This repository is a software product and is not official communication of the N
 
 # Installation 
 
-To install this package use the following
+To install this package:
 
 ```
-devtools::install_github("sean-rohan-noaa/gapctd")
+remotes::install_github("afsc-gap-products/gapctd")
 library(gapctd)
 ```
-                                 
-# Instructions for batch processing in R
-
-CTD data processing in R is conducted using batch processing options specified in SBEDataProcessing software. The gapctd R package provides a wrapper around shell commands and SQL queries in AFSC/RACE/GAP RACEBASE to perform batch processing of CTD data and plots for QA/QC.
-
-1. Create a new local directory and set it as the working directory.
-2. Load the gapctd package (```library(gapctd)```).
-3. Copy .hex and .xmlcon files from a CTD directory to your working directory and set up the working directory structure using ```setup_ctd_processing_dir()```. In the example below, .hex and .xmlcon files are copied from G:/RACE_CTD/data/2019/ebs/v162 to a working directory and the directory is setup to process data from an SBE19 (non-plus).
-
-```
-gapctd::setup_ctd_processing_dir(ctd_dir = "G:/RACE_CTD/data/2019/ebs/v162",
-                                 ctd_unit = "sbe19")
-```
-
-4. Open an ODBC database connection in R using the RODBC package.
-5. Batch process CTD files using ```run_sbe_batch```. In the example below, batch processing is conducted for vessel 162, year 2019, from the eastern Bering Sea ('BS'), and haul data is queried from RACEBASE using the user-provided RODBC connection (channel). Alternatively, a .csv file containing haul data could be provided instead of using the rodbc_channel. 
-
-```
-gapctd::run_sbe_batch(vessel = 162,
-                      year = 2019,
-                      region = "BS",
-                      rodbc_channel = channel)
-```
-
-Profiles of upcasts and downcasts with TEOS-10 seawater properties will be included in the /final_cnv/ folder of the working directory. 
-6. Run make_cast_plots() to generate plots for visual QA/QC inspection<br/>.
