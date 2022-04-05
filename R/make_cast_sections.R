@@ -155,8 +155,14 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
                 paste0(append_char[2],".cnv") #%4
                 ))
   
-  
+  # Remove downcast files from upcast alignments and upcast files from downcast alignments
   print("Binning upcast and downcast data")
   system(command = paste0("sbebatch ", getwd(), "/", binavg_bat, " ", getwd(), " ", xmlcon_file))
+  
+  upcast_files <- list.files(path = here::here("cnv"), pattern = "_uuu_", full.names = TRUE)
+  file.remove(upcast_files[grep(pattern = "downcast", x = upcast_files)])
+  
+  downcast_files <- list.files(path = here::here("cnv"), pattern = "_ddd_", full.names = TRUE)
+  file.remove(downcast_files[grep(pattern = "upcast", x = downcast_files)])
   
 }

@@ -13,7 +13,8 @@ run_sbe_batch(
   derive_file = NA,
   rodbc_channel = NA,
   make_NMEA = TRUE,
-  use_rds = FALSE
+  alignment_df = NULL,
+  haul_df = NULL
 )
 }
 \arguments{
@@ -33,7 +34,7 @@ run_sbe_batch(
 
 \item{make_NMEA}{Required. Should NMEA files be generated? Default = TRUE.}
 
-\item{use_rds}{See documentation for create_NMEA_files. Used to efficiently test thermal mass correction parameters.}
+\item{haul_df}{Haul data}
 }
 \description{
 Wrapper function to run SBE DataProcessing on Windows using command line in the local directory. Run after gapctd::setup_ctd_processing_dir().

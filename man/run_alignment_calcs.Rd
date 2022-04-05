@@ -5,8 +5,8 @@
 \title{Wrapper function around estimate_alignment}
 \usage{
 run_alignment_calcs(
-  profile_files = sort(c(list.files(here::here("output", "sbe19plus_v2"), full.names =
-    TRUE, pattern = "downcast.cnv"), list.files(here::here("output", "sbe19plus_v2"),
+  profile_files = sort(c(list.files(here::here("output", "sbe19plus_v0"), full.names =
+    TRUE, pattern = "downcast.cnv"), list.files(here::here("output", "sbe19plus_v0"),
     full.names = TRUE, pattern = "upcast.cnv"))),
   make_diagnostic_plots = TRUE,
   min_pressure = 4,
@@ -20,8 +20,8 @@ run_alignment_calcs(
 
 \item{min_pressure}{Minimum pressure to use for alignment correlation. It is advisable to exclude near-surface values due to spikes in conductivity, espeically in downcasts.}
 
-\item{scan_interval}{Scan interval for the CTD.}
+\item{...}{Optional arguments passed to gapctd::estimate_alignment().}
 }
 \description{
-Wrapper function around estimate_alignment
+Estimate alignment for a channel
 }
