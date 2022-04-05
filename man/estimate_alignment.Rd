@@ -19,7 +19,7 @@ estimate_alignment(
 \arguments{
 \item{var1}{Numeric vector of measurements from the first sensors (e.g., conductivity)}
 
-\item{var2}{Numeric vector of measurements from the sensor for which measurements will be time-adjuste (e.g., temperature)}
+\item{var2}{Numeric vector of measurements from the sensor for which measurements will be time-adjusted (e.g., temperature)}
 
 \item{time1}{Scan time in seconds as a numeric vector for the first sensor.}
 
@@ -36,11 +36,13 @@ estimate_alignment(
 \item{return_adj}{Logical indicating whether to return only the time2_adjustments value with the best correlation (TRUE) or a list containing additional results (see Details below)}
 }
 \description{
-Find the time adjustment that maximizes correlations of first time differences between variables (i.e., dx/dt), similar to Ullman and Herbert (2014).
+Find the time adjustment that maximizes correlations of first time difference (dx/dt) between variables, similar to Ullman and Hebert (2014) and Dever et al. (2020).
 }
 \details{
 This function time-shifts measurements from one sensor (e.g. temperature) relative to measurements from another sensor (e.g. conductivity) for all user-provided time2_adjustment values. It then estimates a correlations between time-shifted sensor measurements and returns either the best time2_adustment estimate or a list containing the best time2_adjustment, highest correlation, and data.frame containing results of all time2_adustment comparisons. Time-shifted values between measurements can be interpolated using "rr" or "unesco" from oce::oce.approx or the "linear" method in approx. Correlation methods are any valid methods in cor().
 }
 \references{
 Ullman, D.S., Hebert, D., 2014. Processing of underway CTD data. J. Atmos. Ocean. Technol. 31, 984–998. https://doi.org/10.1175/JTECH-D-13-00200.1
+
+Dever, M., Freilich, M., Farrar, J.T., Hodges, B., Lanagan, T., Baron, A.J., Mahadevan, A., 2020. EcoCTD for profiling oceanic physical–biological properties from an underway ship. J. Atmos. Ocean. Technol. 37, 825–840. https://doi.org/10.1175/JTECH-D-19-0145.1
 }

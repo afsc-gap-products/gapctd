@@ -3,19 +3,18 @@
 #' Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce
 #'
 #' @param rodbc_channel Required if haul_csv is not provided. Must provide an open RODBC channel (this parameter) or path to haul_csv. Default = NA.
-#' @param haul_csv Required if rodbc_channel is not provided. Path to a csv file that contains VESSEL, CRUISE, HAUL, START_TIME, START_LONGITUDE, START_LATITUDE, END_LONGITUDE, END_LATITUDE, GEAR_TEMPERATURE, SURFACE_TEMPERATURE, GEAR_DEPTH, PERFORMANCE.
 #' @param vessel Required. Vessel number as a numeric vector.
 #' @param year Required. Year as a numeric vector. 
 #' @param region Required. Region as a character vector. Either "bs", "ai", or "goa".
-#' @param use_rds If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.
+#' @param haul_df If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.
 #' @export
 
 create_NMEA_files <- function(rodbc_channel = NA, 
-                              haul_csv = NA,
                               vessel,
                               region,
                               year, 
-                              use_rds = FALSE)
+                              haul_df = NULL,
+                              write_metadata = TRUE)
 {
   
   ## Load cnv files ----
@@ -24,13 +23,9 @@ create_NMEA_files <- function(rodbc_channel = NA,
   
   ###### ADD cnv_files check ----
   
-  if(!use_rds) {
+  if(is.null(haul_df)) {
     print("Running query")
-    if(!is.na(rodbc_channel)) {
       haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 200700")
-    }
-  } else{
-    haul_df <- readRDS(here::here("data", "haul_dat.rds"))
   }
   
   ###### create empty data frame for metadata storage ----
@@ -143,8 +138,11 @@ create_NMEA_files <- function(rodbc_channel = NA,
     writeLines(c(first_line, second_line, third_line), fileConn)
     close(fileConn)
   }
-  write.csv(survey_metadata, 
-            file = paste0(getwd(), "/metadata/survey_metadata_", year, ".csv"),
-            row.names = FALSE)
+  
+  if(write_metadata) {
+    write.csv(survey_metadata, 
+              file = paste0(getwd(), "/metadata/survey_metadata_", year, ".csv"),
+              row.names = FALSE)
+  }
   
 }
