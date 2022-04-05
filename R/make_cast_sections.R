@@ -75,19 +75,24 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
     }
   }
   
-  for(ii in 1:nrow(haul_metadata)) {
+  cnv_files <- list.files(here::here("cnv"), pattern = pattern, 
+                          full.names = TRUE)
+  
+  deploy_id <- sub("\\_raw.*", "", list.files(here::here("cnv"), pattern = pattern))
+  
+  for(ii in 1:length(cnv_files)) {
     
     if(ii%%50 == 0) {
       print(paste0("Splitting upcast and downcast from file ", ii, " out of ", nrow(haul_metadata)))
     }
     
-    fpath <- list.files(here::here("cnv"), pattern = sub("\\_raw.*", "", haul_metadata$cnv_file_name[ii]), 
-                        full.names = TRUE)
-    fpath <- fpath[grepl(pattern = pattern, fpath, fixed = TRUE)]
-    
     for(jj in 1:2) {
       
-      cnv_path <- list.files("cnv", pattern = pattern, full.names = TRUE)[ii]
+      oce_dat <- try(oce::read.ctd(cnv_files[ii]))
+      
+      ind_vec <- switch(jj,
+                        `1` = { c(0, max(which(oce_dat@data$timeS < (haul_metadata$DOWNCAST_END_SECONDS[which(deploy_id[ii] == sub("\\_raw.*", "", haul_metadata$cnv_file_name))] + 30))))}, 
+                        `2` = {c(min(which(oce_dat@data$timeS > (haul_metadata$UPCAST_START_SECONDS[which(deploy_id[ii] == sub("\\_raw.*", "", haul_metadata$cnv_file_name))] - 30))), 100000)})
       
       section_path <- here::here("psa_xmlcon", "Section.psa")
       section_psa_file <- readLines(section_path)
@@ -96,9 +101,7 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
       min_val_index <- which(grepl(pattern = "<MinValue", section_psa_file))
       max_val_index <- which(grepl(pattern = "<MaxValue", section_psa_file))
       
-      ind_vec <- switch(jj,
-                        `1` = { c(0, haul_metadata$DOWNCAST_END_INDEX[ii])}, 
-                        `2` = {c(haul_metadata$UPCAST_START_INDEX[ii], 100000)})
+      
       
       if(!any(is.na(ind_vec))) {
         section_psa_file[append_index] <- paste0("  <NameAppend value=\"_", append_char[jj],  "\" />")
@@ -114,7 +117,7 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
         cmd <- paste0("sbebatch ", getwd(), "/", section_bat, " ",  
                       getwd(), " ", #%1
                       xmlcon_file, " ", #%2
-                      cnv_path, " ", #%3
+                      cnv_files[ii], " ", #%3
                       section_path, " ", #%4
                       append_char[jj], " #m") #%5
         system(cmd)
