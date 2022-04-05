@@ -14,7 +14,7 @@
 #' @param alignment_df Data frame containing alignment parameters.
 #' @export
 
-run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA, derive_file = NA, rodbc_channel = NA, make_NMEA = TRUE, alignment_df = NULL, haul_df = NULL) {
+run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA, derive_file = NA, rodbc_channel = NA, make_NMEA = TRUE, alignment_df = NULL, haul_df = NULL, ...) {
   
   # Check for valid region ----
   region <- toupper(region)
@@ -79,6 +79,11 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
                                  pattern = alignment_df$deploy_id[kk], 
                                  full.names = TRUE)
       
+      if(!(length(deploy_files) > 0)) {
+        warning(paste0("Files not found for: ", alignment_df$deploy_id[kk]))
+        next
+      }
+      
       # Remove unused files
       keep_files <- c(grep(pattern = "raw.cnv", x = deploy_files),
                       grep(pattern = "wfil.cnv", x = deploy_files),
@@ -129,7 +134,8 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
                               year = year,
                               vessel = vessel,
                               region = region,
-                              haul_df = haul_df)
+                              haul_df = haul_df, 
+                              ...)
   } else {
     print("Generating NMEA proxy files with coordinates 57 N, -168 W")
     cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_loopedit.cnv$")
