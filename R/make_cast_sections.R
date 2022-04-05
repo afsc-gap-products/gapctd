@@ -83,7 +83,7 @@ make_cast_sections <- function(haul_metadata_path = list.files(paste0(getwd(), "
   for(ii in 1:length(cnv_files)) {
     
     if(ii%%50 == 0) {
-      print(paste0("Splitting upcast and downcast from file ", ii, " out of ", nrow(haul_metadata)))
+      message(paste0("Splitting upcast and downcast from file ", ii, " out of ", length(cnv_files)))
     }
     
     for(jj in 1:2) {
