@@ -14,7 +14,7 @@ License: GPL (>=2)
 Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.1.2
-Depends: R(>= 4.1), ggplot2, dplyr, tidyr, oce, here
+Depends: R(>= 4.1), ggplot2, dplyr, tidyr, oce, here, bbmle
 Imports: RODBC,
          getPass,
          RNetCDF,
