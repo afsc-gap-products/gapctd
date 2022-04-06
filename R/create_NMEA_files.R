@@ -7,6 +7,7 @@
 #' @param year Required. Year as a numeric vector. 
 #' @param region Required. Region as a character vector. Either "bs", "ai", or "goa".
 #' @param haul_df If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.
+#' @param nmea_pattern Character vector denoting the last appended name from the cnv for which the NMEA file should access.
 #' @export
 
 create_NMEA_files <- function(rodbc_channel = NA, 
@@ -14,17 +15,18 @@ create_NMEA_files <- function(rodbc_channel = NA,
                               region,
                               year, 
                               haul_df = NULL,
-                              write_metadata = TRUE)
+                              write_metadata = TRUE,
+                              nmea_pattern)
 {
   
   ## Load cnv files ----
-  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = "\\_loopedit.cnv$")
-  print(paste0("CNV files found: ", length(cnv_files)))
+  cnv_files <- list.files(path = paste0(getwd(), "/cnv"), pattern = paste0("\\", nmea_pattern, ".cnv$"))
+  message(paste0("CNV files found: ", length(cnv_files)))
   
   ###### ADD cnv_files check ----
   
   if(is.null(haul_df)) {
-    print("Running query")
+    message("Running query")
       haul_df <- RODBC::sqlQuery(rodbc_channel, "select * from racebase.haul where cruise > 200700")
   }
   

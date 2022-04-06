@@ -11,7 +11,7 @@
 #' @param rm_files Logical. Should be removed from the directory before starting processing
 #' @export
 
-run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL, ...) {
+run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL, ctm_df = NULL, ...) {
   
   # Create processing directory for a method
   if(!dir.exists(here::here("output", processing_method))) {
@@ -19,10 +19,10 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
   }
   
   # Select workflow
-  if(is.null(alignment_df)) {
-    workflow <- 1
+  if(is.null(alignment_df) & is.null(ctm_df)) {
+    workflow <- 1 # Runs the whole way through and produces metadata output.
   } else {
-    workflow <- 2
+    workflow <- 2 # For estimating and applying alignment and cell thermal mass corrections.
   }
   
   if(workflow == 1) {
@@ -77,7 +77,9 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
                           year = year,
                           region = region,
                           rodbc_channel = channel, 
-                          haul_df = haul_df)
+                          haul_df = haul_df,
+                          alignment_df = alignment_df,
+                          ctm_df = ctm_df)
     
     gapctd::get_haul_events(channel = channel,
                             append_haul_metadata = TRUE)
@@ -122,17 +124,7 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
                           rodbc_channel = channel, 
                           haul_df = haul_df,
                           alignment_df = alignment_df, 
-                          write_metadata = TRUE)
-    
-    # gapctd::get_haul_events(channel = channel,
-    #                         append_haul_metadata = TRUE)
-    # 
-    # gapctd::calc_bottom_mean(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
-    #                                                          full.names = TRUE),
-    #                          pattern = last_pattern,
-    #                          timezone = "America/Anchorage",
-    #                          time_buffer = 30,
-    #                          append_haul_metadata = TRUE)
+                          ctm_df = ctm_df)
     
     gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
                                                                full.names = TRUE),
@@ -142,13 +134,6 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
                                binavg_bat = NA, 
                                pressure_bat = NA)
     
-    # gapctd::remove_bad_station_data(vessel = vessel,
-    #                                 year = year,
-    #                                 region = region,
-    #                                 haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
-    #                                                                 full.names = TRUE),
-    #                                 max_diff_bt_ctd_depth = 10,
-    #                                 min_ctd_depth = 5)
   }
   
   file.remove(list.files(here::here("output", processing_method), full.names = TRUE))
