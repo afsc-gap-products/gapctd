@@ -14,6 +14,7 @@ run_sbe_batch(
   rodbc_channel = NA,
   make_NMEA = TRUE,
   alignment_df = NULL,
+  ctm_df = NULL,
   haul_df = NULL,
   ...
 )
