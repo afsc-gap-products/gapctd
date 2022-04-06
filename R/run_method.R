@@ -11,23 +11,7 @@
 #' @param rm_files Logical. Should be removed from the directory before starting processing
 #' @export
 
-run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL) {
-  
-  # Retrieve haul data
-  if(file.exists(here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))) {
-    haul_df <- readRDS(here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))
-  } else {
-    print("Running query")
-    if(class(channel) == "RODBC") {
-      haul_df <- RODBC::sqlQuery(channel, 
-                                 paste0("select * from racebase.haul where vessel = ", vessel, 
-                                        " and region = '", region, 
-                                        "' and cruise between ", year*100, " and ", year*100+99))
-      
-      saveRDS(object = haul_df, 
-              file = here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))
-    }
-  }
+run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL, ctm_df = NULL, ...) {
   
   # Create processing directory for a method
   if(!dir.exists(here::here("output", processing_method))) {
@@ -35,10 +19,10 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
   }
   
   # Select workflow
-  if(is.null(alignment_df)) {
-    workflow <- 1
+  if(is.null(alignment_df) & is.null(ctm_df)) {
+    workflow <- 1 # Runs the whole way through and produces metadata output.
   } else {
-    workflow <- 2
+    workflow <- 2 # For estimating and applying alignment and cell thermal mass corrections.
   }
   
   if(workflow == 1) {
@@ -73,11 +57,29 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
                                      ctd_unit = processing_method,
                                      recursive = TRUE)
     
+    # Retrieve haul data
+    if(file.exists(here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))) {
+      haul_df <- readRDS(here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))
+    } else {
+      message("run_method: Running query")
+      if(class(channel) == "RODBC") {
+        haul_df <- RODBC::sqlQuery(channel, 
+                                   paste0("select * from racebase.haul where vessel = ", vessel, 
+                                          " and region = '", region, 
+                                          "' and cruise between ", year*100, " and ", year*100+99))
+        
+        saveRDS(object = haul_df, 
+                file = here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))
+      }
+    }
+    
     gapctd::run_sbe_batch(vessel = vessel,
                           year = year,
                           region = region,
                           rodbc_channel = channel, 
-                          haul_df = haul_df)
+                          haul_df = haul_df,
+                          alignment_df = alignment_df,
+                          ctm_df = ctm_df)
     
     gapctd::get_haul_events(channel = channel,
                             append_haul_metadata = TRUE)
@@ -108,14 +110,21 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
   
   if(workflow == 2) {
     
-    message("Running automatic alignment. Processed files will not be cleared from working directory.")
+    message("run_method: Running automatic alignment. Processed files will not be cleared from working directory.")
     
+    
+    haul_df <- readRDS(here::here("data", paste0("haul_dat_", year, "_", region, "_", vessel, ".rds")))
+    message(paste0("run_method: Loaded data from ", nrow(haul_df), " hauls." ))
+    
+
+    message("run_method: Starting batch processing.")
     gapctd::run_sbe_batch(vessel = vessel,
                           year = year,
                           region = region,
                           rodbc_channel = channel, 
                           haul_df = haul_df,
-                          alignment_df = alignment_df)
+                          alignment_df = alignment_df, 
+                          ctm_df = ctm_df)
     
     gapctd::make_cast_sections(haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), 
                                                                full.names = TRUE),
@@ -124,6 +133,7 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
                                section_bat = NA,
                                binavg_bat = NA, 
                                pressure_bat = NA)
+    
   }
   
   file.remove(list.files(here::here("output", processing_method), full.names = TRUE))

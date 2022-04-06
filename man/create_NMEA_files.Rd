@@ -10,7 +10,8 @@ create_NMEA_files(
   region,
   year,
   haul_df = NULL,
-  write_metadata = TRUE
+  write_metadata = TRUE,
+  nmea_pattern
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ create_NMEA_files(
 \item{year}{Required. Year as a numeric vector.}
 
 \item{haul_df}{If TRUE, loads an rds file named "data/haul_data.rds" instead of running a query to retrieve haul data.}
+
+\item{nmea_pattern}{Character vector denoting the last appended name from the cnv for which the NMEA file should access.}
 }
 \description{
 Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce

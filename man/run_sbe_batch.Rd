@@ -14,7 +14,9 @@ run_sbe_batch(
   rodbc_channel = NA,
   make_NMEA = TRUE,
   alignment_df = NULL,
-  haul_df = NULL
+  ctm_df = NULL,
+  haul_df = NULL,
+  ...
 )
 }
 \arguments{
@@ -34,7 +36,9 @@ run_sbe_batch(
 
 \item{make_NMEA}{Required. Should NMEA files be generated? Default = TRUE.}
 
-\item{haul_df}{Haul data}
+\item{alignment_df}{Data frame containing alignment parameters.}
+
+\item{haul_df}{Data frame containing haul data.}
 }
 \description{
 Wrapper function to run SBE DataProcessing on Windows using command line in the local directory. Run after gapctd::setup_ctd_processing_dir().

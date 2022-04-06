@@ -12,7 +12,9 @@ run_method(
   processing_method,
   last_pattern = "TEOS10.cnv",
   ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162",
-  alignment_df = NULL
+  alignment_df = NULL,
+  ctm_df = NULL,
+  ...
 )
 }
 \arguments{

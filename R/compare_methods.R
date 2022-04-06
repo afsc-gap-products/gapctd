@@ -176,8 +176,8 @@ compare_methods <- function(prefix,
       #   dplyr::inner_join(summary_df, by = c("method")) |>
       #   dplyr::mutate(move = NA)
       
-      summary_df$move[summary_df$direction == "down"] <- eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]]
-      summary_df$move[summary_df$direction == "up"] <- eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]]
+      summary_df$move[summary_df$direction == "down"] <- try(eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]], silent = TRUE)
+      summary_df$move[summary_df$direction == "up"] <- try(eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]], silent = TRUE)
       
       best_df <- dplyr::bind_rows(summary_df, best_df)
       
