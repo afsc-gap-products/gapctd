@@ -5,11 +5,12 @@
 #' @param threshold Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.
 #' @param threshold_method Character. "density" to flag inversions based on density anomalies, "bv" for Brunt-Vaisala buoyancy frequency
 #' @param correct_inversion Logical. Should density inversions be removed and interpolated?
+#' @param cnv_dir File path to cnv directory.
 #' @return Writes flagged and corrected data to csvs in output/density_corrected.
 #' @export
 #' 
 
-correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv", correct_inversion = TRUE) {
+correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv", correct_inversion = TRUE, cnv_dir = NULL, ...) {
   
   threshold_method <- tolower(threshold_method)
   
@@ -18,7 +19,7 @@ correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv"
     stop("correct_density_inversion: Max inversion must be positive but is set to ", threshold, "!")
   }
   
-  if(threshold_method == "bv" & threshold < -1e-3) {
+  if(threshold_method == "bv" & threshold < -1e-4) {
     warning(paste0("correct_density_inversion: Brunt-Vaisala (N^2) threshold, (", threshold, ") is unusually low. Consider using a higher value (e.g. -1e-5)."))
   }
   
@@ -27,16 +28,22 @@ correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv"
   }
   
   # List final cnv_files
-  final_cnv_files <- list.files(here::here("final_cnv"), full.names = TRUE)
-  deploy <- list.files(here::here("final_cnv"))
+  if(is.null(cnv_dir)) {
+      cnv_dir <- here::here("final_cnv")
+  } else {
+    
+  }
+  
+  cnv_path <- list.files(cnv_dir, full.names = TRUE, ...)
+  deploy <- list.files(cnv_dir, ...)
   
   deploy_id <- sub("\\_raw.*", "", deploy)
   deploy_id[grepl(pattern = "downcast", x = deploy)] <- paste0(deploy_id, "_downcast")[grepl(pattern = "downcast", x = deploy)] 
   deploy_id[grepl(pattern = "upcast", x = deploy)] <- paste0(deploy_id, "_upcast")[grepl(pattern = "upcast", x = deploy)] 
   
-  for(jj in 1:length(final_cnv_files)) {
+  for(jj in 1:length(cnv_path)) {
     
-    profile_oce <- try(oce::read.ctd(file = final_cnv_files[jj]), silent = TRUE)
+    profile_oce <- try(oce::read.ctd(file = cnv_path[jj]), silent = TRUE)
     
     if(class(profile_oce) == "try-error") next
     
@@ -108,6 +115,13 @@ correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv"
     
     # Write corrected profile to output/density_corrected
     oce::write.ctd(object = profile_oce, file = here::here("output", "density_corrected", paste0(deploy_id[jj], ".csv")), metadata = FALSE, format = "csv")
+    
+    # Remove NAs
+    new_csv <- read.csv(file = here::here("output", "density_corrected", paste0(deploy_id[jj], ".csv")))
+    new_csv$deploy_id <- deploy_id[jj]
+    write.csv(x = new_csv[complete.cases(new_csv),], 
+              file = here::here("output", "density_corrected", paste0(deploy_id[jj], ".csv")), 
+              row.names = FALSE)
     
   }
 }
