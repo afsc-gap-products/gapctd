@@ -117,5 +117,11 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
                 file = here::here("output", "manual_flag", paste0(dat$deploy_id[1], ".csv")), 
                 row.names = FALSE)
     }
+    
+    review_next <- tolower(readline(prompt = "Review next? (y or r): "))  == "y"
+    
+    if(!review_next) {
+      stop("Review stopped")
+    }
   }
 }
