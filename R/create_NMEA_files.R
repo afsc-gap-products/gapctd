@@ -62,6 +62,7 @@ create_NMEA_files <- function(rodbc_channel = NA,
   
   for(i in 1:length(cnv_files))
   {
+    
     current_cnv <- oce::read.oce(paste0(getwd(), "/cnv/", cnv_files[i]))
     cnv_date <- substring(current_cnv[["metadata"]]$startTime, 1, 10)
     cnv_time_zone <- attr(current_cnv[["metadata"]]$startTime, "tzone")
@@ -70,8 +71,6 @@ create_NMEA_files <- function(rodbc_channel = NA,
     subset_haul <- haul_df[haul_df$tow_date == cnv_date, ]
     haul_time_zone <- attr(as.POSIXlt(subset_haul$START_TIME[1]),"tzone")[3]
     
-    #if(cnv_time_zone == haul_time_zone)
-    #{
     time_diff <- abs(
       as.numeric(
         difftime(strptime(subset_haul$START_TIME, "%Y-%m-%d %H:%M:%S"),
@@ -88,13 +87,7 @@ create_NMEA_files <- function(rodbc_channel = NA,
     nmea_haul <- subset_haul[position, ]$HAUL
     nmea_longitude <- subset_haul[position, ]$START_LONGITUDE
     nmea_latitude <- subset_haul[position, ]$START_LATITUDE
-    
-    ## paste info together for txt file output ----
-    first_line <- paste0("// VESSEL ", nmea_vessel,", CRUISE ", nmea_cruise,", HAUL ", nmea_haul," //")
-    second_line <- paste0("Longitude: ", nmea_longitude)
-    third_line <- paste0("Latitude: ", nmea_latitude)
-    
-    
+  
     ## write haul metadata to a .csv to be able to link to original cnv files ----
     survey_metadata_tmp <- c()
     end_longitude <- subset_haul[position, ]$END_LONGITUDE
@@ -106,6 +99,23 @@ create_NMEA_files <- function(rodbc_channel = NA,
     surface_temperature <- subset_haul[position, ]$SURFACE_TEMPERATURE
     gear_depth <- subset_haul[position, ]$GEAR_DEPTH
     performance <- subset_haul[position, ]$PERFORMANCE
+    
+    # Add NMEA info to cnv header
+    cnv_text <- readLines(paste0(getwd(), "/cnv/", cnv_files[i]))
+    head_cnv <- cnv_text[c(1:6)]
+    tail_cnv <- cnv_text[c(7:length(cnv_text))]
+    lon_line <- paste0("** Longitude: ", gapctd:::ddlon_to_nmea(nmea_longitude))
+    lat_line <- paste0("** Latitude: ", gapctd:::ddlat_to_nmea(nmea_latitude))
+    vessel_line <- paste0("** ship: ", nmea_vessel)
+    station_line <- paste0("** station: ", station_id)
+    depth_line <- paste0("** depth: ", gear_depth)
+    
+    writeLines(text = c(head_cnv, lon_line, lat_line, vessel_line, station_line, depth_line, tail_cnv), con = paste0(getwd(), "/cnv/", cnv_files[i]))
+    
+    # paste info together for txt file output ----
+    first_line <- paste0("// VESSEL ", nmea_vessel,", CRUISE ", nmea_cruise,", HAUL ", nmea_haul," //")
+    second_line <- paste0("Longitude: ", nmea_longitude)
+    third_line <- paste0("Latitude: ", nmea_latitude)
     
     
     survey_metadata_tmp <- data.frame(cbind("VESSEL" = nmea_vessel, 
@@ -129,12 +139,12 @@ create_NMEA_files <- function(rodbc_channel = NA,
     
     ##write the nmea txt files ----
     file_name <- gsub("\\..*","",cnv_files[i])
-    
+
     # Setup NMEA for no EOS80 ----
     fileConn <- file(paste0(getwd(), "/cnv/", file_name, ".txt"))
     writeLines(c(first_line, second_line, third_line), fileConn)
     close(fileConn)
-    
+
     # Setup NMEA with EOS80 ----
     fileConn <- file(paste0(getwd(), "/cnv/", file_name, "_EOS80.txt"))
     writeLines(c(first_line, second_line, third_line), fileConn)
