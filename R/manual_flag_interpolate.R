@@ -37,8 +37,12 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
                                                 y = x$gsw_densityA0[-flags], 
                                                 xout = x$depth[flags], 
                                                 method = "unesco")
-      x$N2 <- oce::swN2(pressure = x$pressure,
-                        sigmaTheta = x$gsw_densityA0 - 1000)
+      ctd_obj <- as.ctd(salinity = x$salinity,
+             temperature = x$temperature,
+             pressure = x$pressure,
+             conductivity = x$conductivity)
+      
+      x$N2 <- oce::swN2(ctd_obj)
     }
     return(x)
   }
@@ -112,6 +116,12 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
       write.csv(x = dat, 
                 file = here::here("output", "manual_flag", paste0(dat$deploy_id[1], ".csv")), 
                 row.names = FALSE)
+    }
+    
+    review_next <- tolower(readline(prompt = "Review next? (y or r): "))  == "y"
+    
+    if(!review_next) {
+      stop("Review stopped")
     }
   }
 }
