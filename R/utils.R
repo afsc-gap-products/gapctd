@@ -129,3 +129,25 @@ get_connected <- function(schema = NA){
                                  pwd = paste(password),
                                  believeNRows = FALSE)
 }
+
+#' Convert decimal degree latitude to NMEA format
+#' 
+#' @param x Numeric decimal degrees
+#' @noRd
+
+ddlat_to_nmea <- function(x) {
+  paste0(format(floor(abs(x)), 2), " ", 
+         format(abs(x)%%1*60, nsmall = 3), " ",
+         c("S", "N")[sign(x) == c(-1, 1)])
+}
+
+#' Convert decimal degree longitude to NMEA format
+#' 
+#' @param x Numeric decimal degrees
+#' @noRd
+
+ddlon_to_nmea <- function(x) {
+  paste0(format(floor(abs(x)), 2), " ", 
+         format(abs(x)%%1*60, nsmall = 3), " ",
+         c("W", "E")[sign(x) == c(-1, 1)])
+}
