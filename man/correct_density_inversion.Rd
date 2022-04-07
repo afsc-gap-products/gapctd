@@ -7,7 +7,9 @@
 correct_density_inversion(
   threshold = NULL,
   threshold_method = "bv",
-  correct_inversion = TRUE
+  correct_inversion = TRUE,
+  cnv_dir = NULL,
+  ...
 )
 }
 \arguments{
@@ -16,6 +18,8 @@ correct_density_inversion(
 \item{threshold_method}{Character. "density" to flag inversions based on density anomalies, "bv" for Brunt-Vaisala buoyancy frequency}
 
 \item{correct_inversion}{Logical. Should density inversions be removed and interpolated?}
+
+\item{cnv_dir}{File path to cnv directory.}
 }
 \value{
 Writes flagged and corrected data to csvs in output/density_corrected.
