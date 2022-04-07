@@ -91,7 +91,7 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
              ylab = "Index")
         lines(diff(dat$temperature)/diff(dat$pressure),
               y = (nrow(dat)-1):1,)
-        plot(dat$salinity, -1*dat$pressure, 
+        plot(dat$temperature, -1*dat$pressure, 
              xlab = "Temperature", 
              ylab = "Pressure",
              main = "Left-click on points to be removed then press 'Esc'")
@@ -110,7 +110,7 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
       
       
       write.csv(x = dat, 
-                file = here::here("output", "manual_flag", paste0(deploy_id[1], ".csv")), 
+                file = here::here("output", "manual_flag", paste0(dat$deploy_id[1], ".csv")), 
                 row.names = FALSE)
     }
   }
