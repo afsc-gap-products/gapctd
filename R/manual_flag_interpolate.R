@@ -37,8 +37,12 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
                                                 y = x$gsw_densityA0[-flags], 
                                                 xout = x$depth[flags], 
                                                 method = "unesco")
-      x$N2 <- oce::swN2(pressure = x$pressure,
-                        sigmaTheta = x$gsw_densityA0 - 1000)
+      ctd_obj <- as.ctd(salinity = x$salinity,
+             temperature = x$temperature,
+             pressure = x$pressure,
+             conductivity = x$conductivity)
+      
+      x$N2 <- oce::swN2(ctd_obj)
     }
     return(x)
   }
