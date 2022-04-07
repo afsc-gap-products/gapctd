@@ -32,7 +32,7 @@ change_psa_alignctd <- function(variable, alignment, psa_path = NULL) {
   }
   
   string1 <- paste0(gsub(pattern = "\\value.*", "", align_psa_file[align_index]), "value")
-  string2 <- paste0("=\"", format(alignment, nsmall = 3),  "000\" ")
+  string2 <- paste0("=\"", format(alignment, nsmall = 6),  "\" ")
   string3 <- paste0("variable_name", gsub(pattern = ".*variable_name", "", align_psa_file[align_index]))
   new_string <- paste0(string1, string2, string3)
   align_psa_file[align_index] <- new_string
@@ -57,10 +57,10 @@ change_psa_celltm <- function(alpha, tau_ctm, psa_path = here::here("psa_xmlcon"
   celltm_psa_file <- readLines(psa_path)
   
   celltm_index <- which(grepl(pattern = "    <TA_Amplitude", celltm_psa_file))
-  celltm_psa_file[celltm_index] <- paste0("    <TA_Amplitude value=\"", format(alpha, nsmall = 5), "0\" />")
+  celltm_psa_file[celltm_index] <- paste0("    <TA_Amplitude value=\"", format(alpha, nsmall = 6), "\" />")
   
   celltm_index <- which(grepl(pattern = "    <TA_TimeConstant", celltm_psa_file))
-  celltm_psa_file[celltm_index] <- paste0("    <TA_TimeConstant value=\"", format(tau_ctm, nsmall = 5), "0\" />")
+  celltm_psa_file[celltm_index] <- paste0("    <TA_TimeConstant value=\"", format(tau_ctm, nsmall = 6), "\" />")
   
   psa_con <- file(psa_path)
   writeLines(text = celltm_psa_file, con = psa_con)

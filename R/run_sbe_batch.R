@@ -128,15 +128,24 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
       if(alignment_df$best_adj[kk] == 0) {
         in_celltm <- deploy_files[grepl(pattern = "loopedit.cnv", x = deploy_files)]
         
-        system(command = paste0("sbebatch ", getwd(), "/sbe19plus_noalign.bat", " ", 
-                                getwd(), " ", #%1
-                                xmlcon_file, " ", #%2
-                                in_celltm, " ", #%3
-                                paste0("_", alignment_df$dir_abbv[kk], "_align"), " ", #%4
-                                " #m"))
+        if(file.exists(in_celltm)) {
+          system(command = paste0("sbebatch ", getwd(), "/sbe19plus_noalign.bat", " ", 
+                                  getwd(), " ", #%1
+                                  xmlcon_file, " ", #%2
+                                  in_celltm, " ", #%3
+                                  paste0("_", alignment_df$dir_abbv[kk], "_align"), " ", #%4
+                                  " #m"))
+        } else {
+          warning(paste0("run_sbe_batch: ", in_celltm, " not found."))
+        }
+        
+
       } else {
         # Setup input paths for alignment, celltm, loopedit
         in_align <- deploy_files[grepl(pattern = "loopedit.cnv", x = deploy_files)]
+        
+        if(file.exists(in_align)) {
+        
         in_celltm <- gsub(pattern = "\\.cnv", 
                           replacement =  paste0("_", alignment_df$dir_abbv[kk], "_align.cnv"),
                           x = in_align)
@@ -147,7 +156,10 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
                                 xmlcon_file, " ", #%2
                                 in_align, " ", #%3
                                 paste0("_", alignment_df$dir_abbv[kk], "_align"), " ", #%4
-                                " #m"))
+                                " #m")) 
+        } else {
+          warning(paste0("run_sbe_batch: ", in_align, " not found."))
+        }
       }
     }
   } else if(batch_method == 3) {
@@ -181,8 +193,6 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
       
       # Remove unused files
       keep_files <- c(grep(pattern = "raw.cnv", x = deploy_files),
-                      # grep(pattern = "wfil.cnv", x = deploy_files),
-                      # grep(pattern = "fil1.cnv", x = deploy_files),
                       grep(pattern = "tmcorrect.cnv", x = deploy_files),
                       grep(pattern = "align.cnv", x = deploy_files))
       invisible(file.remove(deploy_files[-keep_files]))

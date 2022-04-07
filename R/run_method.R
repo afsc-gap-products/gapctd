@@ -11,11 +11,16 @@
 #' @param rm_files Logical. Should be removed from the directory before starting processing
 #' @export
 
-run_method <- function(vessel, year, region, channel, processing_method, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL, ctm_df = NULL, ...) {
+run_method <- function(vessel, year, region, channel, processing_method, storage_directory = NULL, last_pattern = "TEOS10.cnv", ctd_dir = "G:/RACE_CTD/data/2021/ebs/v162", alignment_df = NULL, ctm_df = NULL, ...) {
+  
+  
+  if(is.null(storage_directory)) {
+    storage_directory <- here::here("output", processing_method)
+  }
   
   # Create processing directory for a method
-  if(!dir.exists(here::here("output", processing_method))) {
-    dir.create(here::here("output", processing_method))
+  if(!dir.exists(storage_directory)) {
+    dir.create(storage_directory)
   }
   
   # Select workflow
@@ -136,20 +141,20 @@ run_method <- function(vessel, year, region, channel, processing_method, last_pa
     
   }
   
-  file.remove(list.files(here::here("output", processing_method), full.names = TRUE))
+  file.remove(list.files(storage_directory, full.names = TRUE))
   
   # Move files to method directory
   dc_files <- list.files(here::here("cnv"), pattern = "downcast", full.names = TRUE)
   uc_files <- list.files(here::here("cnv"), pattern = "upcast", full.names = TRUE)
   
   file.copy(dc_files,
-            gsub(pattern = "/cnv/", 
-                 replacement = paste0("/output/", processing_method, "/"),
+            gsub(pattern = here::here("cnv"), 
+                 replacement = paste0(storage_directory, "/"),
                  x = dc_files))
   
   file.copy(uc_files,
-            gsub(pattern = "/cnv/", 
-                 replacement = paste0("/output/", processing_method, "/"),
+            gsub(pattern = here::here("cnv"), 
+                 replacement = paste0(storage_directory, "/"),
                  x = uc_files))
   
 }

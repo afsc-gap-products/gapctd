@@ -11,7 +11,7 @@
   <OutputFile value="" />
   <LastProcessed value="0" />
   <MinVelocityType value="0" high="1" low="0" initialValue="0" />
-  <MinCTD_Velocity value="0.10000" />
+  <MinCTD_Velocity value="0.05000" />
   <TimeWindowSize value="300.000000" />
   <PercentMeanSpeed value="20.000000" />
   <ExcludeMarkedBad value="1" />

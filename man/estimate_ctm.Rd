@@ -12,7 +12,8 @@ estimate_ctm(
   pressure,
   conductivity,
   flag,
-  obj_fn = NULL
+  obj_fn = NULL,
+  binned = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ estimate_ctm(
 \item{flag}{Character or numeric vector of data quality flags where NAs are scans to be excluded from final profiles. NA scans are used to estimate thermal cell inertia conductivity corrections and salinity but re removed from binned outputs.}
 
 \item{obj_fn}{Logical. If "path", returns an objective function, the total path distance of the salinity profile. Otherwise, returns temperature, salinity, and conductivity in 1 db depth bins.}
+
+\item{binned}{Logical. If TRUE, objective function is calculated for pressure-binned data. If FALSE, the objective function is calculated using all un-flagged data.}
 }
 \description{
 Calculates conductivity cell thermal intertia correction based on alpha, inverse beta (tau[CTM]), scan interval, temperature, and conductivity, then recalculates salinity.
