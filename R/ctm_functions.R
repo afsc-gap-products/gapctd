@@ -53,16 +53,18 @@ ctm_correct_c_t <- function(a, b, temperature) {
 #' @param conductivity Numeric vector of conductivity in S/m.
 #' @param flag Character or numeric vector of data quality flags where NAs are scans to be excluded from final profiles. NA scans are used to estimate thermal cell inertia conductivity corrections and salinity but re removed from binned outputs. 
 #' @param obj_fn Logical. If "path", returns an objective function, the total path distance of the salinity profile. Otherwise, returns temperature, salinity, and conductivity in 1 db depth bins.
+#' @param binned Logical. If TRUE, objective function is calculated for pressure-binned data. If FALSE, the objective function is calculated using all un-flagged data. 
 #' @export
 
 estimate_ctm <- function(alpha = 0.04,
-                          tau = 8,
-                          f_n = 0.25,
-                          temperature,
-                          pressure,
-                          conductivity,
-                          flag,
-                          obj_fn = NULL) {
+                         tau = 8,
+                         f_n = 0.25,
+                         temperature,
+                         pressure,
+                         conductivity,
+                         flag,
+                         obj_fn = NULL,
+                         binned = TRUE) {
   
   aa <- ctm_par_a(alpha = alpha, f_n = f_n, beta = 1/tau)
   bb <- ctm_par_b(alpha = alpha, a = aa)
@@ -82,7 +84,11 @@ estimate_ctm <- function(alpha = 0.04,
                          FUN = mean)
   
   if(obj_fn == "path") {
-    obj <- sum(abs(diff(salinity_psu[!is.na(flag)])))
+    if(binned) {
+      obj <- sum(abs(diff(out_df$salinity)))
+    } else {
+      obj <- sum(abs(diff(salinity_psu[!is.na(flag)])))
+    }
     
   } else {
     obj <- out_df
@@ -194,9 +200,8 @@ run_estimate_ctm <- function(profile_files = sort(c(list.files(here::here("outpu
                                             flag = flag,
                                             obj_fn = "path",
                                             f_n = 0.25),
-                                trace = FALSE,
                                 method = optim_method,
-                                control = list(trace = 1, maxit = optim_maxit, reltol = 1e-5,
+                                control = list(maxit = optim_maxit, reltol = 1e-5,
                                                parscale = c(alpha = 0.01, tau = 1))), silent = TRUE)
     conv <- try(est_pars@details$convergence, silent = TRUE)
     
@@ -210,9 +215,8 @@ run_estimate_ctm <- function(profile_files = sort(c(list.files(here::here("outpu
                                               flag = flag,
                                               obj_fn = "area",
                                               f_n = 0.25),
-                                  trace = FALSE,
                                   method = optim_method,
-                                  control = list(trace = 1, maxit = optim_maxit, reltol = 1e-5,
+                                  control = list(maxit = optim_maxit, reltol = 1e-5,
                                                  parscale = c(alpha = 0.1, tau = 1))), silent = TRUE)
       conv <- try(est_pars@details$convergence, silent = TRUE)
     }
