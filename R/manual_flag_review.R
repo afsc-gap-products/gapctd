@@ -1,59 +1,36 @@
-#' Review manual flags
+#' Visually inspect profiles
 #' 
-#' Review plots from gapctd::manual_flag_interpolate.
+#' Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
 #' 
-#' @param var Variable to search for point removal.
-#' @param flag_dir Manual flag directory file path. Default NULL uses the directory [working_directory]/output/manual_flag/
+#' @param csv_paths Path to csv files. If NULL, the function uses all csv files in output/manual_flag/
 #' @export
 
-manual_flag_review <- function(var = c("salinity", "temperature"),
-                               flag_dir = NULL) {
+manual_review <- function(csv_paths) {
   
-  if(is.null(flag_dir)) {
-    flag_dir <- here::here("output", "manual_flag")
+  if(is.null(csv_paths)) {
+    csv_paths <- list.files(here::here("output", "manual_flag"), full.names = TRUE)
   }
   
-  
-  flag_files <- list.files(flag_dir, full.names = TRUE)
-  
-  for(ii in 1:length(flag_files)) {
-    dat <- read.csv(file = flag_files[ii])
+  if(!file.exists(here::here("output", "accepted_profile", sel_profile$deploy_id[ii], ".csv"))) {
     
-    dat <- dat |>
-      tidyr::pivot_longer(cols = c(paste0(var, "_upcast"), paste0(var, "_downcast"))) |>
-      dplyr::mutate(variable = stringr::str_split(name, "_", simplify = TRUE)[,1],
-                    direction = stringr::str_split(name, "_", simplify = TRUE)[,2]) |>
-      dplyr::arrange(pressure)
+    sel_profile <- read.csv(file = csv_paths[ii])
     
-    plot_title <- dat$file[1]
+    profile_oce <- as.ctd(salinity = sel_profile$salinity,
+                          temperature = sel_profile$temperature,
+                          pressure = sel_profile$pressure,
+                          conductivity = sel_profile$conductivity)
     
-    print(
-      ggplot2::ggplot(data = dat,
-                      ggplot2::aes(x = round(value, 2), 
-                                   y = -1*pressure, 
-                                   color = direction, 
-                                   linetype = direction)) +
-        ggplot2::geom_path(size = ggplot2::rel(1.2)) +
-        ggplot2::facet_grid(~variable, scales = "free_x") +
-        ggplot2::scale_y_continuous(name = "Pressure") +
-        ggplot2::scale_x_continuous(name = "Value") +
-        ggplot2::scale_linetype(name = "Direction") +
-        ggplot2::scale_color_manual(name = "Direction", values = c("#4E79A7", "#F28E2B")) +
-        ggplot2::ggtitle(paste0("Deployment: ",  plot_title)) +
-        ggplot2::theme_bw())
+    accept. <- tolower(readline(prompt = "Accept profile? (y or n): "))
     
-    keep <- c(TRUE, FALSE)[match(tolower(readline(paste0("Accept profile (", ii, " out of ", length(flag_files), ") -- y or n?:"))), c("y", "n"))]
-    
-    if(!keep) {
-      # Delete file
-      file.remove(flag_files[ii])
-      print(paste0("Removing ", flag_files[ii]))
+    if(accept == "y") {
+      file.copy(from = csv_paths[ii], 
+                to = here::here("output", "accepted_profile", sel_profile$deploy_id[1], ".csv"))
     } else {
-      # Move to output/accepted_profiles
-      new_name <- gsub(pattern = "manual_flag", "accepted_profiles", x = flag_files[ii])
-      new_name <- gsub(pattern = "flag_interp", "accepted", x = new_name)
-      file.rename(from = flag_files[ii], new_name)
+      message(paste0("Removing ", csv_paths[ii], ". Rerun manual_flag_review() if manual adjustment should be made to this profile. Otherwise the profile will be exluded from the output."))
+      file.remove(csv_paths[ii])
     }
+    
+  } else {
+    message(paste0("Skipping ", sel_profile$deploy_id[ii]))
   }
-  
 }
