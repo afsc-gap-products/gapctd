@@ -8,6 +8,7 @@
 #' @param return_output Logical. If true, returns output in a data.frame.
 #' @param pattern_upcast Character vector pattern for upcast file.
 #' @param pattern_downcast Character vector pattern for downcast file.
+#' @param min_pressure_bin Numeric vector (1L) indicating the minimum depth bin to use for comparing profiles.
 #' @export
 
 compare_methods <- function(prefix,
@@ -15,7 +16,8 @@ compare_methods <- function(prefix,
                             method_labels = NULL,
                             return_output = FALSE,
                             pattern_downcast = "downcast.cnv",
-                            pattern_upcast = "upcast.cnv") {
+                            pattern_upcast = "upcast.cnv",
+                            min_pressure_bin = 4) {
   
   if(!dir.exists(here::here("plots", "binavg"))) {
     dir.create(here::here("plots", "binavg"))
@@ -109,37 +111,67 @@ compare_methods <- function(prefix,
     comb_df <- data.frame()
     
     for(mm in 1:length(processing_method)) {
+      dat_d <- try(oce::read.oce(eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]), silent = TRUE)
+      dat_u <- try(oce::read.oce(eval(parse(text = paste0("u_listcnv_", processing_method[mm])))[kk]), silent = TRUE)
       
-      dat_d <- suppressWarnings(oce::read.oce(eval(parse(text = paste0("d_listcnv_", processing_method[mm])))[kk]))
-      dat_u <- suppressWarnings(oce::read.oce(eval(parse(text = paste0("u_listcnv_", processing_method[mm])))[kk]))
+      if(class(dat_d) == "try-error" & class(dat_u) == "try-error") { next }
       
-      down_df <- data.frame(temperature = dat_d@data$temperature[!is.na(dat_d@data$flag)],
-                            salinity = dat_d@data$salinity[!is.na(dat_d@data$flag)],
-                            pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
-                            delta_s = mean(abs(diff(dat_d@data$salinity[dat_d@data$pressure > 2]))),
-                            direction = "down") 
-      up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
-                          salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
-                          pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
-                          delta_s = mean(abs(diff(dat_u@data$salinity[dat_d@data$pressure > 2]))),
-                          direction = "up")
+      p_max <- 0
+      if(class(dat_d) == "try-error") {
+        down_df <- data.frame(temperature = numeric(),
+                              salinity = numeric(),
+                              pressure = numeric(),
+                              delta_s = numeric(),
+                              direction = character())
+        p_max <- 1
+      } else {
+        down_df <- data.frame(temperature = dat_d@data$temperature[!is.na(dat_d@data$flag)],
+                              salinity = dat_d@data$salinity[!is.na(dat_d@data$flag)],
+                              pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
+                              delta_s = mean(abs(diff(dat_d@data$salinity[dat_d@data$pressure > min_pressure])), na.rm = TRUE),
+                              direction = "down") 
+      }
       
-      max_pressure <- min(c(max(down_df$pressure, na.rm = TRUE),  max(up_df$pressure, na.rm = TRUE)))
       
-      ts_area <- dplyr::bind_rows(down_df |> dplyr::select(pressure, salinity, temperature), 
+      
+      if(class(dat_u) == "try-error") {
+        up_df <- data.frame(temperature = numeric(),
+                            salinity = numeric(),
+                            pressure = numeric(),
+                            delta_s = numeric(),
+                            direction = character())
+        p_max <- 2
+      } else {
+        up_df <- data.frame(temperature = dat_u@data$temperature[!is.na(dat_u@data$flag)],
+                            salinity = dat_u@data$salinity[!is.na(dat_u@data$flag)],
+                            pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
+                            delta_s = mean(abs(diff(dat_u@data$salinity[dat_d@data$pressure > min_pressure])), na.rm = TRUE),
+                            direction = "up")
+      }
+      
+      if(p_max == 0) {
+        max_pressure <- min(c(max(down_df$pressure, na.rm = TRUE),  max(up_df$pressure, na.rm = TRUE)))
+        
+        ts_area <- dplyr::bind_rows(down_df |> dplyr::select(pressure, salinity, temperature), 
                                     up_df |> dplyr::select(pressure, salinity, temperature)) |>
-        dplyr::filter(pressure > 2, pressure < max_pressure)
-      
-      ts_area <- dplyr::bind_rows(ts_area, ts_area[1,]) |>
-        dplyr::filter(!is.na(salinity), !is.na(temperature)) |>
-        sf::st_as_sf(coords = c("salinity", "temperature")) |>
-        dplyr::group_by(ID = 1) |>
-        summarise(do_union = FALSE) |>
-        sf::st_cast(to = "POLYGON") |> 
-        sf::st_area()
-      
-      down_df$area_ts <- ts_area
-      up_df$area_ts <- ts_area
+          dplyr::filter(pressure > 2, pressure < max_pressure)
+        
+        ts_area <- dplyr::bind_rows(ts_area, ts_area[1,]) |>
+          dplyr::filter(!is.na(salinity), !is.na(temperature)) |>
+          sf::st_as_sf(coords = c("salinity", "temperature")) |>
+          dplyr::group_by(ID = 1) |>
+          summarise(do_union = FALSE) |>
+          sf::st_cast(to = "POLYGON") |> 
+          sf::st_area()
+        
+        down_df$area_ts <- ts_area
+        up_df$area_ts <- ts_area
+        
+      } else if(p_max == 1) {
+        max_pressure <- min(max(up_df$pressure, na.rm = TRUE))
+      } else {
+        max_pressure <- min(max(down_df$pressure, na.rm = TRUE))
+      }
       
       comb_df <- dplyr::bind_rows(down_df, up_df) |>
         dplyr::mutate(method = processing_method[mm],
@@ -158,23 +190,30 @@ compare_methods <- function(prefix,
       out_df <- dplyr::bind_rows(out_df, comb_df)
       
       # List best files to move
-      summary_df <- comb_df |>
-        dplyr::select(direction, method, label, deploy, method_index, index, delta_s, area_ts) |>
-        unique()
-    
-      summary_df <- summary_df |>
-        dplyr::group_by(direction) |>
-        dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
-        dplyr::inner_join(summary_df) |>
-        dplyr::mutate(move = NA)
-      
-      # summary_df <- summary_df |>
-      #   dplyr::group_by(method) |>
-      #   dplyr::summarise(delta_s = mean(delta_s, na.rm = TRUE)) |>
-      #   dplyr::filter(delta_s == min(delta_s, na.rm = TRUE)) |>
-      #   dplyr::select(method) |>
-      #   dplyr::inner_join(summary_df, by = c("method")) |>
-      #   dplyr::mutate(move = NA)
+      if("area_ts" %in% names(comb_df)) {
+        summary_df <- comb_df |>
+          dplyr::select(direction, method, label, deploy, method_index, index, delta_s, area_ts) |>
+          unique()
+        
+        summary_df <- summary_df |>
+          dplyr::group_by(direction) |>
+          dplyr::summarise(area_ts = min(area_ts, na.rm = TRUE)) |>
+          dplyr::inner_join(summary_df) |>
+          dplyr::mutate(move = NA) |>
+          dplyr::select(-area_ts, -delta_s)
+        
+      } else {
+        summary_df <- comb_df |>
+          dplyr::select(direction, method, label, deploy, method_index, index, delta_s) |>
+          unique()
+        
+        summary_df <- summary_df |>
+          dplyr::group_by(direction) |>
+          dplyr::summarise(delta_s = min(delta_s, na.rm = TRUE)) |>
+          dplyr::inner_join(summary_df) |>
+          dplyr::mutate(move = NA) |>
+          dplyr::select(-delta_s)
+      }
       
       summary_df$move[summary_df$direction == "down"] <- try(eval(parse(text = paste0("d_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "down"]])))[summary_df$index[summary_df$direction == "down"]], silent = TRUE)
       summary_df$move[summary_df$direction == "up"] <- try(eval(parse(text = paste0("u_listcnv_", processing_method[summary_df$method_index[summary_df$direction == "up"]])))[summary_df$index[summary_df$direction == "up"]], silent = TRUE)
@@ -184,7 +223,7 @@ compare_methods <- function(prefix,
     }
     
     best_profiles_df <- comb_df |> 
-      dplyr::inner_join(summary_df, by = c("delta_s", "direction", "method", "method_index", "label", "index", "deploy"))
+      dplyr::inner_join(summary_df, by = c("direction", "method", "method_index", "label", "index", "deploy"))
     
     png(file = here::here("plots", paste0(prefix, "_salinity_", kk, ".png")), width = 8, height = 8, units = "in", res = 300)
     print(ggplot() +

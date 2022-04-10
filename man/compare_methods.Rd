@@ -10,7 +10,8 @@ compare_methods(
   method_labels = NULL,
   return_output = FALSE,
   pattern_downcast = "downcast.cnv",
-  pattern_upcast = "upcast.cnv"
+  pattern_upcast = "upcast.cnv",
+  min_pressure_bin = 4
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ compare_methods(
 \item{pattern_downcast}{Character vector pattern for downcast file.}
 
 \item{pattern_upcast}{Character vector pattern for upcast file.}
+
+\item{min_pressure_bin}{Numeric vector (1L) indicating the minimum depth bin to use for comparing profiles.}
 }
 \description{
 Compare processing methods based on spikiness of profiles and make multipanel plots to compare methods/workflows for processing CTD data.

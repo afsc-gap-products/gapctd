@@ -172,6 +172,15 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
       stop("run_sbe_batch: No data found in ctm_df!")
     }
     
+    # Add upcast and downcast columns if only one set of CTM parameters
+    if(!"cast_direction" %in% names(ctm_df)) {
+      ctm_df <- dplyr::bind_rows(ctm_df |>
+        dplyr::mutate(cast_direction = "downcast"),
+        ctm_df |>
+          dplyr::mutate(cast_direction = "upcast"))
+      
+    }
+    
     # Abbreviation for upcast and downcast profile outputs
     ctm_df$dir_abbv <- c("uuu", "ddd")[match(ctm_df$cast_direction, c("upcast", "downcast"))]
     
