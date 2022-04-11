@@ -452,6 +452,8 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
     }
   }
   
+  par_alpha[is.na(par_alpha)] <- start_alpha
+  par_tau[is.na(par_tau)] <- start_tau
   out_df <- data.frame(deploy_id = unique_id,
                        default_obj = default_obj,
                        adj_obj = adj_obj,
