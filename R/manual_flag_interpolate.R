@@ -112,16 +112,16 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
         dat <- interp_flags(x = dat, flags = new_flags)
       }
       
-      
       write.csv(x = dat, 
                 file = here::here("output", "manual_flag", paste0(dat$deploy_id[1], ".csv")), 
                 row.names = FALSE)
-    }
-    
-    review_next <- tolower(readline(prompt = "Review next? (y or r): "))  == "y"
-    
-    if(!review_next) {
-      stop("Review stopped")
+      
+      review_next <- tolower(readline(prompt = "Review next? (y or n): ")) == "y"
+      print(review_next)
+      
+      if(!review_next) {
+        stop("Review stopped")
+      }
     }
   }
 }
