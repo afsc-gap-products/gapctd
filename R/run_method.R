@@ -20,6 +20,7 @@ run_method <- function(vessel, year, region, channel, processing_method, storage
   
   # Create processing directory for a method
   if(!dir.exists(storage_directory)) {
+    dir.create(paste0(getwd(),"/output"))
     dir.create(storage_directory)
   }
   
@@ -141,7 +142,9 @@ run_method <- function(vessel, year, region, channel, processing_method, storage
     
   }
   
-  file.remove(list.files(storage_directory, full.names = TRUE))
+  if(length(list.files(storage_directory, full.names = TRUE)) >= 1){
+    file.remove(list.files(storage_directory, full.names = TRUE))
+    }
   
   # Move files to method directory
   dc_files <- list.files(here::here("cnv"), pattern = "downcast", full.names = TRUE)

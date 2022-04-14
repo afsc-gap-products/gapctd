@@ -36,6 +36,7 @@ remove_bad_station_data <- function(haul_metadata_path = list.files(paste0(getwd
   
   bad_files <- sub("\\_raw.*", "", haul_dat$cnv_file_name[index_error])
   
+  if(length(bad_files) >= 1){
   # Move bad cnv files
   for(i in 1:length(bad_files)) {
     f_list <- list.files(pattern = bad_files[i], recursive = TRUE, full.names = TRUE)
@@ -43,6 +44,7 @@ remove_bad_station_data <- function(haul_metadata_path = list.files(paste0(getwd
     f_newloc <- gsub(pattern = "/cnv/", replacement = "/bad_cnv/", f_list)
     file.rename(from = f_list, 
                 to = f_newloc)
+  }
   }
   
   # Remove erroneous data from data frame

@@ -82,11 +82,11 @@ get_haul_events <- function(haul_metadata_path = list.files(paste0(getwd(), "/me
                                      " and a.vessel_id = ", unique_vessel_cruise$VESSEL[i],
                                      " and b.cruise_id = a.cruise_id
                           and c.haul_id = b.haul_id
-                          and c.event_type_id in (3,5,6,7)
+                          and c.event_type_id in (3,6,7)
                           and c.datum_code = d.datum_code
                           and d.use_in_analysis = 'Y'")) |>
-      dplyr::inner_join(data.frame(TIME_FLAG = c(3,5,6,7),
-                                   EVENT_NAME = c("ON_BOTTOM", "MARKED_EVENT", "HAULBACK", "OFF_BOTTOM"))) |>
+      dplyr::inner_join(data.frame(TIME_FLAG = c(3,6,7),
+                                   EVENT_NAME = c("ON_BOTTOM", "HAULBACK", "OFF_BOTTOM"))) |>
       tidyr::pivot_wider(id_cols = c("VESSEL", "CRUISE", "HAUL"),
                          names_from = c("EVENT_NAME"),
                          values_from = "DATE_TIME") |>
