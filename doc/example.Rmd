@@ -8,7 +8,7 @@ output: html_document
 
 ## Introduction
 
-This document demonstrates how to use the gapctd package to process CTD data collected on RACE Groundfish Surveys and generate data products. This process was developed for use with SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands. Use of this package requires a connection to the AFSC RACEBASE and RACE_DATA data tables or comma separated value tables provided by AFSC staff.
+This document shows how functions within run_method work in the gapctd package. batch processing works in the gapctd package.
 
 ## 1. Installation
 
