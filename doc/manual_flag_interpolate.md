@@ -1,8 +1,3 @@
----
-title: "Manual flag and interpolate"
-output: html_document
----
-
 # Manual flagging and interpolation of erroneous data
 
 The `manual_flag_interpolate` function allows users to select outliers that should be removed and interpolated using the base R graphical user interface (GUI). The function searches the `./output/density_corrected/` directory for profiles and users review plots of salinity, temperature, and oxygen (future) data one-by-one to remove erroneous data. Erroneous data for all variables from the depth bin are removed and interpolated. Once there are no further corrections to be made to a profile, the manually corrected profile is written to `./output/manual_flag`.

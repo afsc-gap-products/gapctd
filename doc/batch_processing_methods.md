@@ -1,8 +1,3 @@
----
-title: "Batch processing methods"
-output: html_document
----
-
 ## SBE19plus batch processing steps
 
 This document lists of batch processing steps for methods in gapctd that are implemented in `run_method`.
