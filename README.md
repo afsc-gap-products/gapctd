@@ -20,12 +20,11 @@ library(gapctd)
 
 # Documentation
 
-<ul>
-<li>[Instructions for batch processing GAP CTD data](0_batch_processing.md)</li>
-<li>[SBE19plus V2 data processing methods](./doc/batch_processing_methods.md)</li>
-<li>[Data processing errors](./doc/SBE_data_processiong_errors.md)</li>
-<li>[Manually flagging and interpolating 'bad' data](./doc/manual_flag_interpolate.md)</li>
-</ul>
+- [Instructions for batch processing GAP CTD data](0_batch_processing.md)
+- [SBE19plus V2 data processing methods](./doc/batch_processing_methods.md)
+- [Data processing errors](./doc/SBE_data_processiong_errors.md)
+- [Manually flagging and interpolating 'bad' data](./doc/manual_flag_interpolate.md)
+
 
 ## Legal disclaimer
 
