@@ -6,8 +6,6 @@ Import, clean, and process CTD data collected during surveys conducted by the Gr
 
 The most recent version of this package was built in R version 4.1.0 for use with SBE Data Processing (Version 7.26.7).
 
-[Instructions for batch processing GAP CTD data](0_batch_processing.md)
-
 
 # Installation 
 
