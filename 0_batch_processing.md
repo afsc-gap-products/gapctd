@@ -1,10 +1,3 @@
----
-title: "Process GAP's CTD data using gapctd"
-output: html_document
----
-
-*WARNING: Knitting this document will not process any data. To process data, please clone this document and run code blocks one at a time.*
-
 ## Introduction
 
 This document demonstrates how to use the gapctd package to process CTD data collected on Alaska Fisheries Science Center bottom trawl surveys and generate data products. This process was developed for use with SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands. Using the package requires a connection to the AFSC RACEBASE and RACE_DATA.
