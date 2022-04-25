@@ -4,7 +4,7 @@
 
 Import, clean, and process CTD data collected during surveys conducted by the Groundfish Assessment Program at NOAA's Alaska Fisheries Science Center. Current support for data collected using SBE19 and SBE19plus V2.
 
-The most recent version of this package was built in R version 4.1.0 for use with SBE Data Processing (Version 7.26.7).
+The most recent version of this package was built for use with SBE Data Processing (Version 7.26.7).
 
 
 # Installation 
