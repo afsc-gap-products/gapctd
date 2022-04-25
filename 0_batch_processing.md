@@ -133,6 +133,10 @@ saveRDS(object = alignment_df, here::here("output", paste0(region, "_", year, "_
 <li>`profile_rate`: Average profiling speed for the cast. In the example above, there were equipment malfunctions that led to little or no profile data being collected during upcasts, potentially due to low battery issues.</li>
 </ul>
 
+The function also creates plots of the alignment parameter versus correlation coefficient in `/output/alignment.pdf`.
+
+
+![Plot of time adjustment for temperature versus correlation coefficient (Spearman's &rho;) from /output/alignment.pdf. The panel title shows the deployment ID and cast direction (top line) and optimal time adjustment (second line).](./doc/assets/batch_screenshots/align_plot.png)
 
 ## 6. Run batch processing with estimated alignment parameters
 

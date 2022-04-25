@@ -1,8 +1,8 @@
-# GAP CTD Data Batch Processing
+# GAP CTD Data Processing
 
 *This package is in development.*
 
-Import, clean, and process CTD data collected during surveys conducted by the Groundfish Assessment Program at NOAA's Alaska Fisheries Science Center. Current support for data collected using SBE19 and SBE19plus V2.
+Process CTD data collected during AFSC bottom trawl surveys using trawl-mounted CTDs. Current support for data collected using SBE19 and SBE19plus V2.
 
 The most recent version of this package was built for use with SBE Data Processing (Version 7.26.7).
 
