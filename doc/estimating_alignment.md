@@ -1,3 +1,5 @@
+# Optimizing Temperature Alignment
+
 <p>
 This document demonstrates how alignment parameters for the SBE Data
 Processing module are estimated in the gapctd package using
