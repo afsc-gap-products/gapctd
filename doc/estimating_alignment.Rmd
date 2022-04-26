@@ -1,8 +1,11 @@
 ---
 title: "Optimizing Temperature Alignment"
-output: html_document
+output:
+  md_document:
+    variant: markdown_github
 ---
 
+# Optimizing Temperature Alignment
 
 <p> This document demonstrates how alignment parameters for the SBE Data Processing module are estimated in the gapctd package using `run_alignment_calcs` and `estimate_alignment`. Temperature alignments are used in data processing because the thermistor on the SBE19plus responds slower than strain gauge (pressure) and conductivity cell measurements. The manufacturer recommends a dynamic correction using the AlignCTD module to align temperature with conductivity and pressure channels. Although the manufacturer recommendeds a typical alignment of +0.5 seconds, the optimal value of the alignment can vary depending on operating conditions.</p>
 
