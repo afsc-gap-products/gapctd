@@ -96,8 +96,7 @@ The cnv files from batch processing are copied to an output directory that is na
 
 ## 5. Estimate alignment parameters
 
-The physical misalignment of sensors and lagged responses can cause errors in salinity that are especially pronounced near density interfaces. In the default SBE Data Processing modules, this issue is handled using a temperature alignment adjustment of +0.5 seconds to account for the lagged response of the thermistor relative to pressure. However, this default alignment setting is not ideal for all profiles. 
-
+The physical misalignment of sensors and lagged responses can cause errors in salinity that are especially pronounced near density interfaces. The default SBE Data Processing modules handle this issue using a temperature alignment adjustment of +0.5 seconds to account for the lagged response of the thermistor relative to pressure. However, this default alignment setting is not ideal for all profiles, so the gapctd pacakge estimates an optimal alignment for temperature (see [Optimizing Temperature Alignment](./doc/estimating_alignment.html) for an example).
 
 The `run_alignment_calcs` function optimizes the temperature alignment parameter by finding the alignment value that maximizes the correlation between rates of change in temperature and rates of change in conductivity (i.e. first derivative of temperature and conductivity with respect to pressure). The rationale for this approach is that changes in temperature and salinity are generally expected to occur simultaneously around density interfaces in a stratified water column. For each upcast and downcast, the function time shifts temperature relative to pressure by -1.25 to +1.25 seconds (0.01 second increments) then calculates the correlation. The adjustment with the best correlation is used in subsequent steps to adjust the temperature module alignment.
 
