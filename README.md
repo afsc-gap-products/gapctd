@@ -22,7 +22,7 @@ library(gapctd)
 - [SBE19plus V2 data processing methods](./doc/batch_processing_methods.md)
 - [Data processing errors](./doc/SBE_data_processiong_errors.md)
 - [Manually flagging and interpolating 'bad' data](./doc/manual_flag_interpolate.md)
-- [Optimizing temperature alignment](./doc/estimating_alignment.html)
+- [Optimizing temperature alignment](./doc/estimating_alignment.Rmd)
 
 
 ## Legal disclaimer
