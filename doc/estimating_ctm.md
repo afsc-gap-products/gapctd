@@ -64,7 +64,8 @@ no_ctm_binned_df <- no_ctm_df |>
   dplyr::mutate(pressure_bin = round(pressure)) |>
   dplyr::group_by(direction, pressure_bin) |>
   dplyr::summarise(salinity = mean(salinity),
-                   temperature = mean(temperature))
+                   temperature = mean(temperature), 
+                   .groups = "keep")
 ```
 
 Profiles (Figure 1) show a two-layer stratified water column.
@@ -120,17 +121,11 @@ optim_results <- bbmle::mle2(minuslogl = gapctd:::ctm_adjust_tsarea,
     ## converged
 
 ``` r
-print(optim_results@coef)
+optim_results@coef
 ```
 
     ##      alpha        tau 
     ## -0.1470365  1.5910973
-
-``` r
-print(optim_results@details$convergence)
-```
-
-    ## [1] 0
 
 The algorithm converges and estimated parameters (α = -0.147, τ = 1.591)
 differ from the ‘typical’ starting values, which suggests the
@@ -138,14 +133,16 @@ alternative parameters should be used. The package tries a few other
 starting values if the optimization does not converge and uses the
 manufacturer’s typical values if none of the optimization attempts
 converge or if parameters estimates results in an optimized area between
-T-S curves that is higher than the area from the typical values. Below,
-T-S areas are calculated for the initial downcast and upcast profiles
-(No CTM), CTM-corrected profiles using typical values (Default CTM), and
-CTM-corrected profiles using the optimal parameters (Optimized CTM).
-Optimized CTM has a substantially smaller area between T-S curves than
-both No CTM and Default CTM. Meanwhile, correctiong based on the typical
-values (Default CTM) produce a T-S larger area than the profile without
-a correction (No CTM).
+T-S curves that is higher than the area from the typical values.
+
+## Comparison with no CTM and CTM using typical parameters
+
+Profiles that have the smallest area between T-S curves are eventually
+passed to later stages of processing and used to produce data products.
+It is therefore instructive to compare areas between T-S for downcast
+and upcast profiles without the correction (No CTM), CTM-corrected
+profiles using typical values (Default CTM), and CTM-corrected profiles
+using the optimal parameters (Optimized CTM).
 
 ``` r
 ts_area_df <- data.frame(ctm = c("No CTM", "Default CTM", "Optimized CTM"),
@@ -198,11 +195,14 @@ print(ts_area_df)
     ## 2   Default CTM 6.034317e-01  0.0400000 8.000000
     ## 3 Optimized CTM 8.401219e-11 -0.1470365 1.591097
 
-The difference in area between curves is evident in T-S plots (Figure 2)
-and salinity profiles (Figure 3) for No CTM, Default CTM, and Optimized
-CTM. In the Optimized CTM profile, there are no salinity spikes around
-the pycnocline in the upcast and the downcast spike is reduced
-considerably.
+Optimized CTM has a substantially smaller area between T-S curves than
+both No CTM and Default CTM. Meanwhile, corrections using the the
+typical values (Default CTM) result in a larger T-S area than the
+profile without a correction (No CTM). The difference in area between
+curves is evident in T-S plots (Figure 2) and salinity profiles (Figure
+3) for No CTM, Default CTM, and Optimized CTM. In the Optimized CTM
+profile, there are no salinity spikes around the pycnocline in the
+upcast and the downcast spike is smaller than in the other profiles.
 
 <i>Figure 2. Temperature-salinity profiles and area between upcast and
 downcast profiles. Panels show areas between T-S curves without cell
