@@ -92,7 +92,9 @@ ggplot() +
             size = rel(1.2)) +
   scale_color_colorblind("Direction") +
   scale_y_reverse(name = "Pressure (db)") +
-  facet_wrap(~factor(name, levels = c("temperature", "conductivity", "salinity")), scales = "free_x")
+  scale_x_continuous(name  = "Value") +
+  facet_wrap(~factor(name, levels = c("temperature", "conductivity", "salinity")), scales = "free_x") +
+  theme_bw()
 ```
 
 <i>Figure 1. Temperature, conductivity, and salinity versus pressure from a CTD profiled collected during AFSC's 2021 eastern Bering Sea continental shelf bottom trawl survey.</i>
