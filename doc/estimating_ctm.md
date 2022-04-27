@@ -41,8 +41,8 @@ same haul in the eastern Bering Sea. these data were processed using the
 library(gapctd)
 library(ggthemes)
 
-align_down_oce <- oce::read.oce("./inst/extdata/ex_data/ctm_downcast_ex.cnv")
-align_up_oce <- oce::read.oce("./inst/extdata/ex_data/ctm_upcast_ex.cnv")
+align_down_oce <- oce::read.oce(system.file("./extdata/ex_data/ctm_downcast_ex.cnv", package = "gapctd"))
+align_up_oce <- oce::read.oce(system.file("./extdata/ex_data/ctm_upcast_ex.cnv", package = "gapctd"))
 
 no_ctm_df <- dplyr::bind_rows(data.frame(timeS = align_down_oce@data$timeS[align_down_oce@data$pressure > 4],
   temperature = align_down_oce@data$temperature[align_down_oce@data$pressure > 4], 
@@ -64,8 +64,7 @@ no_ctm_binned_df <- no_ctm_df |>
   dplyr::mutate(pressure_bin = round(pressure)) |>
   dplyr::group_by(direction, pressure_bin) |>
   dplyr::summarise(salinity = mean(salinity),
-                   temperature = mean(temperature), 
-                   .groups = "keep")
+                   temperature = mean(temperature), .groups = "keep")
 ```
 
 Profiles (Figure 1) show a two-layer stratified water column.
@@ -73,9 +72,6 @@ Temperature and conductivity appear to be aligned, but downcast and
 upcast profiles have salinity spikes in the opposite directions around
 the pycnocline. As such a conductivity cell thermal mass correction is
 warranted.
-
-    ## `summarise()` has grouped output by 'direction'. You can override using the
-    ## `.groups` argument.
 
 ![](estimating_ctm_files/figure-markdown_github/unnamed-chunk-1-1.png)
 <i>Figure 1. Temperature, conductivity, and salinity versus pressure

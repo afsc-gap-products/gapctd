@@ -15,7 +15,7 @@ Cell thermal mass corrections are performed using a recursive filter (Lueck and 
 
 Load the `gapctd` package and example upcast and downcast data from the same haul in the eastern Bering Sea. these data were processed using the [sbe19plus_v0 method](batch_processing_methods.md) then aligned using [estimated temperature adjustments](estimating_alignment.md) (downcast +0.73 seconds, upcast +0.77 seconds).
 
-```{r setup, include=FALSE, warning=FALSE, results ='hide'}
+```{r setup, include=FALSE, warning=FALSE, results ='hide', message=FALSE, warning=FALSE}
 library(gapctd)
 library(ggthemes)
 
@@ -42,15 +42,15 @@ no_ctm_binned_df <- no_ctm_df |>
   dplyr::mutate(pressure_bin = round(pressure)) |>
   dplyr::group_by(direction, pressure_bin) |>
   dplyr::summarise(salinity = mean(salinity),
-                   temperature = mean(temperature))
+                   temperature = mean(temperature), .groups = "keep")
 ```
 
-```{r load, include=TRUE, eval=FALSE}
+```{r load, include=TRUE, eval=FALSE, message=FALSE, warning=FALSE}
 library(gapctd)
 library(ggthemes)
 
-align_down_oce <- oce::read.oce("./inst/extdata/ex_data/ctm_downcast_ex.cnv")
-align_up_oce <- oce::read.oce("./inst/extdata/ex_data/ctm_upcast_ex.cnv")
+align_down_oce <- oce::read.oce(system.file("./extdata/ex_data/ctm_downcast_ex.cnv", package = "gapctd"))
+align_up_oce <- oce::read.oce(system.file("./extdata/ex_data/ctm_upcast_ex.cnv", package = "gapctd"))
 
 no_ctm_df <- dplyr::bind_rows(data.frame(timeS = align_down_oce@data$timeS[align_down_oce@data$pressure > 4],
   temperature = align_down_oce@data$temperature[align_down_oce@data$pressure > 4], 
@@ -72,8 +72,7 @@ no_ctm_binned_df <- no_ctm_df |>
   dplyr::mutate(pressure_bin = round(pressure)) |>
   dplyr::group_by(direction, pressure_bin) |>
   dplyr::summarise(salinity = mean(salinity),
-                   temperature = mean(temperature), 
-                   .groups = "keep")
+                   temperature = mean(temperature), .groups = "keep")
 ```
 
 Profiles (Figure 1) show a two-layer stratified water column. Temperature and conductivity appear to be aligned, but downcast and upcast profiles have salinity spikes in the opposite directions around the pycnocline. As such a conductivity cell thermal mass correction is warranted.
@@ -86,12 +85,13 @@ ggplot() +
               dplyr::group_by(direction, pressure_bin) |>
               dplyr::summarise(salinity = mean(salinity),
                                temperature = mean(temperature),
-                               conductivity = mean(conductivity)) |>
+                               conductivity = mean(conductivity),
+                               .groups = "keep") |>
               tidyr::pivot_longer(cols = c("salinity", "temperature", "conductivity")),
             aes(x = value, y = pressure_bin, color = direction)) +
   scale_color_colorblind("Direction") +
   scale_y_reverse(name = "Pressure (db)") +
-  facet_wrap(~factor(name, levels = "temperature", "conductivity", "salinity"), scales = "free_x")
+  facet_wrap(~factor(name, levels = c("temperature", "conductivity", "salinity")), scales = "free_x")
 ```
 <i>Figure 1. Temperature, conductivity, and salinity versus pressure from a CTD profiled collected during AFSC's 2021 eastern Bering Sea continental shelf bottom trawl survey.</i>
 
