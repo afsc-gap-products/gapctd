@@ -288,7 +288,7 @@ ggplot() +
                  color = direction)) +
   geom_text(data = ts_area_df,
              aes(x = 5, y = 32.39, label = paste0("Area = ", formatC(area, format = "e", digits = 2), "\nalpha = ", round(alpha, 2), "\ntau = ", round(tau, 1))),
-            hjust = 0) +
+            hjust = 0, size = rel(2.8)) +
   scale_color_colorblind(name = "Direction") +
   scale_y_continuous(name = "Salinity, PSS-78") +
   scale_x_continuous(name = expression(Temperature~(degree*C))) +
