@@ -6,7 +6,7 @@ output:
 ---
 # Process GAP's CTD data using gapctd
 
-*WARNING: Knitting this document will not process any data. To process data, please clone this document and run code blocks one at a time.*
+*WARNING: Knitting the .Rmd version of this document will not process any data. To process data, set eval=TRUE or run code blocks one at a time.*
 
 ## Introduction
 
