@@ -134,12 +134,12 @@ T-S curves that is higher than the area from the typical values.
 
 ## Comparison with no CTM and CTM using typical parameters
 
-Profiles that have the smallest area between T-S curves are eventually
-passed to later stages of processing and used to produce data products.
-It is therefore instructive to compare areas between T-S for downcast
-and upcast profiles without the correction (No CTM), CTM-corrected
-profiles using typical values (Default CTM), and CTM-corrected profiles
-using the optimal parameters (Optimized CTM).
+Profiles with the smallest area between T-S curves are passed to later
+stages of processing and eventually used to produce data products. It is
+therefore instructive to compare areas between T-S for downcast and
+upcast profiles without the correction (No CTM), CTM-corrected profiles
+using typical values (Default CTM), and CTM-corrected profiles using the
+optimal parameters (Optimized CTM).
 
 ``` r
 ts_area_df <- data.frame(ctm = c("No CTM", "Default CTM", "Optimized CTM"),
