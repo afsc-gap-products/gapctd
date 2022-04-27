@@ -137,8 +137,7 @@ from R.
 </li>
 </ul>
 
-![Working directory after running run_method for batch
-processing.](./doc/assets/batch_screenshots/batch_0.png)
+![](./doc/assets/batch_screenshots/batch_0.png "Working directory after running run_method for batch processing.")
 
 The cnv files from this method are copied to an output directory that is
 named for method ./output/sbe19plus_v2.
@@ -165,8 +164,7 @@ that is named for method ./output/sbe19plus_v2. The function also
 creates a metadata .csv file that contains means of bottom variables for
 each deployment in the directory ./output/metadata.
 
-![Output directory after Step 4 contains a subdirectory called
-‘sbe19plus_v0’.](./doc/assets/batch_screenshots/batch_7.png)
+![](./doc/assets/batch_screenshots/batch_7.png "Output directory after Step 4 contains a subdirectory called 'sbe19plus_v0'.")
 
 ## 5. Estimate alignment parameters
 
@@ -222,8 +220,7 @@ alignment_df <-
 saveRDS(object = alignment_df, here::here("output", paste0(region, "_", year, "_", vessel, "_align_pars.rds")))
 ```
 
-![Output of
-run_alignment_calcs](./doc/assets/batch_screenshots/batch_8.png)
+![](./doc/assets/batch_screenshots/batch_8.png "Output of run_alignment_calcs.")
 
 `run_alignment_calcs` returns a data.frame containing:
 
@@ -250,10 +247,7 @@ battery issues.
 </li>
 </ul>
 
-![Plot of time adjustment for temperature versus correlation coefficient
-(Spearman’s ρ) from /output/alignment.pdf. The panel title shows the
-deployment ID and cast direction (top line) and optimal time adjustment
-(second line).](./doc/assets/batch_screenshots/align_plot.png)
+![](./doc/assets/batch_screenshots/align_plot.png "Plot of time adjustment for temperature versus correlation coefficient (Spearman's ρ) from /output/alignment.pdf. The panel title shows the deployment ID and cast direction (top line) and optimal time adjustment (second line).")
 
 ## 6. Run batch processing with estimated alignment parameters
 
@@ -273,8 +267,7 @@ gapctd::run_method(vessel = vessel,
                    alignment_df = readRDS(file = here::here("output", paste0(region, "_", year, "_", vessel, "_align_pars.rds"))))
 ```
 
-![Output directory after Step 6 contains a subdirectory called
-‘sbe19plus_v0_align’.](./doc/assets/batch_screenshots/batch_9.png)
+![](./doc/assets/batch_screenshots/batch_9.png "Output directory after Step 6 contains a subdirectory called 'sbe19plus_v0_align'.")
 
 ## 7. Estimate CTM Correction parameters
 
@@ -317,9 +310,7 @@ ctm_df <- gapctd::run_ctm_adjust_tsarea(profile_files = sort(c(list.files(here::
 saveRDS(ctm_df, file = here::here("output", paste0(region, "_", year, "_", vessel, "_ctm_area_pars.rds")))
 ```
 
-![Output of run_ctm_adjust_tsarea. Note that most of the samples were
-obtained at stations with a fully-mixed water
-column.](./doc/assets/batch_screenshots/batch_10.png)
+![](./doc/assets/batch_screenshots/batch_10.png "Output of run_ctm_adjust_tsarea. Note that most of the samples were obtained at stations with a fully-mixed water column.")
 
 <ul>
 <li>
@@ -379,8 +370,7 @@ gapctd::run_method(vessel = vessel,
                    ctm_df = readRDS(file = here::here("output", paste0(region, "_", year, "_", vessel, "_ctm_area_pars.rds"))))
 ```
 
-![Output directory after Step 8 contains a subdirectory called
-‘sbe19plus_v0_ctm_area’.](./doc/assets/batch_screenshots/batch_11.png)
+![](./doc/assets/batch_screenshots/batch_11.png "Output directory after Step 8 contains a subdirectory called 'sbe19plus_v0_ctm_area'.")
 
 ## 9. Compare batch procesing outputs
 
@@ -410,19 +400,7 @@ compare_df <- gapctd::compare_methods(prefix = "/binavg/align_ctd_method",
                                       pattern_upcast = "upcast_binavg.cnv")
 ```
 
-![Plot of pressure versus salinity profiles from a haul in the eastern
-Bering Sea with different procesing methods and levels of processing.
-‘Typical method’ shows results from processing using manufacturer
-recommmended parameters (processing method = “sbe19plus_v2” from Step
-3); ‘Estimated (Raw)’ shows results without using alignment or cell
-thermal mass correction parameters (processing_method = “sbe19plus_v0”
-from step 4); ‘Estimated (Aligned)’ shows results after aligning using
-estimated alignment (Step 6); ‘Estimated (CTM Area)’ shows results after
-using estimated alignment parameters and cell thermal mass correction
-parameters (Step 8). The panel with the thick line denotes the ‘best’
-method based on the area between T-S curves. Please note that this
-figure is from a different vesse/cruise than the
-example.](./doc/assets/batch_screenshots/align_ctd_method_salinity_104.png)
+![](./doc/assets/batch_screenshots/align_ctd_method_salinity_104.png "Plot of pressure versus salinity profiles from a haul in the eastern Bering Sea with different procesing methods and levels of processing. 'Typical Method' shows results from processing using manufacturer recommended parameters (processing method = sbe19plus_v2 from Step 3). 'Estimated (Raw)' shows results without using alignment or cell thermal mass correction parameters (processing_method = sbe19plus_v0 from step 4); 'Estimated (Aligned)' shows results after aligning using estimated alignment (Step 6); 'Estimated (CTM Area)' shows results after using estimated alignment parameters and cell thermal mass correction parameters (Step 8). The panel with the thick line denotes the 'best' method based on the area between T-S curves. Please note that this figure is from a different vessel/cruise than the example.")
 
 The output of `compare_methods` is a list containing two data.frames,
 compare_df and best_df. compare_df contains the raw data that are shown
@@ -467,8 +445,7 @@ data.frame that was produced by compare_methods.
 gapctd::move_to_final_cnv(best_df = compare_df$best_df)
 ```
 
-![/final_cnv/ subdirectory containing all of the best profiles after
-Step 10](./doc/assets/batch_screenshots/batch_13.png)
+![](./doc/assets/batch_screenshots/batch_13.png "/final_cnv/ subdirectory containing all of the best profiles after Step 10.")
 
 ## 11. Run density inversion check and correction
 
@@ -498,9 +475,7 @@ gapctd::correct_density_inversion(threshold = -1e-5,
                                   pattern = "binavg")
 ```
 
-![Profiles that have been corrected for density inversion errors are
-saved as csv files to the directory
-./output/density_corrected.](./doc/assets/batch_screenshots/batch_14.png)
+![](./doc/assets/batch_screenshots/batch_14.png "Profiles that have been corrected for density inversion errors are saved as csv files to the directory ./output/density_corrected.")
 
 ## 12. Manually flag ‘bad’ data and interpolate
 
@@ -520,8 +495,7 @@ to use the `manual_flag_interpolate` function.*
 gapctd::manual_flag_interpolate()
 ```
 
-![Profile data that have been flagged and reviewed are copied to
-./output/manual_flag.](./doc/assets/batch_screenshots/batch_15.png)
+![](./doc/assets/batch_screenshots/batch_15.png "Profile data that have been flagged and reviewed are copied to ./output/manual_flag.")
 
 ## 13. Review
 
@@ -537,9 +511,7 @@ data product.
 gapctd::manual_review()
 ```
 
-![Profile data are reviewed using the standard set of plots produced by
-the oce package (except a
-map).](./doc/assets/batch_screenshots/batch_16.png)
+![](./doc/assets/batch_screenshots/batch_16.png "Profile data are reviewed using the standard set of plots produced by the oce package (except a map).")
 
 To accept a profile, type ‘y’ in the console and press Enter. To reject
 a profile, type ‘n’ and press Enter. Rejected profiles can be
