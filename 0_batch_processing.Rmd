@@ -72,9 +72,9 @@ If run_method runs successfully in the working directory for the first time, the
 <li><b>/plots/</b>: Empty directory.</li>
 <li><b>.bat files</b>: Nine batch files (.bat) in the working directory. These are used to run SBE data processing modules using system input from R.</li>
 </ul>
-<center>
+
 ![Working directory after running run_method for batch processing.](./doc/assets/batch_screenshots/batch_0.png)
-</center>
+
 The cnv files from this method are copied to an output directory that is named for method ./output/sbe19plus_v2.
 
 
@@ -94,9 +94,9 @@ gapctd::run_method(vessel = vessel,
 ```
 
 The cnv files from batch processing are copied to an output directory that is named for method ./output/sbe19plus_v2. The function also creates a metadata .csv file that contains means of bottom variables for each deployment in the directory ./output/metadata.
-<center>
+
 ![Output directory after Step 4 contains a subdirectory called 'sbe19plus_v0'.](./doc/assets/batch_screenshots/batch_7.png)
-</center>
+
 ## 5. Estimate alignment parameters
 
 The physical misalignment of sensors and lagged responses can cause errors in salinity that are especially pronounced near density interfaces. The default SBE Data Processing modules handle this issue using a temperature alignment adjustment of +0.5 seconds to account for the lagged response of the thermistor relative to pressure. However, this default alignment setting is not ideal for all profiles, so the gapctd pacakge estimates an optimal alignment for temperature (see [Optimizing Temperature Alignment](./doc/estimating_alignment.html) for an example).
@@ -129,9 +129,9 @@ alignment_df <-
 # Save alignment parameters to .rds
 saveRDS(object = alignment_df, here::here("output", paste0(region, "_", year, "_", vessel, "_align_pars.rds")))
 ```
-<center>
+
 ![Output of run_alignment_calcs](./doc/assets/batch_screenshots/batch_8.png)
-</center>
+
 `run_alignment_calcs` returns a data.frame containing:
 
 <ul>
@@ -141,9 +141,9 @@ saveRDS(object = alignment_df, here::here("output", paste0(region, "_", year, "_
 <li><b>best_corr</b>: Correlation for the optimized alignment.</li>
 <li><b>profile_rate</b>: Average profiling speed for the cast. In the example above, there were equipment malfunctions that led to little or no profile data being collected during upcasts, potentially due to low battery issues.</li>
 </ul>
-<center>
+
 ![Plot of time adjustment for temperature versus correlation coefficient (Spearman's &rho;) from /output/alignment.pdf. The panel title shows the deployment ID and cast direction (top line) and optimal time adjustment (second line).](./doc/assets/batch_screenshots/align_plot.png)
-</center>
+
 ## 6. Run batch processing with estimated alignment parameters
 
 To run batch processing with the estimated alignment parameters, pass the output of `run_alignment_calcs` from step 5 to `run_method`. The output is saved to ./output/sbe19plus_v0_align and alignment parameters are read from the .rds file generated in step 5.
@@ -159,9 +159,9 @@ gapctd::run_method(vessel = vessel,
                    ctd_dir = ctd_dir,
                    alignment_df = readRDS(file = here::here("output", paste0(region, "_", year, "_", vessel, "_align_pars.rds"))))
 ```
-<center>
+
 ![Output directory after Step 6 contains a subdirectory called 'sbe19plus_v0_align'.](./doc/assets/batch_screenshots/batch_9.png)
-</center>
+
 ## 7. Estimate CTM Correction parameters
 
 The thermistor and conductivity cell are constructed with materials that have different thermal inertia and, as such, they heat and cool at different rates. These differences in heating/cooling rates are problem when calculating salinity from conductivity and temperature measurements. The Cell Thermal Mass Correction module in SBE Data Processing can be used to correct these effects, but optimal parameters for the correction depend on the magnitude of the error in conductivity measurements.
@@ -184,9 +184,9 @@ ctm_df <- gapctd::run_ctm_adjust_tsarea(profile_files = sort(c(list.files(here::
 # Save CTM correction parameters to .rds
 saveRDS(ctm_df, file = here::here("output", paste0(region, "_", year, "_", vessel, "_ctm_area_pars.rds")))
 ```
-<center>
+
 ![Output of run_ctm_adjust_tsarea. Note that most of the samples were obtained at stations with a fully-mixed water column.](./doc/assets/batch_screenshots/batch_10.png)
-</center>
+
 <ul>
 <li><b>deploy_id</b>: The name of the original deployment file.</li>
 <li><b>default_obj</b>: Value of the objective function (usually area between temperature-salinity curves) using the typical parameters, `alpha = 0.04` and `tau = 8`.</li>
@@ -215,9 +215,9 @@ gapctd::run_method(vessel = vessel,
                    ctd_dir = ctd_dir,
                    ctm_df = readRDS(file = here::here("output", paste0(region, "_", year, "_", vessel, "_ctm_area_pars.rds"))))
 ```
-<center>
+
 ![Output directory after Step 8 contains a subdirectory called 'sbe19plus_v0_ctm_area'.](./doc/assets/batch_screenshots/batch_11.png)
-</center>
+
 ## 9. Compare batch procesing outputs
 
 By following the processing steps above, there will be four sets of upcast and downcast profiles for the four different batch processing runs. The `compare_methods` function calculates the area between temperature-salinity curves for each of the casts to select the 'best' method for each cast. Area calculations are based on the same method as the `run_ctm_adjust_tsarea` function and path distance for salinity is used instead of area if data only exist for a downcast or upcast.
@@ -234,9 +234,9 @@ compare_df <- gapctd::compare_methods(prefix = "/binavg/align_ctd_method",
                                       pattern_upcast = "upcast_binavg.cnv")
 ```
 
-<center>
+
 ![Plot of pressure versus salinity profiles from a haul in the eastern Bering Sea with different procesing methods and levels of processing. 'Typical method' shows results from processing using manufacturer recommmended parameters (processing method = "sbe19plus_v2" from Step 3); 'Estimated (Raw)' shows results without using alignment or cell thermal mass correction parameters (processing_method = "sbe19plus_v0" from step 4); 'Estimated (Aligned)' shows results after aligning using estimated alignment (Step 6); 'Estimated (CTM Area)' shows results after using estimated alignment parameters and cell thermal mass correction parameters (Step 8). The panel with the thick line denotes the 'best' method based on the area between T-S curves. Please note that this figure is from a different vesse/cruise than the example.](./doc/assets/batch_screenshots/align_ctd_method_salinity_104.png)
-</center>
+
 The output of `compare_methods` is a list containing two data.frames, compare_df and best_df. compare_df contains the raw data that are shown in the plot. best_df contains:
 
 <ul>
@@ -258,9 +258,9 @@ The `move_to_final_cnv` function copies the best cnv files based on compare_meth
 ```{r move_final_cnv, include=TRUE, eval=FALSE}
 gapctd::move_to_final_cnv(best_df = compare_df$best_df)
 ```
-<center>
+
 ![/final_cnv/ subdirectory containing all of the best profiles after Step 10](./doc/assets/batch_screenshots/batch_13.png)
-</center>
+
 ## 11. Run density inversion check and correction
 
 Some errors remain in the data after batch processing with SBE Data Processing modules. Examples of these errors include surface errors due to the inclusion of scans from before CTD measurements reached equilibrium surface temperature and salinity conditions, artifacts that are likely caused by shed wakes and flow reversal, and errant spikes in salinity deeper in the water column. These errors result in unrealistic density gradients in profiles, which can sometimes be detected and corrected based on density checks or the centered square of the Brunt-Vaisala buoyancy frequency, N^2.
@@ -274,9 +274,9 @@ gapctd::correct_density_inversion(threshold = -1e-5,
                                   cnv_dir = here::here("final_cnv"), # Update to final_cnv
                                   pattern = "binavg")
 ```
-<center>
+
 ![Profiles that have been corrected for density inversion errors are saved as csv files to the directory ./output/density_corrected.](./doc/assets/batch_screenshots/batch_14.png)
-</center>
+
 ## 12. Manually flag 'bad' data and interpolate 
 
 After all of the automated data processing steps are complete, there will still be occasional errors in casts that need to be flagged manually. The `manual_flag_interpolate` function uses base R's graphical user interface for manual review and interpolation of profile data. Users can stop manual_flag_interpolate at any time and later restart where they left off. The function only reviews profiles that aren't in ./output/manual_flag.
@@ -286,9 +286,9 @@ After all of the automated data processing steps are complete, there will still 
 ```{r manual_flag, include=TRUE, eval=FALSE}
 gapctd::manual_flag_interpolate()
 ```
-<center>
+
 ![Profile data that have been flagged and reviewed are copied to ./output/manual_flag.](./doc/assets/batch_screenshots/batch_15.png)
-</center>
+
 
 ## 13. Review
 
@@ -297,9 +297,9 @@ The `manual_review` function is used to visually inspect 'final' profiles to ver
 ```{r manual_review, include=TRUE, eval=FALSE}
 gapctd::manual_review()
 ```
-<center>
+
 ![Profile data are reviewed using the standard set of plots produced by the oce package (except a map).](./doc/assets/batch_screenshots/batch_16.png)
-</center>
+
 To accept a profile, type 'y' in the console and press Enter. To reject a profile, type 'n' and press Enter. Rejected profiles can be re-examined using `manual_flag_interpolate` or re-processed using remedial methods. Profiles that ultimately do not pass this last round of visual inspection will not be included in the final data product.
 
 
