@@ -23,7 +23,7 @@ library(gapctd)
 - [Data processing errors](./doc/SBE_data_processing_errors.md)
 - [Manually flagging and interpolating 'bad' data](./doc/manual_flag_interpolate.md)
 - [Optimizing temperature alignment](./doc/estimating_alignment.md)
-
+- [Optimizing cell thermal mass correction](./doc/estimating_ctm.md)
 
 ## Legal disclaimer
 
