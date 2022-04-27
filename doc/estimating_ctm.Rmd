@@ -88,11 +88,13 @@ ggplot() +
                                conductivity = mean(conductivity),
                                .groups = "keep") |>
               tidyr::pivot_longer(cols = c("salinity", "temperature", "conductivity")),
-            aes(x = value, y = pressure_bin, color = direction)) +
+            aes(x = value, y = pressure_bin, color = direction),
+            size = rel(1.2)) +
   scale_color_colorblind("Direction") +
   scale_y_reverse(name = "Pressure (db)") +
   facet_wrap(~factor(name, levels = c("temperature", "conductivity", "salinity")), scales = "free_x")
 ```
+
 <i>Figure 1. Temperature, conductivity, and salinity versus pressure from a CTD profiled collected during AFSC's 2021 eastern Bering Sea continental shelf bottom trawl survey.</i>
 
 ## Estimating CTM parameters
@@ -167,7 +169,7 @@ ts_area_df <- data.frame(ctm = c("No CTM", "Default CTM", "Optimized CTM"),
            alpha = c(NA, 0.04, optim_results@coef['alpha']),
            tau = c(NA, 8, optim_results@coef['tau']))
 
-print(ts_area_df)
+ts_area_df
 ```
 
 ```{r, include=TRUE, include=FALSE, warning=FALSE, results ='hide'}
@@ -271,7 +273,7 @@ data.frame(temperature = c(optim_ctm_df$temperature_down,
 
 Optimized CTM has a substantially smaller area between T-S curves than both No CTM and Default CTM. Meanwhile, corrections using the the typical values (Default CTM) result in a larger T-S area than the profile without a correction (No CTM). The difference in area between curves is evident in T-S plots (Figure 2) and salinity profiles (Figure 3) for No CTM, Default CTM, and Optimized CTM. In the Optimized CTM profile, there are no salinity spikes around the pycnocline in the upcast and the downcast spike is smaller than in the other profiles.
 
-```{r, include=FALSE, echo=TRUE}
+```{r, echo = FALSE}
 ggplot() +
   geom_polygon(data = ts_area_polygon,
                aes(x = temperature,
@@ -292,9 +294,10 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "bottom")
 ```
+
 <i>Figure 2. Temperature-salinity profiles and area between upcast and downcast profiles. Panels show areas between T-S curves without cell thermal mass correction (No CTM), with cell thermal mass correction using default parameter values (Default CTM), and with cell thermal mass correction using optimized parameters (Optimized CTM).</i>
 
-```{r, include=FALSE, echo=TRUE}
+```{r, echo = FALSE}
 ggplot() +
   geom_path(data = ctm_corr_df,
             aes(x = salinity,
@@ -309,6 +312,7 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "bottom")
 ```
+
 <i>Figure 3. Upcast and downcast profiles of salinity without cell thermal mass correction (No CTM), with cell thermal mass correction using default parameter values (Default CTM), and with cell thermal mass correction using optimized parameters (Optimized CTM).</i>
 
 

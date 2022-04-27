@@ -74,6 +74,7 @@ the pycnocline. As such a conductivity cell thermal mass correction is
 warranted.
 
 ![](estimating_ctm_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
 <i>Figure 1. Temperature, conductivity, and salinity versus pressure
 from a CTD profiled collected during AFSC’s 2021 eastern Bering Sea
 continental shelf bottom trawl survey.</i>
@@ -183,7 +184,7 @@ ts_area_df <- data.frame(ctm = c("No CTM", "Default CTM", "Optimized CTM"),
            alpha = c(NA, 0.04, optim_results@coef['alpha']),
            tau = c(NA, 8, optim_results@coef['tau']))
 
-print(ts_area_df)
+ts_area_df
 ```
 
     ##             ctm         area      alpha      tau
@@ -200,11 +201,15 @@ curves is evident in T-S plots (Figure 2) and salinity profiles (Figure
 profile, there are no salinity spikes around the pycnocline in the
 upcast and the downcast spike is smaller than in the other profiles.
 
+![](estimating_ctm_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
 <i>Figure 2. Temperature-salinity profiles and area between upcast and
 downcast profiles. Panels show areas between T-S curves without cell
 thermal mass correction (No CTM), with cell thermal mass correction
 using default parameter values (Default CTM), and with cell thermal mass
 correction using optimized parameters (Optimized CTM).</i>
+
+![](estimating_ctm_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 <i>Figure 3. Upcast and downcast profiles of salinity without cell
 thermal mass correction (No CTM), with cell thermal mass correction
