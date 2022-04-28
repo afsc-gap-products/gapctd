@@ -95,26 +95,31 @@ maximum Newton steps = 500.
 
 ``` r
 optim_results <- bbmle::mle2(minuslogl = gapctd:::ctm_adjust_tsarea,
-                start = list(alpha = 0.04,
-                             tau = 8),
-                data = list(down_temperature = align_down_oce@data$temperature[align_down_oce@data$pressure > 4],
-                            down_pressure = align_down_oce@data$pressure[align_down_oce@data$pressure > 4],
-                            down_conductivity = align_down_oce@data$conductivity[align_down_oce@data$pressure > 4],
-                            down_flag = align_down_oce@data$flag[align_down_oce@data$pressure > 4],
-                            up_temperature = align_up_oce@data$temperature[align_up_oce@data$pressure > 4],
-                            up_pressure = align_up_oce@data$pressure[align_up_oce@data$pressure > 4],
-                            up_conductivity = align_up_oce@data$conductivity[align_up_oce@data$pressure > 4],
-                            up_flag = align_up_oce@data$flag[align_up_oce@data$pressure > 4],
-                            obj_fn = "area",
-                            f_n = 0.25),
-                method = "BFGS",
-                control = list(maxit = 500, reltol = 1e-5, trace = 6,
-                               parscale = c(alpha = 0.01, tau = 1)))
+                             start = list(alpha = 0.04,
+                                          tau = 8),
+                             data = list(down_temperature = align_down_oce@data$temperature[align_down_oce@data$pressure > 4],
+                                         down_pressure = align_down_oce@data$pressure[align_down_oce@data$pressure > 4],
+                                         down_conductivity = align_down_oce@data$conductivity[align_down_oce@data$pressure > 4],
+                                         down_flag = align_down_oce@data$flag[align_down_oce@data$pressure > 4],
+                                         up_temperature = align_up_oce@data$temperature[align_up_oce@data$pressure > 4],
+                                         up_pressure = align_up_oce@data$pressure[align_up_oce@data$pressure > 4],
+                                         up_conductivity = align_up_oce@data$conductivity[align_up_oce@data$pressure > 4],
+                                         up_flag = align_up_oce@data$flag[align_up_oce@data$pressure > 4],
+                                         obj_fn = "area",
+                                         f_n = 0.25),
+                             method = "L-BFGS-B",
+                             lower = c(alpha = -10, tau = 0),
+                             upper = c(alpha = 10, tau = 45),
+                             control = list(maxit = 500, reltol = 1e-5, trace = 1))
 ```
 
-    ## initial  value 0.603432 
-    ## iter  10 value 0.000011
-    ## final  value 0.000000 
+    ## Warning in optim(par = c(alpha = 0.04, tau = 8), fn = function (p) : method L-
+    ## BFGS-B uses 'factr' (and 'pgtol') instead of 'reltol' and 'abstol'
+
+    ## iter   10 value 0.113029
+    ## iter   20 value 0.111565
+    ## iter   30 value 0.059414
+    ## final  value 0.057839 
     ## converged
 
 ``` r
@@ -122,9 +127,9 @@ optim_results@coef
 ```
 
     ##      alpha        tau 
-    ## -0.1470365  1.5910973
+    ## -0.2847695  1.2091625
 
-The algorithm converges and estimated parameters (α = -0.147, τ = 1.591)
+The algorithm converges and estimated parameters (α = -0.285, τ = 1.209)
 differ from the ‘typical’ starting values, which suggests the
 alternative parameters should be used. The package tries a few other
 starting values if the optimization does not converge and uses the
@@ -187,10 +192,10 @@ ts_area_df <- data.frame(ctm = c("No CTM", "Default CTM", "Optimized CTM"),
 ts_area_df
 ```
 
-    ##             ctm         area      alpha      tau
-    ## 1        No CTM 3.009144e-01         NA       NA
-    ## 2   Default CTM 6.034317e-01  0.0400000 8.000000
-    ## 3 Optimized CTM 8.401219e-11 -0.1470365 1.591097
+    ##             ctm       area      alpha      tau
+    ## 1        No CTM 0.30091436         NA       NA
+    ## 2   Default CTM 0.36575860  0.0400000 8.000000
+    ## 3 Optimized CTM 0.05783882 -0.2847695 1.209162
 
 Optimized CTM has a substantially smaller area between T-S curves than
 both No CTM and Default CTM. Meanwhile, corrections using the the

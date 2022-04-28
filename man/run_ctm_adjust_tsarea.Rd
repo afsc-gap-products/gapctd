@@ -9,7 +9,7 @@ run_ctm_adjust_tsarea(
     TRUE, pattern = "downcast.cnv"), list.files(here::here("output", "sbe19plus_v0"),
     full.names = TRUE, pattern = "upcast.cnv"))),
   min_pressure = 4,
-  optim_method = "BFGS",
+  optim_method = "L-BFGS-B",
   optim_maxit = 500,
   start_alpha = 0.04,
   start_tau = 8,
