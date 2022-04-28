@@ -152,17 +152,53 @@ compare_methods <- function(prefix,
       if(p_max == 0) {
         max_pressure <- min(c(max(down_df$pressure, na.rm = TRUE),  max(up_df$pressure, na.rm = TRUE)))
         
-        ts_area <- dplyr::bind_rows(down_df |> dplyr::select(pressure, salinity, temperature), 
-                                    up_df |> dplyr::select(pressure, salinity, temperature)) |>
-          dplyr::filter(pressure > 2, pressure < max_pressure)
         
-        ts_area <- dplyr::bind_rows(ts_area, ts_area[1,]) |>
-          dplyr::filter(!is.na(salinity), !is.na(temperature)) |>
-          sf::st_as_sf(coords = c("salinity", "temperature")) |>
-          dplyr::group_by(ID = 1) |>
+        poly_df <- dplyr::inner_join(dplyr::select(up_df, temperature, salinity, pressure) |>
+                                       dplyr::rename(temperature_up = temperature,
+                                              salinity_up = salinity),
+                                     dplyr::select(down_df, temperature, salinity, pressure) |>
+                                       dplyr::rename(temperature_down = temperature,
+                                                     salinity_down = salinity),
+                                     by = "pressure")
+        
+        wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                                         cbind(
+                                                                           apply(
+                                                                             X = cbind(
+                                                                               poly_df$salinity_down[1:(nrow(poly_df))],
+                                                                               poly_df$temperature_down[1:(nrow(poly_df))]),
+                                                                             MARGIN = 1,
+                                                                             FUN = paste, 
+                                                                             collapse = " "),
+                                                                           apply(
+                                                                             cbind(c(poly_df$salinity_up[1:(nrow(poly_df)-1)], poly_df$salinity_up[(nrow(poly_df)-1)]),
+                                                                                   c(poly_df$temperature_up[1:(nrow(poly_df)-1)], poly_df$temperature_up[(nrow(poly_df)-1)])),
+                                                                             MARGIN = 1,
+                                                                             FUN = paste, 
+                                                                             collapse = " "),
+                                                                           apply(
+                                                                             X = cbind(c(poly_df$salinity_down[2:(nrow(poly_df))],poly_df$salinity_up[(nrow(poly_df))]),
+                                                                                       c(poly_df$temperature_down[2:(nrow(poly_df))],poly_df$temperature_up[(nrow(poly_df))])),
+                                                                             MARGIN = 1,
+                                                                             FUN = paste, 
+                                                                             collapse = " "),
+                                                                           apply(
+                                                                             X = cbind(
+                                                                               c(poly_df$salinity_down[1:(nrow(poly_df)-1)],poly_df$salinity_down[(nrow(poly_df))]),
+                                                                               c(poly_df$temperature_down[1:(nrow(poly_df)-1)],poly_df$temperature_down[(nrow(poly_df))])),
+                                                                             MARGIN = 1,
+                                                                             FUN = paste, 
+                                                                             collapse = " ")),
+                                                                       MARGIN = 1,
+                                                                       FUN = paste,
+                                                                       collapse = ", "), ")")) |>
+          dplyr::mutate(ID = row_number()) |>
+          st_as_sf(wkt = "geometry") |> 
+          dplyr::group_by(ID) |>
           summarise(do_union = FALSE) |>
-          sf::st_cast(to = "POLYGON") |> 
-          sf::st_area()
+          sf::st_cast(to = "POLYGON")
+        
+        ts_area <- sum(sf::st_area(wkt_poly), na.rm = TRUE)
         
         down_df$area_ts <- ts_area
         up_df$area_ts <- ts_area
@@ -198,7 +234,7 @@ compare_methods <- function(prefix,
         summary_df <- summary_df |>
           dplyr::group_by(direction) |>
           dplyr::summarise(area_ts = min(area_ts, na.rm = TRUE)) |>
-          dplyr::inner_join(summary_df) |>
+          dplyr::inner_join(summary_df, by = c("direction", "area_ts")) |>
           dplyr::mutate(move = NA) |>
           dplyr::select(-area_ts, -delta_s)
         
