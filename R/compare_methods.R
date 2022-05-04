@@ -9,6 +9,8 @@
 #' @param pattern_upcast Character vector pattern for upcast file.
 #' @param pattern_downcast Character vector pattern for downcast file.
 #' @param min_pressure_bin Numeric vector (1L) indicating the minimum depth bin to use for comparing profiles.
+#' @param area_method Should area calculations use temperature-salinity ("ts") or pressure-salinity ("ps") profiles?
+#' @param scale_vars Logical. Should temperature and salinity be scaled to calculate T-S area?
 #' @export
 
 compare_methods <- function(prefix,
@@ -17,7 +19,9 @@ compare_methods <- function(prefix,
                             return_output = FALSE,
                             pattern_downcast = "downcast.cnv",
                             pattern_upcast = "upcast.cnv",
-                            min_pressure_bin = 4) {
+                            min_pressure_bin = 4,
+                            area_method = "ts",
+                            scale_vars = FALSE) {
   
   if(!dir.exists(here::here("plots", "binavg"))) {
     dir.create(here::here("plots", "binavg"))
@@ -161,37 +165,81 @@ compare_methods <- function(prefix,
                                                      salinity_down = salinity),
                                      by = "pressure")
         
-        wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
-                                                                         cbind(
-                                                                           apply(
-                                                                             X = cbind(
-                                                                               poly_df$salinity_down[1:(nrow(poly_df))],
-                                                                               poly_df$temperature_down[1:(nrow(poly_df))]),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             cbind(c(poly_df$salinity_up[1:(nrow(poly_df)-1)], poly_df$salinity_up[(nrow(poly_df)-1)]),
-                                                                                   c(poly_df$temperature_up[1:(nrow(poly_df)-1)], poly_df$temperature_up[(nrow(poly_df)-1)])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             X = cbind(c(poly_df$salinity_down[2:(nrow(poly_df))],poly_df$salinity_up[(nrow(poly_df))]),
-                                                                                       c(poly_df$temperature_down[2:(nrow(poly_df))],poly_df$temperature_up[(nrow(poly_df))])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             X = cbind(
-                                                                               c(poly_df$salinity_down[1:(nrow(poly_df)-1)],poly_df$salinity_down[(nrow(poly_df))]),
-                                                                               c(poly_df$temperature_down[1:(nrow(poly_df)-1)],poly_df$temperature_down[(nrow(poly_df))])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " ")),
-                                                                       MARGIN = 1,
-                                                                       FUN = paste,
-                                                                       collapse = ", "), ")")) |>
+        if(scale_vars) {
+          poly_df$salinity_up <- scale(c(poly_df$salinity_up, poly_df$salinity_down))[,1][nrow(poly_df)]
+          poly_df$salinity_down <- scale(c(poly_df$salinity_down, poly_df$poly_df$salinity_up))[,1][nrow(poly_df)]
+          poly_df$temperature_up <- scale(c(poly_df$temperature_up, poly_df$temperature_down))[,1][nrow(poly_df)]
+          poly_df$temperature_down <- scale(c(poly_df$temperature_down, poly_df$temperature_up))[,1][nrow(poly_df)]
+        }
+        
+        if(area_method == "ts") {
+          wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                                           cbind(
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 poly_df$salinity_down[1:(nrow(poly_df))],
+                                                                                 poly_df$temperature_down[1:(nrow(poly_df))]),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               cbind(c(poly_df$salinity_up[1:(nrow(poly_df)-1)], poly_df$salinity_up[(nrow(poly_df)-1)]),
+                                                                                     c(poly_df$temperature_up[1:(nrow(poly_df)-1)], poly_df$temperature_up[(nrow(poly_df)-1)])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(c(poly_df$salinity_down[2:(nrow(poly_df))],poly_df$salinity_up[(nrow(poly_df))]),
+                                                                                         c(poly_df$temperature_down[2:(nrow(poly_df))],poly_df$temperature_up[(nrow(poly_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 c(poly_df$salinity_down[1:(nrow(poly_df)-1)],poly_df$salinity_down[(nrow(poly_df))]),
+                                                                                 c(poly_df$temperature_down[1:(nrow(poly_df)-1)],poly_df$temperature_down[(nrow(poly_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " ")),
+                                                                         MARGIN = 1,
+                                                                         FUN = paste,
+                                                                         collapse = ", "), ")")) 
+        } else if(area_method == "ps") {
+          wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                                           cbind(
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 poly_df$salinity_down[1:(nrow(poly_df))],
+                                                                                 poly_df$pressure[1:(nrow(poly_df))]),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               cbind(c(poly_df$salinity_up[1:(nrow(poly_df)-1)], poly_df$salinity_up[(nrow(poly_df)-1)]),
+                                                                                     c(poly_df$pressure[1:(nrow(poly_df)-1)], poly_df$pressure[(nrow(poly_df)-1)])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(c(poly_df$salinity_down[2:(nrow(poly_df))],poly_df$salinity_up[(nrow(poly_df))]),
+                                                                                         c(poly_df$pressure[2:(nrow(poly_df))],poly_df$pressure[(nrow(poly_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 c(poly_df$salinity_down[1:(nrow(poly_df)-1)],poly_df$salinity_down[(nrow(poly_df))]),
+                                                                                 c(poly_df$pressure[1:(nrow(poly_df)-1)],poly_df$pressure[(nrow(poly_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " ")),
+                                                                         MARGIN = 1,
+                                                                         FUN = paste,
+                                                                         collapse = ", "), ")")) 
+        }
+        
+        # Calculate area
+        wkt_poly <- wkt_poly |>
           dplyr::mutate(ID = row_number()) |>
           st_as_sf(wkt = "geometry") |> 
           dplyr::group_by(ID) |>
@@ -272,6 +320,7 @@ compare_methods <- function(prefix,
                           y = pressure, 
                           color = direction),
                       size = rel(1.4)) +
+            ggtitle(comb_df$deploy[1]) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
@@ -289,6 +338,7 @@ compare_methods <- function(prefix,
                           y = pressure, 
                           color = direction),
                       size = rel(1.4)) +
+            ggtitle(comb_df$deploy[1]) +
             facet_wrap(~label) +
             scale_y_reverse() +
             scale_color_manual(values = c("red", "black")) +
