@@ -13,6 +13,7 @@ run_ctm_adjust_tsarea(
   optim_maxit = 500,
   start_alpha = 0.04,
   start_tau = 8,
+  obj_method = "area",
   ...
 )
 }

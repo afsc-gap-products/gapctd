@@ -11,7 +11,9 @@ compare_methods(
   return_output = FALSE,
   pattern_downcast = "downcast.cnv",
   pattern_upcast = "upcast.cnv",
-  min_pressure_bin = 4
+  min_pressure_bin = 4,
+  area_method = "ts",
+  scale_vars = FALSE
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ compare_methods(
 \item{pattern_upcast}{Character vector pattern for upcast file.}
 
 \item{min_pressure_bin}{Numeric vector (1L) indicating the minimum depth bin to use for comparing profiles.}
+
+\item{area_method}{Should area calculations use temperature-salinity ("ts") or pressure-salinity ("ps") profiles?}
+
+\item{scale_vars}{Logical. Should temperature and salinity be scaled to calculate T-S area?}
 }
 \description{
 Compare processing methods based on spikiness of profiles and make multipanel plots to compare methods/workflows for processing CTD data.

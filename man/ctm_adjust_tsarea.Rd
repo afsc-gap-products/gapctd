@@ -16,7 +16,8 @@ ctm_adjust_tsarea(
   up_pressure,
   up_conductivity,
   up_flag,
-  obj_fn = "none"
+  obj_fn = "none",
+  scale_vars = FALSE
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ ctm_adjust_tsarea(
 \item{up_conductivity}{Numeric vector of upcast conductivity in S/m.}
 
 \item{obj_fn}{Character vector ("none" or "area")}
+
+\item{scale_vars}{Logical. Should temperature and salinity be scaled to calculate T-S area?}
 }
 \description{
 Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument obj_fn is set to area, the function calculates and return the value of an objective function which is the area between upcast and downcast temperature-salinity curves in 1 dbar pressure bins. If obj_fn = "none," returns a data.frame with upcast and downcast temperature, conductivity, corrected conductivity, and salinity in 1 dbar pressure bins.
