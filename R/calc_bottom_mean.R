@@ -77,19 +77,21 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
                            units = "secs") / sample_interval) |>
       as.numeric()
     
-    out_df$CTD_MEAN_HAUL_DEPTH[i] <- mean(cast_dat@data$depth[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_MEAN_BOTTOM_TEMPERATURE_C[i] <- mean(cast_dat@data$temperature[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_MEAN_BOTTOM_SALINITY_SA[i] <- mean(cast_dat@data$gsw_saA0[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- mean(cast_dat@data$salinity[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_MEAN_BOTTOM_SOUNDSPEED[i] <- mean(cast_dat@data$soundSpeed[start_index:end_index], na.rm = TRUE)
-    out_df$CTD_N_BOTTOM_SAMPLE[i] <- end_index - start_index + 1
-    out_df$CTD_TEMPERATURE_SN[i] <- cast_dat@metadata$serialNumberTemperature
-    out_df$CTD_CONDUCTIVITY_SN[i] <- cast_dat@metadata$serialNumberConductivity
-    out_df$CTD_CAST_START[i] <- as.character(cast_start)
-    out_df$DOWNCAST_END_SECONDS[i] <- cast_dat@data$timeS[start_index] # Downcast end time in seconds elapsed
-    out_df$DOWNCAST_END_INDEX[i] <- start_index
-    out_df$UPCAST_START_SECONDS[i] <- cast_dat@data$timeS[end_index] # Upcast start time in seconds elapsed
-    out_df$UPCAST_START_INDEX[i] <- end_index
+    if(!is.na(start_index) & !is.na(end_index)) {
+      out_df$CTD_MEAN_HAUL_DEPTH[i] <- mean(cast_dat@data$depth[start_index:end_index], na.rm = TRUE)
+      out_df$CTD_MEAN_BOTTOM_TEMPERATURE_C[i] <- mean(cast_dat@data$temperature[start_index:end_index], na.rm = TRUE)
+      out_df$CTD_MEAN_BOTTOM_SALINITY_SA[i] <- mean(cast_dat@data$gsw_saA0[start_index:end_index], na.rm = TRUE)
+      out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- mean(cast_dat@data$salinity[start_index:end_index], na.rm = TRUE)
+      out_df$CTD_MEAN_BOTTOM_SOUNDSPEED[i] <- mean(cast_dat@data$soundSpeed[start_index:end_index], na.rm = TRUE)
+      out_df$CTD_N_BOTTOM_SAMPLE[i] <- end_index - start_index + 1
+      out_df$CTD_TEMPERATURE_SN[i] <- cast_dat@metadata$serialNumberTemperature
+      out_df$CTD_CONDUCTIVITY_SN[i] <- cast_dat@metadata$serialNumberConductivity
+      out_df$CTD_CAST_START[i] <- as.character(cast_start)
+      out_df$DOWNCAST_END_SECONDS[i] <- cast_dat@data$timeS[start_index] # Downcast end time in seconds elapsed
+      out_df$DOWNCAST_END_INDEX[i] <- start_index
+      out_df$UPCAST_START_SECONDS[i] <- cast_dat@data$timeS[end_index] # Upcast start time in seconds elapsed
+      out_df$UPCAST_START_INDEX[i] <- end_index
+    }
     
   }
   
