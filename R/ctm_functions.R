@@ -55,6 +55,7 @@ ctm_correct_c_t <- function(a, b, temperature) {
 #' @param up_pressure Numeric vector of upcast pressure in dbar.
 #' @param up_conductivity Numeric vector of upcast conductivity in S/m.
 #' @param obj_fn Character vector ("none" or "area")
+#' @param scale_vars Logical. Should temperature and salinity be scaled to calculate T-S area?
 #' @export
 
 ctm_adjust_tsarea <- function(alpha = 0.04,
@@ -68,7 +69,8 @@ ctm_adjust_tsarea <- function(alpha = 0.04,
                               up_pressure,
                               up_conductivity,
                               up_flag,
-                              obj_fn = "none") {
+                              obj_fn = "none",
+                              scale_vars = FALSE) {
   
   
   aa <- ctm_par_a(alpha = alpha, f_n = f_n, beta = 1/tau)
@@ -154,83 +156,96 @@ ctm_adjust_tsarea <- function(alpha = 0.04,
     # Return prediction
     return(updown_df)
   } else {
-    if(obj_fn == "area") {
-      if(down_exists & up_exists) {
-        # Area between temperature-salinity curves
-        # comb_df <- data.frame(salinity = c(updown_df$salinity_down, rev(updown_df$salinity_up), updown_df$salinity_down[1]),
-        #                       temperature = c(updown_df$temperature_down, rev(updown_df$temperature_up), updown_df$temperature_down[1])) |>
-        #   dplyr::filter(!is.na(salinity),
-        #                 !is.na(temperature)) 
-        
-        # obj <- try(comb_df |>
-        #              sf::st_as_sf(coords = c("salinity", "temperature")) |>    
-        #              dplyr::group_by(ID = 1) |>
-        #              summarise(do_union = FALSE) |>
-        #              sf::st_cast(to = "POLYGON") |> 
-        #              sf::st_area(), silent = TRUE)
+    if(down_exists & up_exists) {
+      if(obj_fn == "area") {
         
         comb_df <- updown_df |>
           dplyr::filter(!is.na(salinity_up),
                         !is.na(temperature_up),
                         !is.na(salinity_down),
                         !is.na(temperature_down))
-
+        
         if(nrow(comb_df) == 0) {
           obj <- 1e7
         } else {
-        
-         wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
-                                                                         cbind(
-                                                                           apply(
-                                                                             X = cbind(
-                                                                               comb_df$salinity_down[1:(nrow(comb_df))],
-                                                                               comb_df$temperature_down[1:(nrow(comb_df))]),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             cbind(c(comb_df$salinity_up[1:(nrow(comb_df)-1)], comb_df$salinity_up[(nrow(comb_df)-1)]),
-                                                                                   c(comb_df$temperature_up[1:(nrow(comb_df)-1)], comb_df$temperature_up[(nrow(comb_df)-1)])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             X = cbind(c(comb_df$salinity_down[2:(nrow(comb_df))],comb_df$salinity_up[(nrow(comb_df))]),
-                                                                                       c(comb_df$temperature_down[2:(nrow(comb_df))],comb_df$temperature_up[(nrow(comb_df))])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " "),
-                                                                           apply(
-                                                                             X = cbind(
-                                                                               c(comb_df$salinity_down[1:(nrow(comb_df)-1)],comb_df$salinity_down[(nrow(comb_df))]),
-                                                                               c(comb_df$temperature_down[1:(nrow(comb_df)-1)],comb_df$temperature_down[(nrow(comb_df))])),
-                                                                             MARGIN = 1,
-                                                                             FUN = paste, 
-                                                                             collapse = " ")),
-                                                                       MARGIN = 1,
-                                                                       FUN = paste,
-                                                                       collapse = ", "), ")")) |>
-          dplyr::mutate(ID = row_number()) |>
-          st_as_sf(wkt = "geometry") |> 
-          dplyr::group_by(ID) |>
-          summarise(do_union = FALSE) |>
-          sf::st_cast(to = "POLYGON")
-        
-         obj <- sum(sf::st_area(wkt_poly), na.rm = TRUE)
+          
+          if(scale_vars) {
+            comb_df$salinity_up <- scale(c(comb_df$salinity_up, salinity_down))[,1][nrow(comb_df)]
+            comb_df$salinity_down <- scale(c(salinity_down, comb_df$salinity_up))[,1][nrow(comb_df)]
+            comb_df$temperature_up <- scale(c(comb_df$temperature_up, temperature_down))[,1][nrow(comb_df)]
+            comb_df$temperature_down <- scale(c(comb_df$temperature_down, temperature_up))[,1][nrow(comb_df)]
+          }
+          
+          wkt_poly <- data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                                           cbind(
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 comb_df$salinity_down[1:(nrow(comb_df))],
+                                                                                 comb_df$temperature_down[1:(nrow(comb_df))]),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               cbind(c(comb_df$salinity_up[1:(nrow(comb_df)-1)], comb_df$salinity_up[(nrow(comb_df)-1)]),
+                                                                                     c(comb_df$temperature_up[1:(nrow(comb_df)-1)], comb_df$temperature_up[(nrow(comb_df)-1)])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(c(comb_df$salinity_down[2:(nrow(comb_df))],comb_df$salinity_up[(nrow(comb_df))]),
+                                                                                         c(comb_df$temperature_down[2:(nrow(comb_df))],comb_df$temperature_up[(nrow(comb_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " "),
+                                                                             apply(
+                                                                               X = cbind(
+                                                                                 c(comb_df$salinity_down[1:(nrow(comb_df)-1)],comb_df$salinity_down[(nrow(comb_df))]),
+                                                                                 c(comb_df$temperature_down[1:(nrow(comb_df)-1)],comb_df$temperature_down[(nrow(comb_df))])),
+                                                                               MARGIN = 1,
+                                                                               FUN = paste, 
+                                                                               collapse = " ")),
+                                                                         MARGIN = 1,
+                                                                         FUN = paste,
+                                                                         collapse = ", "), ")")) |>
+            dplyr::mutate(ID = row_number()) |>
+            st_as_sf(wkt = "geometry") |> 
+            dplyr::group_by(ID) |>
+            summarise(do_union = FALSE) |>
+            sf::st_cast(to = "POLYGON")
+          
+          obj <- sum(sf::st_area(wkt_poly), na.rm = TRUE)
         }
         
         if(class(obj) == "try-error") {
           return(comb_df)
         }
-      } else {
-        # Path length
-        obj <- switch(val,
-                      `d` = {sum(abs(diff(updown_df$salinity_down)))},
-                      `u` = {sum(abs(diff(updown_df$salinity_up)))})  
-        
-      }
-      return(obj)
+      } 
+      # else if(obj_fn == "salinity_diff") {
+      #   
+      #   comb_df <- updown_df |>
+      #     dplyr::filter(!is.na(salinity_up),
+      #                   !is.na(temperature_up),
+      #                   !is.na(salinity_down),
+      #                   !is.na(temperature_down))
+      #   
+      #   if(nrow(comb_df) == 0) {
+      #     obj <- 1e7
+      #   } else {
+      #     obj <- 1-cor(
+      #       diff(comb_df$salinity_down),
+      #       diff(comb_df$salinity_up),
+      #       method = "pearson")
+      #   }
+      #   
+      # }
+    } else {
+      # Path length
+      obj <- switch(val,
+                    `d` = {sum(abs(diff(updown_df$salinity_down)))},
+                    `u` = {sum(abs(diff(updown_df$salinity_up)))})  
+      
     }
+    return(obj)
   }
 }
 
@@ -268,6 +283,7 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                   optim_maxit = 500,
                                   start_alpha = 0.04,
                                   start_tau = 8,
+                                  obj_method = "area",
                                   ...) {
   
   deploy_id <- sub("\\_raw.*", "", profile_files)
@@ -402,7 +418,7 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                                   up_pressure = pressure_2,
                                                   up_conductivity = conductivity_2,
                                                   up_flag = flag_2,
-                                                  obj_fn = "area")
+                                                  obj_fn = obj_method)
     
     est_pars <- try(bbmle::mle2(minuslogl = gapctd:::ctm_adjust_tsarea,
                                 start = list(alpha = start_alpha,
@@ -415,12 +431,16 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                             up_pressure = pressure_2,
                                             up_conductivity = conductivity_2,
                                             up_flag = flag_2,
-                                            obj_fn = "area",
+                                            obj_fn = obj_method,
                                             f_n = 0.25),
                                 method = optim_method,
-                                lower = c(alpha = -10, tau = 0),
-                                upper = c(alpha = 10, tau = 45),
-                                control = list(maxit = optim_maxit, reltol = 1e-5, trace = 1)), silent = TRUE)
+                                lower = c(alpha = -1, tau = 0),
+                                upper = c(alpha = 1, tau = 45),
+                                control = list(maxit = optim_maxit, 
+                                               reltol = 1e-4, 
+                                               trace = 1, 
+                                               parscale = c(alpha = 0.1, tau = 1))), 
+                    silent = TRUE)
     conv <- try(est_pars@details$convergence, silent = TRUE)
     
     if(any(class(est_pars) == "try-error", conv != 0)) {
@@ -435,12 +455,16 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                               up_pressure = pressure_2,
                                               up_conductivity = conductivity_2,
                                               up_flag = flag_2,
-                                              obj_fn = "area",
+                                              obj_fn = obj_method,
                                               f_n = 0.25),
                                   method = optim_method,
-                                  lower = c(alpha = -10, tau = 0),
-                                  upper = c(alpha = 10, tau = 45),
-                                  control = list(maxit = optim_maxit, reltol = 1e-5, trace = 1)), silent = TRUE)
+                                  lower = c(alpha = -1, tau = 0),
+                                  upper = c(alpha = 1, tau = 45),
+                                  control = list(maxit = optim_maxit, 
+                                                 reltol = 1e-4, 
+                                                 trace = 1, 
+                                                 parscale = c(alpha = 0.1, tau = 1))), 
+                      silent = TRUE)
       conv <- try(est_pars@details$convergence, silent = TRUE)
     }
     
