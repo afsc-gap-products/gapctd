@@ -178,7 +178,7 @@ The thermistor and conductivity cell are constructed with materials that have di
 
 The `run_ctm_adjust_tsarea` function estimates optimal cell thermal mass correction parameters for hauls by minimizing the area between temperature-salinity curves from upcasts and downcasts, following [Garau et al. (2011)](https://doi.org/10.1175/JTECH-D-10-05030.1). If data are missing from an upcast or downcast, parameters that minimize the path distance of salinity curves is used instead of area.
 
-In the case below, the starting parameters for the optimization are `alpha = 0.04` and `tau = 8`, which are the manufacturer's 'typical' values for the SBE19plus. The Broyden-Fletcher-Goldfarb-Shannon algorithm (`optim_method = "BFGS"`) is used for numerical optimization, with a maximum of 500 optimization steps. If the algorithm doesn't converge or the function estimates implausible parameter values, the default parameters are used.
+In the case below, the starting parameters for the optimization are `alpha = 0.04` and `tau = 8`, which are the manufacturer's 'typical' values for the SBE19plus. If numerical optimization doesn't converge, the default parameters are used.
 
 ```{r estimate_ctm, include=TRUE, eval=FALSE}
 ctm_df <- gapctd::run_ctm_adjust_tsarea(profile_files = sort(c(list.files(here::here("output", "sbe19plus_v0_align"),
@@ -186,8 +186,6 @@ ctm_df <- gapctd::run_ctm_adjust_tsarea(profile_files = sort(c(list.files(here::
                                                                       list.files(here::here("output", "sbe19plus_v0_align"),
                                                                                  full.names = TRUE, pattern = "upcast.cnv"))),
                                                min_pressure = 4,
-                                               optim_method = "BFGS",  #"SANN",
-                                               optim_maxit = 500,
                                                start_alpha = 0.04,
                                                start_tau = 8)
 
