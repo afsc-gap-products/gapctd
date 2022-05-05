@@ -440,8 +440,6 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
     dplyr::select(vessel, ctd_serial_number, ctd_calibration_date) |>
     unique()
   
-  instrument_df <- dplyr::bind_rows(instrument_df,instrument_df)
-  
   # Set up global attributes list
   g_attributes <- list(citation = global_attributes$citation,
                        id = global_attributes$id,
