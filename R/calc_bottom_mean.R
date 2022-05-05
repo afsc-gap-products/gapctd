@@ -49,8 +49,8 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
       out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- NA
       out_df$CTD_MEAN_BOTTOM_SOUNDSPEED[i] <- NA
       out_df$CTD_N_BOTTOM_SAMPLE[i] <- NA
-      out_df$CTD_TEMPERATURE_SN[i] <- NA
-      out_df$CTD_CONDUCTIVITY_SN[i] <- NA
+      out_df$CTD_CALIBRATION_DATE[i] <- NA
+      out_df$CTD_SERIAL_NUMBER[i] <- NA
       out_df$CTD_CAST_START[i] <- NA
       out_df$DOWNCAST_END_SECONDS[i] <- NA
       out_df$DOWNCAST_END_INDEX[i] <- NA
@@ -78,14 +78,26 @@ calc_bottom_mean <- function(haul_metadata_path = list.files(paste0(getwd(), "/m
       as.numeric()
     
     if(!is.na(start_index) & !is.na(end_index)) {
+      
+      # Calibration date
+      calibration_date <- cast_dat@metadata$header[which(grepl(pattern = "CalibrationDate", cast_dat@metadata$header))]
+      calibration_date <- gsub(pattern = ".*<CalibrationDate>", "", calibration_date)
+      calibration_date <- gsub(pattern = "</CalibrationDate>.*", "", calibration_date)
+      
+      
+      serial_number <- cast_dat@metadata$header[which(grepl(pattern = "<SerialNumber>", cast_dat@metadata$header))]
+      serial_number <- gsub(pattern = ".*<SerialNumber>", "", serial_number)
+      serial_number <- gsub(pattern = "</SerialNumber>.*", "", serial_number)
+      
+      
       out_df$CTD_MEAN_HAUL_DEPTH[i] <- mean(cast_dat@data$depth[start_index:end_index], na.rm = TRUE)
       out_df$CTD_MEAN_BOTTOM_TEMPERATURE_C[i] <- mean(cast_dat@data$temperature[start_index:end_index], na.rm = TRUE)
       out_df$CTD_MEAN_BOTTOM_SALINITY_SA[i] <- mean(cast_dat@data$gsw_saA0[start_index:end_index], na.rm = TRUE)
       out_df$CTD_MEAN_BOTTOM_SALINITY_SP[i] <- mean(cast_dat@data$salinity[start_index:end_index], na.rm = TRUE)
       out_df$CTD_MEAN_BOTTOM_SOUNDSPEED[i] <- mean(cast_dat@data$soundSpeed[start_index:end_index], na.rm = TRUE)
       out_df$CTD_N_BOTTOM_SAMPLE[i] <- end_index - start_index + 1
-      out_df$CTD_TEMPERATURE_SN[i] <- cast_dat@metadata$serialNumberTemperature
-      out_df$CTD_CONDUCTIVITY_SN[i] <- cast_dat@metadata$serialNumberConductivity
+      out_df$CTD_CALIBRATION_DATE[i] <- calibration_date[1]
+      out_df$CTD_SERIAL_NUMBER[i] <- serial_number[1]
       out_df$CTD_CAST_START[i] <- as.character(cast_start)
       out_df$DOWNCAST_END_SECONDS[i] <- cast_dat@data$timeS[start_index] # Downcast end time in seconds elapsed
       out_df$DOWNCAST_END_INDEX[i] <- start_index
