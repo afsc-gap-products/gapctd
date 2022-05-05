@@ -67,6 +67,39 @@ df_to_ncdf <- function(x,
                        var_units_3d = NULL,
                        global_attributes) {
   
+  # Check that all variables and dimensions are includes in the input data.frame
+  if(!all(dim_names_2d %in% names(x))) {
+    stop(paste0("df_to_ncdf: dim_names_2d variables (", dim_names_2d[which(!(dim_names_2d %in% names(x)))], ") not found in the input data frame."))
+  }
+
+  if(!all(var_names_2d %in% names(x))) {
+    stop(paste0("df_to_ncdf: var_names_2d variables (", var_names_2d[which(!(var_names_2d %in% names(x)))], ") not found in the input data frame."))
+  }
+  
+  if(!all(dim_names_3d %in% names(x))) {
+    stop(paste0("df_to_ncdf: dim_names_3d variables (", dim_names_3d[which(!(dim_names_3d %in% names(x)))], ") not found in the input data frame."))
+  }
+  
+  if(!all(var_names_3d %in% names(x))) {
+    stop(paste0("df_to_ncdf: var_names_3d variables (", var_names_3d[which(!(var_names_3d %in% names(x)))], ") not found in the input data frame."))
+  }
+  
+  if(length(dim_names_2d) != length(dim_units_2d)) {
+    stop(paste0("df_to_ncdf: Length of dim_names_2d (", length(dim_names_2d), ") does not match length of dim_units_2d (", length(dim_units_2d), ")."))
+  }
+  
+  if(length(var_names_2d) != length(var_units_2d)) {
+    stop(paste0("df_to_ncdf: Length of var_names_2d (", length(var_names_2d), ") does not match length of var_units_2d (", length(var_units_2d), ")."))
+  }
+  
+  if(length(dim_names_3d) != length(dim_units_3d)) {
+    stop(paste0("df_to_ncdf: Length of dim_names_3d (", length(dim_names_3d), ") does not match length of dim_units_3d (", length(dim_units_3d), ")."))
+  }
+  
+  if(length(var_names_3d) != length(var_units_3d)) {
+    stop(paste0("df_to_ncdf: Length of var_names_3d (", length(var_names_3d), ") does not match length of var_units_3d (", length(var_units_3d), ")."))
+  }
+  
   # Assign index value to each cast
   x <- x |> 
     dplyr::select(match(var_names_2d, names(x))) |>
