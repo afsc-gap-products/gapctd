@@ -15,13 +15,11 @@ make_ctd_ncdf(
   global_attributes = list(citation = "CTD TEAM...", id = "doi", cdm_data_type =
     "Point", cruise =
     "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",
-    institution = "NOAA Alaska Fisheries Science Center", contributor_name =
-    "Nicole Charriere, Cecilia O'Leary, Wayne Palsson, Nate Raring, Bethany Riggle",
-    creator_name = "Sean Rohan", creator_institution =
-    "NOAA Alaska Fisheries Science Center", creator_email = "sean.rohan@noaa.gov",
-    publisher = "NOAA Alaska Fisheries Science Center",      publisher_type =
-    "institution", publisher_url =
-    "https://www.fisheries.noaa.gov/about/alaska-fisheries-science-center",
+    institution = "NOAA Alaska Fisheries Science Center", contributor_name = "",
+    creator_name = "", creator_institution = "NOAA Alaska Fisheries Science Center",
+    creator_email = "", publisher = "NOAA Alaska Fisheries Science Center",
+    publisher_type = "institution", publisher_url =
+    "https://www.fisheries.noaa.gov/about/alaska-fisheries-science-center",     
     geospatial_bounds_crs = "EPSG:4326", license =
     "These data may be redistributed and used without restriction.", metadata_link =
     "[DOI]", instrument = "CTD", standard_name_vocabulary = "CF Standard Name Table v79",

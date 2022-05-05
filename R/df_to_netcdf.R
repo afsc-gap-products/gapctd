@@ -211,10 +211,24 @@ df_to_ncdf <- function(x,
         as.matrix() |> 
         t()
       
+      mat_type <- vec_to_nc_class(vec = val_matrix[!is.na(val_matrix)])
+      
+      if(mat_type == "NC_FLOAT") {
+        val_matrix[is.na(val_matrix)] <- -9999
+        fill_value <- -9999
+      } else {
+        fill_value <- -9999
+      }
+      
       RNetCDF::var.def.nc(ncfile = ncout, 
                           varname = var_names_3d[kk], 
-                          vartype = vec_to_nc_class(vec = val_matrix[!is.na(val_matrix)]), 
+                          vartype = mat_type, 
                           dimensions = c(dim_names_3d, "index"))
+      RNetCDF::att.put.nc(ncfile = ncout, 
+                          variable = var_names_3d[kk],
+                          name = "_FillValue",
+                          type = mat_type,
+                          value = fill_value)
       RNetCDF::var.put.nc(ncfile = ncout, 
                           variable = var_names_3d[kk],
                           data = val_matrix)
