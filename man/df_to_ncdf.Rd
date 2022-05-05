@@ -16,6 +16,8 @@ df_to_ncdf(
   dim_sort_3d,
   var_names_3d = NULL,
   var_units_3d = NULL,
+  instrument_attributes = NULL,
+  instrument_values = NULL,
   global_attributes
 )
 }
@@ -37,6 +39,10 @@ df_to_ncdf(
 \item{var_names_3d}{A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).}
 
 \item{var_units_3d}{A vector of unit quantities for the 3D variables (e.g., 'degrees Celcius', 'Practical Salinity').}
+
+\item{instrument_attributes}{Optional. A vector of attribute names for the instrument variable.}
+
+\item{instrument_values}{Optional. A list of attribute values for the instrument variable.}
 
 \item{global_attributes}{A list of global attributes (i.e., non-dimensional) as 1L character, numeric, or date vectors, where names of list objects are the names of attributes.}
 }
