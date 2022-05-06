@@ -35,6 +35,11 @@ correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv"
   }
   
   cnv_path <- list.files(cnv_dir, full.names = TRUE, ...)
+  
+  if(!(length(cnv_path) >= 1)) {
+    stop(paste0("correct_density_inversion: No files found in ", cnv_dir))
+  }
+  
   deploy <- list.files(cnv_dir, ...)
   
   deploy_id <- sub("\\_raw.*", "", deploy)
