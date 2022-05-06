@@ -490,7 +490,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
                      dim_units_3d = c("m"),
                      dim_sort_3d = c(TRUE),
                      var_names_3d = c("sea_water_pressure", "sea_water_temperature", "sea_water_practical_salinity", "sea_water_salinity", "sea_water_density", "buoyancy_frequency", "sea_water_electrical_conductivity", "sound_speed_in_sea_water", "flag_value"),
-                     var_units_3d = c("dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-1", "S m-1)", "m s-1", "1"),
+                     var_units_3d = c("dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-2", "S m-1)", "m s-1", "1"),
                      instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel"),
                      instrument_values = list(make_model = "Sea-Bird SBE19plus V2",
                                               serial_number = instrument_df$ctd_serial_number,
