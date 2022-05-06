@@ -60,45 +60,18 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
       while(loop_ind == 1) {
         
         par(mfrow = c(1,2))
-        plot(diff(dat$salinity)/diff(dat$pressure),
-             y = (nrow(dat)-1):1,
-             type = 'p', 
-             xlab = expression(d*S/d*rho),
-             ylab = "Index")
-        lines(diff(dat$salinity)/diff(dat$pressure),
-              y = (nrow(dat)-1):1,)
-        plot(dat$salinity, -1*dat$pressure, 
-             xlab = "Salinity", 
-             ylab = "Pressure",
-             main = "Left-click on points to be removed then press 'Esc'")
-        
-        new_flags <- identify(dat$salinity, -1*dat$pressure)
-        
-        if(!(length(new_flags) > 0)) {
-          loop_ind <- 0
-          next
-        }
-        
-        dat$flag[new_flags] <- 7
-        dat <- interp_flags(x = dat, flags = new_flags)
-        
-      }
-      
-      loop_ind <- 1
-      while(loop_ind == 1) {
-        
-        par(mfrow = c(1,2))
         plot(diff(dat$temperature)/diff(dat$pressure),
              y = (nrow(dat)-1):1,
              type = 'p', 
              xlab = expression(d*"T"/d*rho),
              ylab = "Index")
         lines(diff(dat$temperature)/diff(dat$pressure),
-              y = (nrow(dat)-1):1,)
+              y = (nrow(dat)-1):1)
         plot(dat$temperature, -1*dat$pressure, 
              xlab = "Temperature", 
              ylab = "Pressure",
              main = "Left-click on points to be removed then press 'Esc'")
+        lines(x = dat$temperature, y = -1*dat$pressure)
         
         new_flags <- identify(dat$temperature, -1*dat$pressure)
         
@@ -110,6 +83,35 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
         
         dat$flag[new_flags] <- 7
         dat <- interp_flags(x = dat, flags = new_flags)
+      }
+      
+      loop_ind <- 1
+      while(loop_ind == 1) {
+        
+        par(mfrow = c(1,2))
+        plot(diff(dat$salinity)/diff(dat$pressure),
+             y = (nrow(dat)-1):1,
+             type = 'p', 
+             xlab = expression(d*S/d*rho),
+             ylab = "Index")
+        lines(diff(dat$salinity)/diff(dat$pressure),
+              y = (nrow(dat)-1):1,)
+        plot(dat$salinity, -1*dat$pressure, 
+             xlab = "Salinity", 
+             ylab = "Pressure",
+             main = "Left-click on points to be removed then press 'Esc'")
+        lines(x = dat$salinity, y = -1*dat$pressure)
+        
+        new_flags <- identify(dat$salinity, -1*dat$pressure)
+        
+        if(!(length(new_flags) > 0)) {
+          loop_ind <- 0
+          next
+        }
+        
+        dat$flag[new_flags] <- 7
+        dat <- interp_flags(x = dat, flags = new_flags)
+        
       }
       
       write.csv(x = dat, 
