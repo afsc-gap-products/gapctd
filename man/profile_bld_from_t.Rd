@@ -9,7 +9,8 @@ profile_bld_from_t(
   z,
   ref_dist_from_max = 4,
   min_temperature_diff = 0.5,
-  temp_threshold = 0.25
+  temp_threshold = 0.25,
+  na_rm = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ profile_bld_from_t(
 \item{temp_threshold}{Threshold temperature difference.}
 
 \item{ref_distance_from_max}{Numeric vector of distances from the maximum depth to use for the reference temperature.}
+
+\item{na.rm}{Should NA values be omitted?}
 }
 \description{
 Based on the temperature recorded at a specified difference from the maximum depth for a profile.

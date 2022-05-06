@@ -4,18 +4,27 @@
 \alias{profile_bld}
 \title{Calculate bottom layer depth using a threshold method}
 \usage{
-profile_bld(rho, z, totdepth, threshold = 0.1, ref.depth = 5)
+profile_bld(
+  rho,
+  z,
+  totdepth = NULL,
+  threshold = 0.1,
+  ref.depth = 5,
+  na_rm = TRUE
+)
 }
 \arguments{
 \item{rho}{Numeric vector of densities}
 
 \item{z}{Numeric vector of depths. Depths are positive.}
 
-\item{totdepth}{Maximum depth sampled by the cast}
+\item{totdepth}{Maximum depth sampled by the cast. If NULL, estimated from profile data.}
 
 \item{threshold}{Density threshold}
 
 \item{ref.depth}{Thickness of bottom layer to use for calculating bottom layer density}
+
+\item{na_rm}{Should NA values be omitted?}
 }
 \description{
 Calculate bottom layer depth using a threshold method

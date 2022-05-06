@@ -4,10 +4,12 @@
 \alias{manual_review}
 \title{Visually inspect profiles}
 \usage{
-manual_review(csv_paths = NULL)
+manual_review(csv_paths = NULL, threshold = -1e-05)
 }
 \arguments{
 \item{csv_paths}{Path to csv files. If NULL, the function uses all csv files in output/manual_flag/}
+
+\item{threshold}{Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.}
 }
 \description{
 Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.

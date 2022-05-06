@@ -10,7 +10,8 @@ profile_mld_from_t(
   reference_depth = 5,
   min_temperature_diff = 0.5,
   temp_threshold = 0.25,
-  assign_inversion
+  assign_inversion,
+  na_rm = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ profile_mld_from_t(
 \item{temp_threshold}{Threshold temperature difference}
 
 \item{assign_inversion}{Substitutes maximum depth when temperature deep in the water column is higher than reference. Rare occurrence that may be an artifact of the survey sampling scheme.}
+
+\item{na_rm}{Should NA values be omitted?}
 }
 \description{
 Based on the temperature recorded at a specified reference depth, calculates the mixed layer depth using only temperature.
