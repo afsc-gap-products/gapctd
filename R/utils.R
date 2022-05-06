@@ -110,3 +110,30 @@ ddlon_to_nmea <- function(x) {
          format(abs(x)%%1*60, nsmall = 3), " ",
          c("W", "E")[sign(x) == c(-1, 1)])
 }
+
+#' Package final files and metadata in a zip file
+#' 
+#' @param region Survey region
+#' @param vessel Survey vessel
+#' @param year Survey year
+#' @export
+
+make_ctd_zip <- function(region, vessel, year) {
+  
+  xmlcon_text <- readLines(paste0("./psa_xmlcon/", list.files("./psa_xmlcon/", pattern = ".xmlcon")))
+  
+  serial_number <- xmlcon_text[which(grepl(pattern = "<SerialNumber>", xmlcon_text))][1]
+  serial_number <- gsub(pattern = ".*<SerialNumber>", "", serial_number)
+  serial_number <- gsub(pattern = "</SerialNumber>.*", "", serial_number)
+  
+  zip_name <- paste0("CTD_", year, "_", region, "_", vessel, "_", serial_number, ".zip")
+  
+  message(paste0("Writing CTD data to ", zip_name))
+  utils::zip(zipfile = zip_name, files = "./metadata/")
+  utils::zip(zipfile = zip_name, files = "./final_cnv/")
+  utils::zip(zipfile = zip_name, files = "./data/")
+  utils::zip(zipfile = zip_name, files = paste0("./output/", list.files("./output/", pattern = ".rds")))
+  utils::zip(zipfile = zip_name, files = "./output/accepted_profiles/")
+  utils::zip(zipfile = zip_name, files = paste0("./psa_xmlcon/", list.files("./psa_xmlcon/", pattern = ".xmlcon")))
+  
+}

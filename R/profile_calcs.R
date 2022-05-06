@@ -7,13 +7,22 @@
 #' @param ref_distance_from_max Numeric vector of distances from the maximum depth to use for the reference temperature.
 #' @param min_temperature_diff Minimum temperature difference. If the difference in temperatures between the reference depths and shallow depths. If the difference is below this threshold, the function returns the minimum depth (i.e. column is considered fully mixed).
 #' @param temp_threshold Threshold temperature difference.
+#' @param na.rm Should NA values be omitted?
 #' @export
 
 profile_bld_from_t <- function(temperature,
-                                 z,
-                                 ref_dist_from_max = 4,
-                                 min_temperature_diff = 0.5,
-                                 temp_threshold = 0.25) {
+                               z,
+                               ref_dist_from_max = 4,
+                               min_temperature_diff = 0.5,
+                               temp_threshold = 0.25,
+                               na_rm = TRUE) {
+  
+  
+  if(na_rm) {
+    keep <- which(!is.na(temperature) & !is.na(z))
+    temperature <- temperature[keep]
+    z <- z[keep]
+  }
   
   bld <- NA
   z_above_bld <- NA
@@ -53,11 +62,23 @@ profile_bld_from_t <- function(temperature,
 #' @param rho Numeric vector of densities
 #' @param z Numeric vector of depths. Depths are positive.
 #' @param ref.depth Thickness of bottom layer to use for calculating bottom layer density
-#' @param totdepth Maximum depth sampled by the cast
+#' @param totdepth Maximum depth sampled by the cast. If NULL, estimated from profile data.
 #' @param threshold Density threshold
+#' @param na_rm Should NA values be omitted?
 #' @export 
 
-profile_bld <- function(rho, z, totdepth, threshold = 0.1, ref.depth = 5) {
+profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref.depth = 5, na_rm = TRUE) {
+  
+  if(na_rm) {
+    keep <- which(!is.na(rho) & !is.na(z))
+    rho <- rho[keep]
+    z <- z[keep]
+  }
+  
+  if(is.null(totdepth)) {
+    totdepth <- max(z)
+  }
+  
   rho <- rho[order(z)]
   z <- z[order(z)]
   z.max <- max(z)
@@ -112,6 +133,7 @@ profile_cokelet_density_diff <- function(rho, z, mld, ref.depth = 5, mld.buffer 
 #' @param min_temperature_diff Minimum temperature difference. If the difference in temperatures between the reference depths and other depths is below this threshold. If the difference is below this threshold, the function returns the maximum depth (i.e. column is considered fully mixed).
 #' @param temp_threshold Threshold temperature difference 
 #' @param assign_inversion Substitutes maximum depth when temperature deep in the water column is higher than reference. Rare occurrence that may be an artifact of the survey sampling scheme.
+#' @param na_rm Should NA values be omitted?
 #' @export 
 
 profile_mld_from_t <- function(temperature,
@@ -119,7 +141,14 @@ profile_mld_from_t <- function(temperature,
                                  reference_depth = 5,
                                  min_temperature_diff = 0.5,
                                  temp_threshold = 0.25,
-                                 assign_inversion) {
+                                 assign_inversion,
+                               na_rm = TRUE) {
+  
+  if(na_rm) {
+    keep <- which(!is.na(temperature) & !is.na(z))
+    temperature <- temperature[keep]
+    z <- z[keep]
+  }
   
   if(diff(range(temperature[z >= max(reference_depth)])) < min_temperature_diff) {
     mld <- max(z)
