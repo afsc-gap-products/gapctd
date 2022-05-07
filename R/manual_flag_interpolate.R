@@ -69,6 +69,7 @@ manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
                ylab = "Pressure",
                main = " ",
                col = "red")
+          abline(h = -1, lty = 2)
           lines(x = dat$temperature, 
                 y = -1*dat$pressure,
                 col = "red")
@@ -77,6 +78,7 @@ manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
                ylab = "Pressure",
                main = " ",
                col = "darkgreen")
+          abline(h = -1, lty = 2)
           lines(x = dat$salinity, 
                 y = -1*dat$pressure,
                 col = "darkgreen")
@@ -86,6 +88,7 @@ manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
                ylab = "Pressure",
                main = "Left-click on points to be removed then press 'Esc'",
                col = "blue")
+          abline(h = -1, lty = 2)
           lines(x = dat$gsw_densityA0, 
                 y = -1*dat$pressure,
                 col = "blue")
@@ -114,12 +117,14 @@ manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
                type = 'p',
                xlab = expression(d*"T"/d*rho),
                ylab = "Index")
+          abline(h = -1, lty = 2)
           lines(diff(dat$temperature)/diff(dat$pressure),
                 y = (nrow(dat)-1):1)
           plot(dat$temperature, -1*dat$pressure,
                xlab = "Temperature",
                ylab = "Pressure",
                main = "Left-click on points to be removed then press 'Esc'")
+          abline(h = -1, lty = 2)
           lines(x = dat$temperature, y = -1*dat$pressure)
           
           new_flags <- identify(dat$temperature, -1*dat$pressure)
@@ -145,12 +150,14 @@ manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
                type = 'p',
                xlab = expression(d*S/d*rho),
                ylab = "Index")
+          abline(h = -1, lty = 2)
           lines(diff(dat$salinity)/diff(dat$pressure),
                 y = (nrow(dat)-1):1,)
           plot(dat$salinity, -1*dat$pressure,
                xlab = "Salinity",
                ylab = "Pressure",
                main = "Left-click on points to be removed then press 'Esc'")
+          abline(h = -1, lty = 2)
           lines(x = dat$salinity, y = -1*dat$pressure)
           
           new_flags <- identify(dat$salinity, -1*dat$pressure)
