@@ -4,7 +4,7 @@
 \alias{manual_flag_interpolate}
 \title{Manually flag and interpolate bad data}
 \usage{
-manual_flag_interpolate(csv_paths = NULL)
+manual_flag_interpolate(csv_paths = NULL, review = c("density"))
 }
 \arguments{
 \item{csv_paths}{Path to csv files to be flagged and reviewed.}

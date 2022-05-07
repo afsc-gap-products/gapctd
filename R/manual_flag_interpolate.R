@@ -5,7 +5,7 @@
 #' @param csv_paths Path to csv files to be flagged and reviewed.
 #' @export
 
-manual_flag_interpolate <- function(csv_paths = NULL) {
+manual_flag_interpolate <- function(csv_paths = NULL, review = c("density")) {
   
   if(is.null(csv_paths)) {
     csv_paths <- list.files(here::here("output", "density_corrected"), full.names = TRUE)
@@ -56,62 +56,121 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
     
     if(!file.exists(here::here("output", "manual_flag", paste0(dat$deploy_id[1], ".csv")))) {
       
-      loop_ind <- 1
-      while(loop_ind == 1) {
+      message(dat$deploy_id[1])
+      
+      if("density" %in% review) {
         
-        par(mfrow = c(1,2))
-        plot(diff(dat$temperature)/diff(dat$pressure),
-             y = (nrow(dat)-1):1,
-             type = 'p', 
-             xlab = expression(d*"T"/d*rho),
-             ylab = "Index")
-        lines(diff(dat$temperature)/diff(dat$pressure),
-              y = (nrow(dat)-1):1)
-        plot(dat$temperature, -1*dat$pressure, 
-             xlab = "Temperature", 
-             ylab = "Pressure",
-             main = "Left-click on points to be removed then press 'Esc'")
-        lines(x = dat$temperature, y = -1*dat$pressure)
-        
-        new_flags <- identify(dat$temperature, -1*dat$pressure)
-        
-        
-        if(!(length(new_flags) > 0)) {
-          loop_ind <- 0
-          next
+        loop_ind <- 1
+        while(loop_ind == 1) {
+          
+          par(mfrow = c(1,3))
+          plot(dat$temperature, -1*dat$pressure, 
+               xlab = "Temperature", 
+               ylab = "Pressure",
+               main = " ",
+               col = "red")
+          abline(h = -1, lty = 2)
+          lines(x = dat$temperature, 
+                y = -1*dat$pressure,
+                col = "red")
+          plot(dat$salinity, -1*dat$pressure, 
+               xlab = "Salinity", 
+               ylab = "Pressure",
+               main = " ",
+               col = "darkgreen")
+          abline(h = -1, lty = 2)
+          lines(x = dat$salinity, 
+                y = -1*dat$pressure,
+                col = "darkgreen")
+          plot(x = dat$gsw_densityA0, 
+               y = -1*dat$pressure, 
+               xlab = "Density", 
+               ylab = "Pressure",
+               main = "Left-click on points to be removed then press 'Esc'",
+               col = "blue")
+          abline(h = -1, lty = 2)
+          lines(x = dat$gsw_densityA0, 
+                y = -1*dat$pressure,
+                col = "blue")
+          
+          new_flags <- identify(dat$gsw_densityA0, -1*dat$pressure)
+          
+          
+          if(!(length(new_flags) > 0)) {
+            loop_ind <- 0
+            next
+          }
+          
+          dat$flag[new_flags] <- 7
+          dat <- interp_flags(x = dat, flags = new_flags)
         }
-        
-        dat$flag[new_flags] <- 7
-        dat <- interp_flags(x = dat, flags = new_flags)
       }
       
-      loop_ind <- 1
-      while(loop_ind == 1) {
+      if("temperature" %in% review) {
         
-        par(mfrow = c(1,2))
-        plot(diff(dat$salinity)/diff(dat$pressure),
-             y = (nrow(dat)-1):1,
-             type = 'p', 
-             xlab = expression(d*S/d*rho),
-             ylab = "Index")
-        lines(diff(dat$salinity)/diff(dat$pressure),
-              y = (nrow(dat)-1):1,)
-        plot(dat$salinity, -1*dat$pressure, 
-             xlab = "Salinity", 
-             ylab = "Pressure",
-             main = "Left-click on points to be removed then press 'Esc'")
-        lines(x = dat$salinity, y = -1*dat$pressure)
-        
-        new_flags <- identify(dat$salinity, -1*dat$pressure)
-        
-        if(!(length(new_flags) > 0)) {
-          loop_ind <- 0
-          next
+        loop_ind <- 1
+        while(loop_ind == 1) {
+          
+          par(mfrow = c(1,2))
+          plot(diff(dat$temperature)/diff(dat$pressure),
+               y = (nrow(dat)-1):1,
+               type = 'p',
+               xlab = expression(d*"T"/d*rho),
+               ylab = "Index")
+          abline(h = -1, lty = 2)
+          lines(diff(dat$temperature)/diff(dat$pressure),
+                y = (nrow(dat)-1):1)
+          plot(dat$temperature, -1*dat$pressure,
+               xlab = "Temperature",
+               ylab = "Pressure",
+               main = "Left-click on points to be removed then press 'Esc'")
+          abline(h = -1, lty = 2)
+          lines(x = dat$temperature, y = -1*dat$pressure)
+          
+          new_flags <- identify(dat$temperature, -1*dat$pressure)
+          
+          
+          if(!(length(new_flags) > 0)) {
+            loop_ind <- 0
+            next
+          }
+          
+          dat$flag[new_flags] <- 7
+          dat <- interp_flags(x = dat, flags = new_flags)
         }
-        
-        dat$flag[new_flags] <- 7
-        dat <- interp_flags(x = dat, flags = new_flags)
-        
+      }
+      
+      if("salinity" %in% review) {
+        loop_ind <- 1
+        while(loop_ind == 1) {
+          
+          par(mfrow = c(1,2))
+          plot(diff(dat$salinity)/diff(dat$pressure),
+               y = (nrow(dat)-1):1,
+               type = 'p',
+               xlab = expression(d*S/d*rho),
+               ylab = "Index")
+          abline(h = -1, lty = 2)
+          lines(diff(dat$salinity)/diff(dat$pressure),
+                y = (nrow(dat)-1):1,)
+          plot(dat$salinity, -1*dat$pressure,
+               xlab = "Salinity",
+               ylab = "Pressure",
+               main = "Left-click on points to be removed then press 'Esc'")
+          abline(h = -1, lty = 2)
+          lines(x = dat$salinity, y = -1*dat$pressure)
+          
+          new_flags <- identify(dat$salinity, -1*dat$pressure)
+          
+          if(!(length(new_flags) > 0)) {
+            loop_ind <- 0
+            next
+          }
+          
+          dat$flag[new_flags] <- 7
+          dat <- interp_flags(x = dat, flags = new_flags)
+          
+        }
       }
       
       write.csv(x = dat, 
@@ -124,6 +183,8 @@ manual_flag_interpolate <- function(csv_paths = NULL) {
       if(!review_next) {
         stop("Review stopped")
       }
+    } else {
+      message(paste0("Skipping ", dat$deploy_id[1]))
     }
   }
 }

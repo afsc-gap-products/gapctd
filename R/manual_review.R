@@ -16,6 +16,11 @@ manual_review <- function(csv_paths = NULL, threshold = -1e-5) {
     
     sel_profile <- read.csv(file = csv_paths[ii])
     
+    if(min(sel_profile$depth) > 1) {
+      message(paste0("Skipping ", sel_profile$deploy_id[ii]))
+      next
+    }
+    
     if(!file.exists(here::here("output", "accepted_profiles", paste0(sel_profile$deploy_id[1], ".csv")))) {
       
       profile_oce <- oce::as.ctd(salinity = sel_profile$salinity,
@@ -27,6 +32,7 @@ manual_review <- function(csv_paths = NULL, threshold = -1e-5) {
       oce::plot(profile_oce, which = 1, type = 'l')
       oce::plot(profile_oce, which = 2, type = 'l')
       abline(v = threshold, lwd = 3, col = "brown")
+      abline(h = 1, lwd = 3, col = "black", lty = 2)
       
       accept <- tolower(readline(prompt = "Accept profile? (y or n): ")) == "y"
       
