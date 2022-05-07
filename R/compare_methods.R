@@ -134,6 +134,10 @@ compare_methods <- function(prefix,
                               pressure = dat_d@data$pressure[!is.na(dat_d@data$flag)],
                               delta_s = mean(abs(diff(dat_d@data$salinity[dat_d@data$pressure > min_pressure_bin])), na.rm = TRUE),
                               direction = "down") 
+        if(nrow(down_df) < 8) {
+          # Handle insufficient data
+          p_max <- 1
+        }
       }
       
       
@@ -151,6 +155,10 @@ compare_methods <- function(prefix,
                             pressure = dat_u@data$pressure[!is.na(dat_u@data$flag)],
                             delta_s = mean(abs(diff(dat_u@data$salinity[dat_d@data$pressure > min_pressure_bin])), na.rm = TRUE),
                             direction = "up")
+        if(nrow(up_df) < 8) {
+          # Handle insufficient data
+          p_max <- 2
+        }
       }
       
       if(p_max == 0) {
