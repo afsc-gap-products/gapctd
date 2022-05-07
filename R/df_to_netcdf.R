@@ -7,7 +7,8 @@
 #' @param dim_units_2d A vector of unit quantities for 2D dimensions.
 #' @param var_names_2d A vector of variable names that for 2D variables (e.g., VESSEL, CRUISE, HAUL, CAST, STATIONID).
 #' @param var_units_2d A vector of unit quantities for the 2D variables.
-#' @param dim_names_3d A vector of names of 3D dimension (e.g., DEPTH).
+#' @param dim_names_3d A vector of names of 3D dimension (e.g., depth).
+#' @param dim_long_names_3d A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").
 #' @param dim_units_3d A vector of unit quantities for 3D dimensions.
 #' @param var_names_3d A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).
 #' @param var_units_3d A vector of unit quantities for the 3D variables (e.g., 'degrees Celcius', 'Practical Salinity').
@@ -59,13 +60,17 @@
 df_to_ncdf <- function(x,
                        output_filename,
                        dim_names_2d,
+                       dim_long_names_2d = NULL,
                        dim_units_2d,
                        var_names_2d,
+                       var_long_names_2d = NULL,
                        var_units_2d,
                        dim_names_3d = NULL,
+                       dim_long_names_3d = NULL,
                        dim_units_3d = NULL,
                        dim_sort_3d,
                        var_names_3d = NULL,
+                       var_long_names_3d = NULL,
                        var_units_3d = NULL,
                        instrument_attributes = NULL,
                        instrument_values = NULL,
@@ -163,11 +168,19 @@ df_to_ncdf <- function(x,
                           name = "units",
                           type = "NC_STRING",
                           value = dim_units_3d[ii])
+      if(!is.null(dim_long_names_3d)){
+        RNetCDF::att.put.nc(ncfile = ncout, 
+                            variable = dim_names_3d[ii],
+                            name = "long_name",
+                            type = "NC_STRING",
+                            value = dim_long_names_3d[ii])
+      } 
     }
   }
   
   # Define 2D dimensions that are indexed to hauls or casts
   combined_var_dim_names_2d <- c(dim_names_2d, var_names_2d)
+  combined_var_dim_long_names_2d <- c(dim_long_names_2d, var_long_names_2d)
   combined_var_dim_units_2d <- c(dim_units_2d, var_units_2d)
   
   for(jj in 1:length(combined_var_dim_names_2d)) {
@@ -191,6 +204,13 @@ df_to_ncdf <- function(x,
                         name = "units",
                         type = "NC_STRING",
                         value = combined_var_dim_units_2d[jj])
+    if(!is.null(combined_var_dim_long_names_2d)){
+      RNetCDF::att.put.nc(ncfile = ncout, 
+                          variable = combined_var_dim_names_2d[jj],
+                          name = "long_name",
+                          type = "NC_STRING",
+                          value = combined_var_dim_long_names_2d[jj])
+    } 
   }
   
   if(!is.null(var_names_3d)) {
@@ -211,7 +231,12 @@ df_to_ncdf <- function(x,
         as.matrix() |> 
         t()
       
-      mat_type <- vec_to_nc_class(vec = val_matrix[!is.na(val_matrix)])
+      mat_type <- try(vec_to_nc_class(vec = val_matrix[!is.na(val_matrix)]), silent = TRUE)
+      
+      if(class(mat_type) == "try-error") {
+        message(paste0("val_matrix class", print(class(val_matrix)), "not supported. Returning object for inspection."))
+        return(val_matrix)
+      }
       
       if(mat_type == "NC_FLOAT") {
         val_matrix[is.na(val_matrix)] <- -9999
@@ -237,6 +262,13 @@ df_to_ncdf <- function(x,
                           name = "units",
                           type = "NC_STRING",
                           value = var_units_3d[kk])
+      if(!is.null(var_long_names_3d)) {
+        RNetCDF::att.put.nc(ncfile = ncout, 
+                            variable = var_names_3d[kk],
+                            name = "long_name",
+                            type = "NC_STRING",
+                            value = var_long_names_3d[kk])
+      }
     }
   }
   
@@ -355,10 +387,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
   if(!all(req_attributes %in% names(global_attributes))) {
     stop(paste0("make_ctd_ncdf: The follow required global attribute(s) were not found in global_attributes : ", req_attributes[which(!(req_attributes %in% names(global_attributes)))]))
   }
-  
-  
-  names(global_attributes)
-  
+
   metadata_df <- data.frame()
   
   for(ii in metadata_path) {
@@ -386,8 +415,15 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
   all_profiles <- data.frame()
   
   for(jj in 1:length(fpath)) {
-    profile_df <- read.csv(file = fpath[jj]) |>
-      dplyr::inner_join(metadata_df, by = "deploy_id")
+    
+    new_profile <- read.csv(file = fpath[jj])
+    
+    if(any(table(new_profile$depth) > 1)) {
+      # Corner case. Not sure why this happens but it likely has to do with some issue that can occur with the identify function.
+      stop(paste0("make_ctd_ncdf: Duplicate depth values found in ", fpath[jj], ". Please remove duplicates from the file then rerun make_ctd_ncdf()."))
+    }
+    
+    profile_df <- dplyr::inner_join(new_profile, metadata_df, by = "deploy_id")
     
     all_profiles <- dplyr::bind_rows(all_profiles, profile_df)
   }
@@ -483,13 +519,17 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
   gapctd::df_to_ncdf(x = all_profiles,
                      output_filename = output_file,
                      dim_names_2d = c("latitude", "longitude", "time"),
-                     dim_units_2d = c("decimal degrees_north", "decimal degrees_east", "Coordinated Universal Time (UTC)"),
+                     dim_units_2d = c("decimal degrees_north", "decimal degrees_east", "time_utc"),
+                     dim_long_names_2d = c("Latitude (positive north)", "Longitude (positive east)", "Profile start time in Coordinated Universal Time (UTC)"),
                      var_names_2d = c("stationid", "profile", "vessel", "cruise", "haul", "haul_depth", "sea_floor_temperature", "sea_floor_practical_salinity", "sea_floor_salinity", "sea_floor_sound_speed_in_sea_water"),
-                     var_units_2d = c("Station ID", "Cast ID", "Vessel code", "Cruise code", "Haul", "m", "degree_C", "1", "g kg-1", "m s-1"),
+                     var_long_names_2d = c("AFSC/RACE/GAP Survey Station Name", "Profile Number and Direction", "AFSC/RACE/GAP Vessel Code", "AFSC/RACE/GAP Cruise Code", "Haul Number", "Mean towed depth of CTD during haul", "Mean bottom temperature during haul (ITS-90)", "Mean Practical Salinity during haul (PSS-78)", "Mean Absolute Salinity during haul (TEOS-10 GSW)", "Mean speed of sound during haul (Chen-Millero)"),
+                     var_units_2d = c("Station ID", "Profile ID", "Vessel code", "Cruise code", "Haul", "m", "degree_C", "1", "g kg-1", "m s-1"),
                      dim_names_3d = c("depth"),
+                     dim_long_names_3d = c("Depth in meters (positive down)"),
                      dim_units_3d = c("m"),
                      dim_sort_3d = c(TRUE),
                      var_names_3d = c("sea_water_pressure", "sea_water_temperature", "sea_water_practical_salinity", "sea_water_salinity", "sea_water_density", "buoyancy_frequency", "sea_water_electrical_conductivity", "sound_speed_in_sea_water", "flag_value"),
+                     var_long_names_3d = c("Strain Gauge Pressure", "ITS-90 Temperature", "PSS-78 Practical Salinity", "TEOS-10 GSW Absolute Salinity", "TEOS-10 GSW Density", "Squared Brunt-Vaisala Buoyancy Frequency", "Electrical Conductivity", "Speed of Sound (Chen-Millero)", "Data Quality/Processing Flag"),
                      var_units_3d = c("dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-2", "S m-1)", "m s-1", "1"),
                      instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel"),
                      instrument_values = list(make_model = "Sea-Bird SBE19plus V2",

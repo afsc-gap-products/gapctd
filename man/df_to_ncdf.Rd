@@ -8,13 +8,17 @@ df_to_ncdf(
   x,
   output_filename,
   dim_names_2d,
+  dim_long_names_2d = NULL,
   dim_units_2d,
   var_names_2d,
+  var_long_names_2d = NULL,
   var_units_2d,
   dim_names_3d = NULL,
+  dim_long_names_3d = NULL,
   dim_units_3d = NULL,
   dim_sort_3d,
   var_names_3d = NULL,
+  var_long_names_3d = NULL,
   var_units_3d = NULL,
   instrument_attributes = NULL,
   instrument_values = NULL,
@@ -32,7 +36,9 @@ df_to_ncdf(
 
 \item{var_units_2d}{A vector of unit quantities for the 2D variables.}
 
-\item{dim_names_3d}{A vector of names of 3D dimension (e.g., DEPTH).}
+\item{dim_names_3d}{A vector of names of 3D dimension (e.g., depth).}
+
+\item{dim_long_names_3d}{A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").}
 
 \item{dim_units_3d}{A vector of unit quantities for 3D dimensions.}
 
