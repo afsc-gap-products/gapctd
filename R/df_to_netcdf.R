@@ -2,16 +2,21 @@
 #' 
 #' Write 2D and/or 3D data from a data frame to a netCDF version-4 file using the RNetCDF package.
 #' 
-#' @param x A data frame containing gridded data and metadata to add to write to a netCDF file.
+#' @param x A data frame containing data and metadata to add to write to a netCDF file.
 #' @param dim_names_2d A vector of names of 2D spatial and time dimensions (e.g., LATITUDE, LONGITUDE, DATETIME).
 #' @param dim_units_2d A vector of unit quantities for 2D dimensions.
 #' @param var_names_2d A vector of variable names that for 2D variables (e.g., VESSEL, CRUISE, HAUL, CAST, STATIONID).
+#' @param var_long_names_2d A vector of long_names for the 2D variable.
 #' @param var_units_2d A vector of unit quantities for the 2D variables.
+#' @param var_flag_values_2d Optional. A list of containing vectors of flag values for 2D flag variables where list item names correspond with variables in var_names_2d.
+#' @param var_flag_meanings_2d Optional. A list of containing vectors of flag_meaning definitions for 2D flag variables where list item names correspond with variables in var_names_2d.
 #' @param dim_names_3d A vector of names of 3D dimension (e.g., depth).
 #' @param dim_long_names_3d A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").
 #' @param dim_units_3d A vector of unit quantities for 3D dimensions.
 #' @param var_names_3d A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).
-#' @param var_units_3d A vector of unit quantities for the 3D variables (e.g., 'degrees Celcius', 'Practical Salinity').
+#' @param var_units_3d A vector of unit quantities for the 3D variables (e.g., 'degrees Celsius', 'Practical Salinity').
+#' @param var_flag_values_3d Optional. A list of containing vectors of flag values for 3D flag variables where list item names correspond with variables in var_names_3d.
+#' @param var_flag_meanings_3d Optional. A list of containing vectors of flag_meaning definitions for 3D flag variables where list item names correspond with variables in var_names_3d.
 #' @param instrument_attributes Optional. A vector of attribute names for the instrument variable.
 #' @param instrument_values Optional. A list of attribute values for the instrument variable.
 #' @param global_attributes A list of global attributes (i.e., non-dimensional) as 1L character, numeric, or date vectors, where names of list objects are the names of attributes.
@@ -65,13 +70,18 @@ df_to_ncdf <- function(x,
                        var_names_2d,
                        var_long_names_2d = NULL,
                        var_units_2d,
+                       var_flag_values_2d = NULL,
+                       var_flag_meanings_2d = NULL,
                        dim_names_3d = NULL,
                        dim_long_names_3d = NULL,
+                       dim_positive_3d = NULL,
                        dim_units_3d = NULL,
                        dim_sort_3d,
                        var_names_3d = NULL,
                        var_long_names_3d = NULL,
                        var_units_3d = NULL,
+                       var_flag_values_3d = NULL,
+                       var_flag_meanings_3d = NULL,
                        instrument_attributes = NULL,
                        instrument_values = NULL,
                        global_attributes) {
@@ -113,10 +123,18 @@ df_to_ncdf <- function(x,
     if(length(instrument_attributes) != length(instrument_values)) {
       stop(paste0("df_to_ncdf: Length of instrument_attributes (", length(instrument_attributes), ") does not equal length of instrument_values (", length(instrument_values), ")."))
     }
+    
+    if(class(instrument_values) != "list") {
+      stop(paste0("df_to_ncdf: instrument_values has class ", class(instrument_values), " but should have class 'list'"))
+    }
+    
   }
   
-  if(class(instrument_values) != "list") {
-    stop(paste0("df_to_ncdf: instrument_values has class ", class(instrument_values), " but should have class 'list'"))
+  # Check for valid classes
+  df_classes <- unlist(sapply(x, FUN = class))
+  
+  if(!all(df_classes %in% c("numeric", "integer", "character", "logical", "matrix", "factor"))) {
+    stop(paste0("df_to_netcdf: Invalid class in x (",   unique(as.character(df_classes[which(!(df_classes  %in% c("numeric", "integer", "character", "logical", "matrix", "factor")))])), "). Supported classes are numeric, integer, character, logical, and factor"))
   }
   
   # Assign index value to each cast
@@ -129,6 +147,8 @@ df_to_ncdf <- function(x,
   # Create netCDF4 file
   ncout <- RNetCDF::create.nc(filename = output_filename,
                               format = "netcdf4")
+  
+  message(paste0("Adding index for ", length(unique(x$index)), " samples/locations."))
   # Define dimensions (index)
   RNetCDF::dim.def.nc(ncfile = ncout,
                       dimname = "index", 
@@ -140,6 +160,11 @@ df_to_ncdf <- function(x,
   RNetCDF::var.put.nc(ncfile = ncout, 
                       variable = "index",
                       data = unique(x$index))
+  RNetCDF::att.put.nc(ncfile = ncout,
+                      variable = "index",
+                      name = "long_name",
+                      type = "NC_STRING",
+                      value = "Sample index")
   
   if(!is.null(var_names_3d)) {
     
@@ -151,7 +176,7 @@ df_to_ncdf <- function(x,
         dim_vals <- sort(dim_vals)
       }
       
-      print(paste0("Adding 3D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii]))
+      message(paste0("Adding 3D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii]))
       
       RNetCDF::dim.def.nc(ncfile = ncout,
                           dimname = dim_names_3d[ii], 
@@ -174,7 +199,21 @@ df_to_ncdf <- function(x,
                             name = "long_name",
                             type = "NC_STRING",
                             value = dim_long_names_3d[ii])
-      } 
+      }
+      
+      if(!is.null(dim_positive_3d)) {
+        if(dim_names_3d[ii] %in% names(dim_positive_3d)) {
+          
+          flag_index_3d <- which(names(dim_positive_3d) == dim_names_3d[ii])
+          
+          RNetCDF::att.put.nc(ncfile = ncout,
+                              variable = dim_names_3d[ii],
+                              name = "positive",
+                              type = vec_to_nc_class(vec = dim_positive_3d[[flag_index_3d]]),
+                              value = dim_positive_3d[[flag_index_3d]])
+          
+        }
+      }
     }
   }
   
@@ -185,7 +224,7 @@ df_to_ncdf <- function(x,
   
   for(jj in 1:length(combined_var_dim_names_2d)) {
     
-    print(paste0("Adding 2D variable ", combined_var_dim_names_2d[jj], " with units ", combined_var_dim_units_2d[jj]))
+    message(paste0("Adding 2D variable ", combined_var_dim_names_2d[jj], " with units ", combined_var_dim_units_2d[jj]))
     
     var_vals <- (x |> dplyr::select(match(x = c("index", 
                                                 combined_var_dim_names_2d[jj]), 
@@ -194,7 +233,7 @@ df_to_ncdf <- function(x,
     
     RNetCDF::var.def.nc(ncfile = ncout, 
                         varname = combined_var_dim_names_2d[jj], 
-                        vartype = vec_to_nc_class(vec = var_vals), 
+                        vartype = vec_to_nc_class(vec = var_vals[!is.na(var_vals)]), 
                         dimensions = "index")
     RNetCDF::var.put.nc(ncfile = ncout, 
                         variable = combined_var_dim_names_2d[jj],
@@ -210,7 +249,27 @@ df_to_ncdf <- function(x,
                           name = "long_name",
                           type = "NC_STRING",
                           value = combined_var_dim_long_names_2d[jj])
-    } 
+    }
+    
+    if(!is.null(var_flag_meanings_2d)) {
+      if(combined_var_dim_names_2d[jj] %in% names(var_flag_meanings_2d)) {
+        
+        flag_index_2d <- which(names(var_flag_meanings_2d) == combined_var_dim_names_2d[jj])
+        
+        RNetCDF::att.put.nc(ncfile = ncout,
+                            variable = combined_var_dim_names_2d[jj],
+                            name = "flag_values",
+                            type = vec_to_nc_class(vec = var_flag_values_2d[[flag_index_2d]]),
+                            value = var_flag_values_2d[[flag_index_2d]])
+        
+        RNetCDF::att.put.nc(ncfile = ncout,
+                            variable = combined_var_dim_names_2d[jj],
+                            name = "flag_meanings",
+                            type = vec_to_nc_class(vec = var_flag_meanings_2d[[flag_index_2d]]),
+                            value = var_flag_meanings_2d[[flag_index_2d]])
+        
+      }
+    }
   }
   
   if(!is.null(var_names_3d)) {
@@ -218,7 +277,7 @@ df_to_ncdf <- function(x,
     # Define 3D variables and assign to list
     for(kk in 1:length(var_names_3d)) {
       
-      print(paste0("Adding 3D variable ", var_names_3d[kk], " with units ", var_units_3d[kk]))
+      message(paste0("Adding 3D variable ", var_names_3d[kk], " with units ", var_units_3d[kk]))
       
       val_matrix <- dplyr::select(x, match(c(var_names_3d[kk], 
                                              dim_names_3d, 
@@ -269,11 +328,33 @@ df_to_ncdf <- function(x,
                             type = "NC_STRING",
                             value = var_long_names_3d[kk])
       }
+      
+      if(!is.null(var_flag_meanings_3d)) {
+        
+        if(var_names_3d[kk] %in% names(var_flag_meanings_3d)) {
+          
+          flag_index_3d <- which(names(var_flag_meanings_3d) == var_names_3d[kk])
+          
+          RNetCDF::att.put.nc(ncfile = ncout,
+                              variable = var_names_3d[kk],
+                              name = "flag_values",
+                              type = vec_to_nc_class(vec = var_flag_values_3d[[flag_index_3d]]),
+                              value = var_flag_values_3d[[flag_index_3d]])
+          
+          RNetCDF::att.put.nc(ncfile = ncout,
+                              variable = var_names_3d[kk],
+                              name = "flag_meanings",
+                              type = vec_to_nc_class(vec = var_flag_meanings_3d[[flag_index_3d]]),
+                              value = var_flag_meanings_3d[[flag_index_3d]])
+          
+        }
+      }
     }
   }
-  
+
   # Add instrument attributes
   if(!is.null(instrument_attributes) & !is.null(instrument_values)) {
+    message("Adding instrument attributes")
     RNetCDF::var.def.nc(ncfile = ncout, 
                         varname = "instrument", 
                         vartype = vec_to_nc_class(vec = "NC_STRING"),
@@ -290,6 +371,7 @@ df_to_ncdf <- function(x,
   
   # Add global attributes to NetCDF object
   for(mm in 1:length(global_attributes)) {
+    message(c("Adding global attribute ", names(global_attributes)[mm]))
     RNetCDF::att.put.nc(ncfile = ncout,
                         variable = "NC_GLOBAL",
                         name = names(global_attributes)[mm],
@@ -348,20 +430,18 @@ vec_to_nc_class <- function(vec, pkg = "RNetCDF") {
 
 #' Make netCDF from profiles and metadata 
 #' 
-#' Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise.
+#' Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise. Must provide the following global_attributes to the function in a list: references, id, cdm_data_type, cruise, institution, contributor_name, creator_name, creator_institution, creator_email,publisher, publisher_type, publisher_url, geospatial_bounds_crs, license, metadata_link, instrument, standard_name_vocabulary, Conventions, source.
 #' 
 #' @param fpath Path to accepted profiles.
 #' @param metadata_path Path to metadata files.
-#' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes)
+#' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).
 #' @export
 
-make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "accepted_profiles"), full.names = TRUE),
-                                    list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/AKK/accepted_profiles", full.names = TRUE)),
-                          metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE),
-                                            list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/AKK/metadata",
-                                                       full.names = TRUE)), 
+make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "accepted_profiles"), full.names = TRUE)),
+                          metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE, full.names = TRUE)), 
                           output_file = "output.nc",
-                          global_attributes = list(citation = "CTD TEAM...",
+                          global_attributes = list(title = "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey",
+                                                   references = "CTD TEAM...",
                                                    id = "doi",
                                                    cdm_data_type = "Point",
                                                    cruise = "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",
@@ -377,18 +457,20 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
                                                    license = "These data may be redistributed and used without restriction.",
                                                    metadata_link = "[DOI]",
                                                    instrument = "CTD",
+                                                   Conventions = "CF-1.8",
                                                    standard_name_vocabulary = "CF Standard Name Table v79",
                                                    source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))) {
   
-  req_attributes <- c("citation", "id", "cdm_data_type", "cruise", "institution", "contributor_name",
+  req_attributes <- c("title", "references", "id", "cdm_data_type", "cruise", "institution", "contributor_name",
                       "creator_name", "creator_institution", "creator_email","publisher", "publisher_type", 
-                      "publisher_url", "geospatial_bounds_crs", "license", "metadata_link", "instrument", "standard_name_vocabulary", "source")
+                      "publisher_url", "geospatial_bounds_crs", "license", "metadata_link", "instrument", "standard_name_vocabulary", "Conventions", "source")
   
   if(!all(req_attributes %in% names(global_attributes))) {
     stop(paste0("make_ctd_ncdf: The follow required global attribute(s) were not found in global_attributes : ", req_attributes[which(!(req_attributes %in% names(global_attributes)))]))
   }
 
   metadata_df <- data.frame()
+  all_profiles <- data.frame()
   
   for(ii in metadata_path) {
     metadata_df <- dplyr::bind_rows(metadata_df,
@@ -411,9 +493,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
       dplyr::select(-START_LONGITUDE, -START_LATITUDE) |>
       dplyr::rename(LONGITUDE = END_LONGITUDE,
                     LATITUDE = END_LATITUDE))
-  
-  all_profiles <- data.frame()
-  
+
   for(jj in 1:length(fpath)) {
     
     new_profile <- read.csv(file = fpath[jj])
@@ -421,6 +501,12 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
     if(any(table(new_profile$depth) > 1)) {
       # Corner case. Not sure why this happens but it likely has to do with some issue that can occur with the identify function.
       stop(paste0("make_ctd_ncdf: Duplicate depth values found in ", fpath[jj], ". Please remove duplicates from the file then rerun make_ctd_ncdf()."))
+    }
+    
+    if(jj > 1) {
+      if(new_profile$deploy_id[1] %in% all_profiles$deploy_id) {
+        stop(paste0("make_ctd_ncdf: ", fpath[jj], " cannot be added to profile_df because ", new_profile$deploy_id[1], " has already been added. Please check that deploy_id values are unique for each profile (i.e. no two hex/cnv files can have the same file name)."))
+      }
     }
     
     profile_df <- dplyr::inner_join(new_profile, metadata_df, by = "deploy_id")
@@ -464,7 +550,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
                   sea_water_electrical_conductivity = conductivity,
                   sound_speed_in_sea_water = soundspeed,
                   buoyancy_frequency = n2,
-                  flag_value = flag)
+                  quality_flag = flag)
   
   # Define spatial extent of data set using WKT polygon
   geospatial_bounds <- cbind(
@@ -491,7 +577,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
     unique()
   
   # Set up global attributes list
-  g_attributes <- list(citation = global_attributes$citation,
+  g_attributes <- list(references = global_attributes$references,
                        id = global_attributes$id,
                        cruise =  global_attributes$cruise,
                        institution = global_attributes$institution,
@@ -508,6 +594,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
                        metadata_link = global_attributes$metadata_link,
                        date_created = as.character(Sys.Date()),
                        instrument = global_attributes$instrument,
+                       Conventions = global_attributes$Conventions,
                        standard_name_vocabulary = global_attributes$standard_name_vocabulary,
                        cdm_data_type = global_attributes$cdm_data_type,
                        time_coverage_start = time_coverage[1],
@@ -519,17 +606,23 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
   gapctd::df_to_ncdf(x = all_profiles,
                      output_filename = output_file,
                      dim_names_2d = c("latitude", "longitude", "time"),
-                     dim_units_2d = c("decimal degrees_north", "decimal degrees_east", "time_utc"),
-                     dim_long_names_2d = c("Latitude (positive north)", "Longitude (positive east)", "Profile start time in Coordinated Universal Time (UTC)"),
+                     dim_units_2d = c("degree_north", "degree_east", "time"),
+                     dim_long_names_2d = c("Latitude (decimal degrees)", "Longitude (decimal degrees)", "Time in Coordinated Universal Time (UTC)"),
                      var_names_2d = c("stationid", "profile", "vessel", "cruise", "haul", "haul_depth", "sea_floor_temperature", "sea_floor_practical_salinity", "sea_floor_salinity", "sea_floor_sound_speed_in_sea_water"),
-                     var_long_names_2d = c("AFSC/RACE/GAP Survey Station Name", "Profile Number and Direction", "AFSC/RACE/GAP Vessel Code", "AFSC/RACE/GAP Cruise Code", "Haul Number", "Mean towed depth of CTD during haul", "Mean bottom temperature during haul (ITS-90)", "Mean Practical Salinity during haul (PSS-78)", "Mean Absolute Salinity during haul (TEOS-10 GSW)", "Mean speed of sound during haul (Chen-Millero)"),
-                     var_units_2d = c("Station ID", "Profile ID", "Vessel code", "Cruise code", "Haul", "m", "degree_C", "1", "g kg-1", "m s-1"),
+                     var_long_names_2d = c("AFSC/RACE/GAP Survey Station Name", "Profile Number and Direction", "AFSC/RACE/GAP Vessel Code", "AFSC/RACE/GAP Cruise Code", "Haul Number", "Mean towed depth of CTD during haul", "Mean bottom temperature (ITS-90) at towed depth", "Mean Practical Salinity (PSS-78) at towed depth", "Mean Absolute Salinity (TEOS-10 GSW) at towed depth", "Mean speed of sound during haul (Chen-Millero)"),
+                     var_units_2d = c("1", "1", "1", "1", "1", "m", "degree_C", "1", "g kg-1", "m s-1"),
                      dim_names_3d = c("depth"),
-                     dim_long_names_3d = c("Depth in meters (positive down)"),
+                     dim_long_names_3d = c("Depth in meters"),
+                     dim_positive_3d = list("depth" = "down"),
                      dim_units_3d = c("m"),
                      dim_sort_3d = c(TRUE),
-                     var_names_3d = c("sea_water_pressure", "sea_water_temperature", "sea_water_practical_salinity", "sea_water_salinity", "sea_water_density", "buoyancy_frequency", "sea_water_electrical_conductivity", "sound_speed_in_sea_water", "flag_value"),
-                     var_long_names_3d = c("Strain Gauge Pressure", "ITS-90 Temperature", "PSS-78 Practical Salinity", "TEOS-10 GSW Absolute Salinity", "TEOS-10 GSW Density", "Squared Brunt-Vaisala Buoyancy Frequency", "Electrical Conductivity", "Speed of Sound (Chen-Millero)", "Data Quality/Processing Flag"),
+                     var_names_3d = c("sea_water_pressure", "sea_water_temperature", "sea_water_practical_salinity", "sea_water_salinity", "sea_water_density", "buoyancy_frequency", "sea_water_electrical_conductivity", "sound_speed_in_sea_water", "quality_flag"),
+                     var_long_names_3d = c("Strain Gauge Pressure", "ITS-90 Temperature", "PSS-78 Practical Salinity", "TEOS-10 GSW Absolute Salinity", "TEOS-10 GSW Density", "Squared Brunt-Vaisala Buoyancy Frequency", "Electrical Conductivity", "Speed of Sound (Chen-Millero)", "Data Quality Assurance Flag"),
+                     var_flag_values_3d = list("quality_flag" = c(-6,0,6,7)),
+                     var_flag_meanings_3d = list("quality_flag" = c("Interpolated value. Density inversion error detected based on buoyancy frequency and remains after automatic removal and interpolation of point.",
+                                                               "Good quality, no issues detected.",
+                                                               "Interpolated value. Density inversion error detected based on buoyancy frequency and corrected using automatic removal and interpolation of point.",
+                                                               "Interpolated value. Point mannually flagged and removed during visual inspection then estimated through interpolation.")),
                      var_units_3d = c("dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-2", "S m-1)", "m s-1", "1"),
                      instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel"),
                      instrument_values = list(make_model = "Sea-Bird SBE19plus V2",
