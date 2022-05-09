@@ -6,14 +6,13 @@
 \usage{
 make_ctd_ncdf(
   fpath = c(list.files(path = here::here("output", "accepted_profiles"), full.names =
-    TRUE), list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/AKK/accepted_profiles",
-    full.names = TRUE)),
-  metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE),
-    list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/AKK/metadata", full.names =
     TRUE)),
+  metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE,
+    full.names = TRUE)),
   output_file = "output.nc",
-  global_attributes = list(citation = "CTD TEAM...", id = "doi", cdm_data_type =
-    "Point", cruise =
+  global_attributes = list(title =
+    "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey", references = "CTD TEAM...", id
+    = "doi", cdm_data_type = "Point", cruise =
     "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",
     institution = "NOAA Alaska Fisheries Science Center", contributor_name = "",
     creator_name = "", creator_institution = "NOAA Alaska Fisheries Science Center",
@@ -22,8 +21,9 @@ make_ctd_ncdf(
     "https://www.fisheries.noaa.gov/about/alaska-fisheries-science-center",     
     geospatial_bounds_crs = "EPSG:4326", license =
     "These data may be redistributed and used without restriction.", metadata_link =
-    "[DOI]", instrument = "CTD", standard_name_vocabulary = "CF Standard Name Table v79",
-    source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))
+    "[DOI]", instrument = "CTD", Conventions = "CF-1.8", standard_name_vocabulary =
+    "CF Standard Name Table v79", source = paste0("CTD data processed using gapctd ",
+    packageVersion(pkg = "gapctd")))
 )
 }
 \arguments{
@@ -34,5 +34,5 @@ make_ctd_ncdf(
 \item{global_attributes}{List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes)}
 }
 \description{
-Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise.
+Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise. Must provide the following global_attributes to the function in a list: references, id, cdm_data_type, cruise, institution, contributor_name, creator_name, creator_institution, creator_email,publisher, publisher_type, publisher_url, geospatial_bounds_crs, license, metadata_link, instrument, standard_name_vocabulary, Conventions, source.
 }

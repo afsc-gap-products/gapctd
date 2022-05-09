@@ -44,6 +44,7 @@ doc/*.html
 /data/
 /sim_data/
 /archive/
+/inst/extdata/nc/
 
 # Manuscript and presentations
 /paper/

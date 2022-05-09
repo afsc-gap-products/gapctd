@@ -8,21 +8,30 @@ df_to_ncdf(
   x,
   output_filename,
   dim_names_2d,
+  dim_long_names_2d = NULL,
   dim_units_2d,
   var_names_2d,
+  var_long_names_2d = NULL,
   var_units_2d,
+  var_flag_values_2d = NULL,
+  var_flag_meanings_2d = NULL,
   dim_names_3d = NULL,
+  dim_long_names_3d = NULL,
+  dim_positive_3d = NULL,
   dim_units_3d = NULL,
   dim_sort_3d,
   var_names_3d = NULL,
+  var_long_names_3d = NULL,
   var_units_3d = NULL,
+  var_flag_values_3d = NULL,
+  var_flag_meanings_3d = NULL,
   instrument_attributes = NULL,
   instrument_values = NULL,
   global_attributes
 )
 }
 \arguments{
-\item{x}{A data frame containing gridded data and metadata to add to write to a netCDF file.}
+\item{x}{A data frame containing data and metadata to add to write to a netCDF file.}
 
 \item{dim_names_2d}{A vector of names of 2D spatial and time dimensions (e.g., LATITUDE, LONGITUDE, DATETIME).}
 
@@ -30,15 +39,27 @@ df_to_ncdf(
 
 \item{var_names_2d}{A vector of variable names that for 2D variables (e.g., VESSEL, CRUISE, HAUL, CAST, STATIONID).}
 
+\item{var_long_names_2d}{A vector of long_names for the 2D variable.}
+
 \item{var_units_2d}{A vector of unit quantities for the 2D variables.}
 
-\item{dim_names_3d}{A vector of names of 3D dimension (e.g., DEPTH).}
+\item{var_flag_values_2d}{Optional. A list of containing vectors of flag values for 2D flag variables where list item names correspond with variables in var_names_2d.}
+
+\item{var_flag_meanings_2d}{Optional. A list of containing vectors of flag_meaning definitions for 2D flag variables where list item names correspond with variables in var_names_2d.}
+
+\item{dim_names_3d}{A vector of names of 3D dimension (e.g., depth).}
+
+\item{dim_long_names_3d}{A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").}
 
 \item{dim_units_3d}{A vector of unit quantities for 3D dimensions.}
 
 \item{var_names_3d}{A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).}
 
-\item{var_units_3d}{A vector of unit quantities for the 3D variables (e.g., 'degrees Celcius', 'Practical Salinity').}
+\item{var_units_3d}{A vector of unit quantities for the 3D variables (e.g., 'degrees Celsius', 'Practical Salinity').}
+
+\item{var_flag_values_3d}{Optional. A list of containing vectors of flag values for 3D flag variables where list item names correspond with variables in var_names_3d.}
+
+\item{var_flag_meanings_3d}{Optional. A list of containing vectors of flag_meaning definitions for 3D flag variables where list item names correspond with variables in var_names_3d.}
 
 \item{instrument_attributes}{Optional. A vector of attribute names for the instrument variable.}
 
