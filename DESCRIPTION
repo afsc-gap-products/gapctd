@@ -1,7 +1,7 @@
 Package: gapctd
 Type: Package
 Title: Process RACE/GAP CTD data and generate output.
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(person("Sean", "Rohan", 
               email = "sean.rohan@noaa.gov", 
               role = c("aut", "cre")),
@@ -13,7 +13,7 @@ Description: Package to process SBE19 CTD data for AFSC RACE/Groundfish Assessme
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Depends: R(>= 4.1), ggplot2, dplyr, tidyr, oce, here, bbmle, sf
 Imports: RODBC,
          getPass,

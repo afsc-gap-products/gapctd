@@ -4,7 +4,7 @@
 \alias{ctm_correct_c_t}
 \title{Conductivity thermal intertia correction factor (C[T])}
 \usage{
-ctm_correct_c_t(a, b, temperature)
+ctm_correct_c_t(a, b, temperature, precision = 6)
 }
 \arguments{
 \item{a}{Numeric vector (1L). a parameter in thermal mass correction formula, as calculated by gapctd::ctm_par_a()}
@@ -12,6 +12,8 @@ ctm_correct_c_t(a, b, temperature)
 \item{b}{Numeric vector (1L). b parameter in thermal mass correction formula, as calculated by gapctd::ctm_par_b().}
 
 \item{temperature}{Numeric vector of temperatures in degC (ITS-90 scale).}
+
+\item{precision}{Precision (significant digits) for conductivity (default = 6).}
 }
 \description{
 Calculate thermal inertia adjustment factors for SBE19 conductivity cell using temperature and parameters a and b, using the same method as the Thermal Mass Correction module in SBE Data Processing software.

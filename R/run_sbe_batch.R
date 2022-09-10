@@ -64,10 +64,13 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
     }
   }
   
+  print(batch_method)
+  
   # Run without automatic alignment
   if(batch_method == 1) {
     
     nmea_pattern <- "_loopedit"
+    
     write_metadata <- TRUE
     
     # Get data, filter, loop edit, align ----
@@ -89,7 +92,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
     
   } else if(batch_method == 2)  {
     
-    nmea_pattern <- "_align"
+    nmea_pattern <- "_loopedit"
     write_metadata <- FALSE
     
     message("run_sbe_batch: Estimating alignment parameters")
@@ -126,7 +129,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
       invisible(file.remove(deploy_files[-keep_files]))
       
       if(alignment_df$best_adj[kk] == 0) {
-        in_celltm <- deploy_files[grepl(pattern = "loopedit.cnv", x = deploy_files)]
+        in_celltm <- deploy_files[grepl(pattern = "fil1.cnv", x = deploy_files)]
         
         if(file.exists(in_celltm)) {
           system(command = paste0("sbebatch ", getwd(), "/sbe19plus_noalign.bat", " ", 
@@ -142,7 +145,7 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
 
       } else {
         # Setup input paths for alignment, celltm, loopedit
-        in_align <- deploy_files[grepl(pattern = "loopedit.cnv", x = deploy_files)]
+        in_align <- deploy_files[grepl(pattern = "fil1.cnv", x = deploy_files)]
         
         if(file.exists(in_align)) {
         
@@ -221,6 +224,9 @@ run_sbe_batch <- function(vessel, year, region, xmlcon_file = NA, bat_file = NA,
   }
 
   if(make_NMEA) {
+    nmea_pattern <- ifelse(length(list.files(path = paste0(getwd(), "/cnv/"),
+                                      pattern = "_loopedit.cnv")) >= 1, "_loopedit", "_fil1")
+    
     message("run_sbe_batch: Generating NMEA files")
     gapctd::create_NMEA_files(rodbc_channel = rodbc_channel,
                               year = year,
