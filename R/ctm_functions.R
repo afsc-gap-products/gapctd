@@ -3,11 +3,11 @@
 #' Calculate Sea-Bird conductivity cell thermal mass correction parameter a, which is used to apply thermal inertia correction to conductivity measurements.
 #' 
 #' @param alpha Numeric vector (1L). Alpha parameter in thermal mass correction formula. Default = 0.04 for SBE19plus.
-#' @param inv_beta Numeric vector (1L). 1/beta parameter in thermal mass correction formula. Default = 1/8 for SBE19plus.
+#' @param beta Numeric vector (1L). 1/beta parameter in thermal mass correction formula. Default = 1/8 for SBE19plus.
 #' @param f_n Numeric vector (1L). Scan interval in seconds. Default = 0.25 for SBE19plus default 4 Hz scan interval.
 #' @export
 
-ctm_par_a <- function(alpha = 0.04, beta, f_n = 0.25) {
+ctm_par_a <- function(alpha = 0.04, beta = 1/8, f_n = 0.25) {
   return(2 * alpha / (f_n * beta + 2))
 }
 
@@ -30,14 +30,16 @@ ctm_par_b <- function(alpha, a) {
 #' @param a Numeric vector (1L). a parameter in thermal mass correction formula, as calculated by gapctd::ctm_par_a()
 #' @param b Numeric vector (1L). b parameter in thermal mass correction formula, as calculated by gapctd::ctm_par_b().
 #' @param temperature Numeric vector of temperatures in degC (ITS-90 scale).
+#' @param precision Precision (significant digits) for conductivity (default = 6).
 #' @export
 
-ctm_correct_c_t <- function(a, b, temperature) {
+ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
   c_t <- numeric(length = length(temperature))
   c_t[1] <- 0
   for(i in 2:length(temperature)) {
     c_t[i] <- -1 * b * c_t[i-1] + a * 0.1 * (1 + 0.006 * (temperature[i] - 20)) * (temperature[i] - temperature[i-1])
   }
+  c_t <- round(c_t, 6)
   return(c_t)
 }
 
@@ -307,7 +309,6 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
   
   for(ii in 1:length(unique_id)) {
     
-    # ii <- 9
     message(unique_id[ii])
     cast_files <- profile_files[grepl(pattern = unique_id[ii], profile_files)]
     
@@ -392,8 +393,6 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
       }
     }
     
-    
-    
     default_dat <- gapctd:::ctm_adjust_tsarea(alpha = start_alpha,
                                               tau = start_tau,
                                               f_n = 0.25,
@@ -434,7 +433,7 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                             obj_fn = obj_method,
                                             f_n = 0.25),
                                 method = optim_method,
-                                lower = c(alpha = -1, tau = 0),
+                                lower = c(alpha = 0, tau = 0),
                                 upper = c(alpha = 1, tau = 45),
                                 control = list(maxit = optim_maxit, 
                                                reltol = 1e-4, 
@@ -458,7 +457,7 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
                                               obj_fn = obj_method,
                                               f_n = 0.25),
                                   method = optim_method,
-                                  lower = c(alpha = -1, tau = 0),
+                                  lower = c(alpha = 0, tau = 0),
                                   upper = c(alpha = 1, tau = 45),
                                   control = list(maxit = optim_maxit, 
                                                  reltol = 1e-4, 
@@ -718,7 +717,7 @@ run_ctm_adjust_path <- function(profile_files = sort(c(list.files(here::here("ou
                                               pressure = pressure,
                                               conductivity = conductivity,
                                               flag = flag,
-                                              obj_fn = "area",
+                                              obj_fn = "path",
                                               f_n = 0.25),
                                   method = optim_method,
                                   control = list(maxit = optim_maxit, reltol = 1e-5,
