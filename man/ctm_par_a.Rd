@@ -4,14 +4,14 @@
 \alias{ctm_par_a}
 \title{Conductivity thermal inertia correction parameter a}
 \usage{
-ctm_par_a(alpha = 0.04, beta, f_n = 0.25)
+ctm_par_a(alpha = 0.04, beta = 1/8, f_n = 0.25)
 }
 \arguments{
 \item{alpha}{Numeric vector (1L). Alpha parameter in thermal mass correction formula. Default = 0.04 for SBE19plus.}
 
-\item{f_n}{Numeric vector (1L). Scan interval in seconds. Default = 0.25 for SBE19plus default 4 Hz scan interval.}
+\item{beta}{Numeric vector (1L). 1/beta parameter in thermal mass correction formula. Default = 1/8 for SBE19plus.}
 
-\item{inv_beta}{Numeric vector (1L). 1/beta parameter in thermal mass correction formula. Default = 1/8 for SBE19plus.}
+\item{f_n}{Numeric vector (1L). Scan interval in seconds. Default = 0.25 for SBE19plus default 4 Hz scan interval.}
 }
 \description{
 Calculate Sea-Bird conductivity cell thermal mass correction parameter a, which is used to apply thermal inertia correction to conductivity measurements.
