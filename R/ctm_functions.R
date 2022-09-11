@@ -43,6 +43,89 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
   return(c_t)
 }
 
+#' Calculate area between temperature-salinity curves
+#' 
+#' @param dc downcast oce object
+#' @param uc upcast oce object
+#' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
+#' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
+#' @noRD
+
+ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
+  
+  pd_switch <- ifelse(by == "pressure", "depth", "pressure")
+  
+  dc_df <- as.data.frame(downcast@data) |>
+    dplyr::select(pressure, temperature, salinity, depth)
+  dc_cols <- which(names(dc_df) %in% c("temperature", "salinity", pd_switch))
+  names(dc_df)[dc_cols] <- paste0("dc_", names(dc_df)[dc_cols])
+  
+  uc_df <- as.data.frame(upcast@data) |>
+    dplyr::select(pressure, temperature, salinity, depth)
+  uc_cols <- which(names(uc_df) %in% c("temperature", "salinity", pd_switch))
+  names(uc_df)[uc_cols] <- paste0("uc_", names(uc_df)[uc_cols])
+  
+  comb_df <- dplyr::full_join(dc_df, uc_df, by = by)
+  x_ind <- which(names(comb_df) == by)
+  
+  missing_vars <- unique(which(is.na(comb_df), arr.ind = TRUE)[,2])
+  
+  # Interpolate/extrapolate missing for area calculations
+  for(jj in missing_vars) {
+    comb_df[, jj][which(is.na(comb_df[, jj]))] <- approx(x = comb_df[, x_ind],
+                                                         y = comb_df[, jj],
+                                                         xout = comb_df[, x_ind][which(is.na(comb_df[, jj]))],
+                                                         method = "linear",
+                                                         yleft = comb_df[, jj][min(which(!is.na(comb_df[, jj])))],
+                                                         yright = comb_df[, jj][max(which(!is.na(comb_df[, jj])))])$y
+  }
+  
+  ts_area_sf <- comb_df |>
+    data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                         cbind(
+                                                           apply(
+                                                             X = cbind(
+                                                               comb_df$dc_salinity[1:(nrow(comb_df))],
+                                                               comb_df$dc_temperature[1:(nrow(comb_df))]),
+                                                             MARGIN = 1,
+                                                             FUN = paste, 
+                                                             collapse = " "),
+                                                           apply(
+                                                             cbind(c(comb_df$uc_salinity[1:(nrow(comb_df)-1)], comb_df$uc_salinity[(nrow(comb_df)-1)]),
+                                                                   c(comb_df$uc_temperature[1:(nrow(comb_df)-1)], comb_df$uc_temperature[(nrow(comb_df)-1)])),
+                                                             MARGIN = 1,
+                                                             FUN = paste, 
+                                                             collapse = " "),
+                                                           apply(
+                                                             X = cbind(c(comb_df$dc_salinity[2:(nrow(comb_df))],comb_df$uc_salinity[(nrow(comb_df))]),
+                                                                       c(comb_df$dc_temperature[2:(nrow(comb_df))],comb_df$uc_temperature[(nrow(comb_df))])),
+                                                             MARGIN = 1,
+                                                             FUN = paste, 
+                                                             collapse = " "),
+                                                           apply(
+                                                             X = cbind(
+                                                               c(comb_df$dc_salinity[1:(nrow(comb_df)-1)],comb_df$dc_salinity[(nrow(comb_df))]),
+                                                               c(comb_df$dc_temperature[1:(nrow(comb_df)-1)],comb_df$dc_temperature[(nrow(comb_df))])),
+                                                             MARGIN = 1,
+                                                             FUN = paste, 
+                                                             collapse = " ")),
+                                                       MARGIN = 1,
+                                                       FUN = paste,
+                                                       collapse = ", "), ")")) |>
+    dplyr::mutate(ID = row_number()) |>
+    st_as_sf(wkt = "geometry") |> 
+    dplyr::group_by(ID) |>
+    summarise(do_union = FALSE) |>
+    sf::st_cast(to = "POLYGON")
+  
+  if(return_sf) {
+    return(ts_area_sf)
+  } else {
+    obj <- sum(sf::st_area(ts_area_sf), na.rm = TRUE)
+    return(obj)
+  }
+}
+
 #' Perform conductivity cell thermal inertia correction and compare upcasts to downcasts
 #' 
 #' Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument obj_fn is set to area, the function calculates and return the value of an objective function which is the area between upcast and downcast temperature-salinity curves in 1 dbar pressure bins. If obj_fn = "none," returns a data.frame with upcast and downcast temperature, conductivity, corrected conductivity, and salinity in 1 dbar pressure bins.
