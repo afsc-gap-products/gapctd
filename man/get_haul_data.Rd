@@ -4,7 +4,13 @@
 \alias{get_haul_data}
 \title{Get haul data from RACEBASE}
 \usage{
-get_haul_data(channel, vessel, cruise, out_path = NULL)
+get_haul_data(
+  channel,
+  vessel,
+  cruise,
+  out_path = NULL,
+  tzone = "America/Anchorage"
+)
 }
 \arguments{
 \item{channel}{RODBC connection.}
@@ -14,6 +20,8 @@ get_haul_data(channel, vessel, cruise, out_path = NULL)
 \item{cruise}{Cruise code as a numeric vector (can include more than one).}
 
 \item{out_path}{Optional. Filepath for the output R data file (.rds).}
+
+\item{tzone}{Time zone for events and star_time.}
 }
 \value{
 Returns a data.frame containing haul data. Also saves haul data to an rds file.
