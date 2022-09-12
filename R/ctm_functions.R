@@ -162,7 +162,11 @@ ctm_par_b <- function(alpha, a) {
 ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
   c_t <- numeric(length = length(temperature))
   c_t[1] <- 0
-  for(i in 2:length(temperature)) {
+  
+  start_index <- min(which(!is.na(temperature))) + 1
+  end_index <- max(which(!is.na(temperature)))
+  
+  for(i in start_index:end_index) {
     c_t[i] <- -1 * b * c_t[i-1] + a * 0.1 * (1 + 0.006 * (temperature[i] - 20)) * (temperature[i] - temperature[i-1])
   }
   c_t <- round(c_t, 6)
