@@ -274,7 +274,7 @@ lowpass_filter <- function(x,
 #' 
 #' @param x oce object
 #' @param precision Optional named numeric vector with precision (decimal places) for variables.
-#' @noRD
+#' @noRd
 
 derive_eos <- function(x, precision = NULL) {
   
@@ -471,6 +471,11 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
   x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  
+  if(!(length(x@data[[1]]) > 1)) {
+    warning(paste0("No scans in ", cast_direction))
+    x <- NULL
+  }
   
   return(x)
   

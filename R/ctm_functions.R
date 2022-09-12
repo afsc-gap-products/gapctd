@@ -1,3 +1,125 @@
+#' Optimize cell thermal mass correction parameters
+#' 
+#' Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the path distance of the salinity profile
+#' 
+#' @param dc downcast oce object
+#' @param uc upcast oce object
+#' @param optim_method Optimization method for optim(). Default is the Broyden-Fletcher-Goldfarb-Shanno with constraints algorithm ("L-BFGS-B")
+#' @param optim_maxit Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.
+#' @param start_alpha_C Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).
+#' @param start_beta_C Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).
+#' @return A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
+#' @noRd
+
+optim_ctm_pars <- function(dc = NULL, 
+                           uc = NULL,
+                           optim_method = "L-BFGS-B",
+                           optim_maxit = 500,
+                           start_alpha_C = 0.04,
+                           start_beta_C = 1/8,
+                           ...) {
+  
+  est_pars <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
+                              start = list(alpha_C = start_alpha_C,
+                                           beta_C = start_beta_C),
+                              data = list(dc = downcast,
+                                          uc = upcast),
+                              method = optim_method,
+                              lower = c(alpha_C = 0, beta_C = 1/45),
+                              upper = c(alpha_C = 1, beta_C = 1),
+                              control = list(reltol = 1e-4, 
+                                             trace = 1,
+                                             maxit = optim_maxit,
+                                             parscale = c(alpha_C = 0.01, beta_C = 0.1))), 
+                  silent = TRUE)
+  
+  
+  if(any(class(est_pars) == "try-error", try(est_pars@details$convergence != 0, silent = TRUE))) {
+    est_pars <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
+                                start = list(alpha_C = 0.08,
+                                             beta_C = 1/12),
+                                data = list(dc = downcast,
+                                            uc = upcast),
+                                method = optim_method,
+                                lower = c(alpha_C = 0, beta_C = 1/45),
+                                upper = c(alpha_C = 1, beta_C = 1),
+                                control = list(reltol = 1e-4, 
+                                               trace = 1,
+                                               parscale = c(alpha_C = 0.01, beta_C = 0.1))), 
+                    silent = TRUE)
+  }
+  
+  if(any(class(est_pars) == "try-error", try(est_pars@details$convergence != 0, silent = TRUE))) {
+    best_pars <- c(alpha_C = 0.04, beta_C = 0.125)
+  } else {
+    best_pars <- est_pars@coef
+  }
+  
+  return(best_pars)
+  
+}
+
+
+
+#' Objective function for cell thermal mass calculations
+#' 
+#' Calculates area between temperature and salinity curves when upcast and downcast data are provided. Calculates path distance for salinity if only downcast or upcast is provided.
+#' 
+#' @param dc Downcast oce object
+#' @param uc Upcast oce object
+#' @param alpha_C Conductivity cell thermal inertia correction alpha parameter, passed to gapctd::conductivity_correction()
+#' @param beta_C Conductivity cell thermal inertia correction beta parameter, passed to gapctd::conductivity_correction()
+#' @return Area between T-S curves or path distance of salinity curve as a 1L numeric vector 
+#' @noRd
+
+ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
+  
+  # Area when both dc and uc are provided
+  if(!is.null(dc) & !is.null(uc)) {
+    dc_eval <- dc |>
+      gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
+      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+      gapctd:::derive_eos() |>
+      gapctd:::bin_average(by = "depth", bin_width = 1)
+    
+    uc_eval <- uc |>
+      gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
+      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
+      gapctd:::derive_eos() |>
+      gapctd:::bin_average(by = "depth", bin_width = 1)
+    
+    obj <- gapctd:::ts_area(dc = dc_eval, 
+                            uc = uc_eval, 
+                            by = "depth", 
+                            return_sf = FALSE)
+  }
+  
+  # Path distance
+  if(!is.null(dc) & is.null(uc)) {
+    dc_eval <- dc |>
+      gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
+      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+      gapctd:::derive_eos() |>
+      gapctd:::bin_average(by = "depth", bin_width = 1)
+    
+    obj <- sum(abs(diff(dc_eval@data$salinity[dc_eval@data$flag == 0])))
+  }
+  
+  if(is.null(dc) & !is.null(uc)) {
+    uc_eval <- uc |>
+      gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
+      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
+      gapctd:::derive_eos() |>
+      gapctd:::bin_average(by = "depth", bin_width = 1)
+    
+    obj <- sum(abs(diff(uc_eval@data$salinity[uc_eval@data$flag == 0])))
+  }
+  
+  return(obj)
+}
+
+
+
 #' Conductivity thermal inertia correction parameter a
 #' 
 #' Calculate Sea-Bird conductivity cell thermal mass correction parameter a, which is used to apply thermal inertia correction to conductivity measurements.
@@ -11,6 +133,8 @@ ctm_par_a <- function(alpha = 0.04, beta = 1/8, f_n = 0.25) {
   return(2 * alpha / (f_n * beta + 2))
 }
 
+
+
 #' Conductivity thermal inertia correction parameter b
 #' 
 #' Calculate Sea-Bird conductivity cell thermal mass correction parameter b, which is used to apply thermal inertia correction to conductivity measurements.
@@ -22,6 +146,8 @@ ctm_par_a <- function(alpha = 0.04, beta = 1/8, f_n = 0.25) {
 ctm_par_b <- function(alpha, a) {
   return(1-(2*a/alpha))
 }
+
+
 
 #' Conductivity thermal intertia correction factor (C[T])
 #' 
@@ -43,24 +169,26 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
   return(c_t)
 }
 
+
+
 #' Calculate area between temperature-salinity curves
 #' 
 #' @param dc downcast oce object
 #' @param uc upcast oce object
 #' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
-#' @noRD
+#' @noRd
 
 ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
   
   pd_switch <- ifelse(by == "pressure", "depth", "pressure")
   
-  dc_df <- as.data.frame(downcast@data) |>
+  dc_df <- as.data.frame(dc@data) |>
     dplyr::select(pressure, temperature, salinity, depth)
   dc_cols <- which(names(dc_df) %in% c("temperature", "salinity", pd_switch))
   names(dc_df)[dc_cols] <- paste0("dc_", names(dc_df)[dc_cols])
   
-  uc_df <- as.data.frame(upcast@data) |>
+  uc_df <- as.data.frame(uc@data) |>
     dplyr::select(pressure, temperature, salinity, depth)
   uc_cols <- which(names(uc_df) %in% c("temperature", "salinity", pd_switch))
   names(uc_df)[uc_cols] <- paste0("uc_", names(uc_df)[uc_cols])
@@ -125,6 +253,8 @@ ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
     return(obj)
   }
 }
+
+
 
 #' Perform conductivity cell thermal inertia correction and compare upcasts to downcasts
 #' 
@@ -305,24 +435,6 @@ ctm_adjust_tsarea <- function(alpha = 0.04,
           return(comb_df)
         }
       } 
-      # else if(obj_fn == "salinity_diff") {
-      #   
-      #   comb_df <- updown_df |>
-      #     dplyr::filter(!is.na(salinity_up),
-      #                   !is.na(temperature_up),
-      #                   !is.na(salinity_down),
-      #                   !is.na(temperature_down))
-      #   
-      #   if(nrow(comb_df) == 0) {
-      #     obj <- 1e7
-      #   } else {
-      #     obj <- 1-cor(
-      #       diff(comb_df$salinity_down),
-      #       diff(comb_df$salinity_up),
-      #       method = "pearson")
-      #   }
-      #   
-      # }
     } else {
       # Path length
       obj <- switch(val,
