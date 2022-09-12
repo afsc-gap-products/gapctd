@@ -179,10 +179,11 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param variables Character vector of data variable names to offset.
 #' @param offset Numeric vector of offsets (in seconds) to add.
 #' @param method Interpolation method for the approx function to use.
+#' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
 #' @noRd
 
-align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear") {
+align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear", na_rm = FALSE) {
   
   in_timeS <- x@data$timeS
   
@@ -198,6 +199,14 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
                                                             method = interp_method)$y
     x@data$flag[is.na(x@data[[match(variables[ii], names(x@data))]])] <- -1
   }
+  
+  if(na_rm) {
+    x@data <- x@data |>
+      as.data.frame() |>
+      dplyr::filter(flag != -1) |>
+      as.list()
+  }
+  
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
   x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
