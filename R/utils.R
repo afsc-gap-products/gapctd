@@ -1,4 +1,4 @@
-#' Retrieve haul event times from RACEBASE
+#' Retrieve haul event times from RACEBASE (SBEDP workflow)
 #' 
 #' Retrieves on bottom, haul back, off bottom, and marked event times from RACE_DATA.
 #' 
@@ -111,7 +111,7 @@ ddlon_to_nmea <- function(x) {
          c("W", "E")[sign(x) == c(-1, 1)])
 }
 
-#' Package final files and metadata in a zip file
+#' Package final files and metadata in a zip file (SBEDP workflow)
 #' 
 #' @param region Survey region
 #' @param vessel Survey vessel

@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_fixed_depth_ts.R
 \name{calc_fixed_depth_ts}
 \alias{calc_fixed_depth_ts}
-\title{Calculate fixed depth temperature and salinity}
+\title{Calculate fixed depth temperature and salinity (SBEDP workflow)}
 \usage{
 calc_fixed_depth_ts(
   haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctm_functions.R
 \name{run_ctm_adjust_tsarea}
 \alias{run_ctm_adjust_tsarea}
-\title{Wrapper function around ctm_adjust_tsarea}
+\title{Wrapper function around ctm_adjust_tsarea (SBEDP workflow)}
 \usage{
 run_ctm_adjust_tsarea(
   profile_files = sort(c(list.files(here::here("output", "sbe19plus_v0"), full.names =

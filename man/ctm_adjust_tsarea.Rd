@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctm_functions.R
 \name{ctm_adjust_tsarea}
 \alias{ctm_adjust_tsarea}
-\title{Perform conductivity cell thermal inertia correction and compare upcasts to downcasts}
+\title{Perform conductivity cell thermal inertia correction and compare upcasts to downcasts (SBEDP workflow)}
 \usage{
 ctm_adjust_tsarea(
   alpha = 0.04,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{assign_metadata_fields}
 \alias{assign_metadata_fields}
-\title{Assign metadata fields}
+\title{Assign metadata fields (R workflow)}
 \usage{
 assign_metadata_fields(x, cast_direction)
 }

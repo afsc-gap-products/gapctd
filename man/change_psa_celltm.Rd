@@ -2,7 +2,7 @@
 % Please edit documentation in R/change_psa_parameters.R
 \name{change_psa_celltm}
 \alias{change_psa_celltm}
-\title{Change CellTM parameters}
+\title{Change CellTM parameters (SBEDP workflow)}
 \usage{
 change_psa_celltm(
   alpha,

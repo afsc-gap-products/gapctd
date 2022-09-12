@@ -1,4 +1,4 @@
-#' Function to move final .cnv files to bad_cnv and final_cnv directories
+#' Function to move final .cnv files to bad_cnv and final_cnv directories (SBEDP workflow)
 #' 
 #' Moves binned .cnv files without data from the cnv folder to bad_cnv, and files with data to final_cnv.
 #' 

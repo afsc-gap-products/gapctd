@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_bottom_mean.R
 \name{calc_bottom_mean}
 \alias{calc_bottom_mean}
-\title{Calculate station bottom temperature and salinity}
+\title{Calculate station bottom temperature and salinity (SBEDP workflow)}
 \usage{
 calc_bottom_mean(
   haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),

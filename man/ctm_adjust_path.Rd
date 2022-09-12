@@ -2,7 +2,7 @@
 % Please edit documentation in R/ctm_functions.R
 \name{ctm_adjust_path}
 \alias{ctm_adjust_path}
-\title{Calculate conductivity cell thermal intertia correction}
+\title{Calculate conductivity cell thermal intertia correction (SBEDP workflow)}
 \usage{
 ctm_adjust_path(
   alpha = 0.04,

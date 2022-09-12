@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{make_ctd_zip}
 \alias{make_ctd_zip}
-\title{Package final files and metadata in a zip file}
+\title{Package final files and metadata in a zip file (SBEDP workflow)}
 \usage{
 make_ctd_zip(region, vessel, year)
 }
@@ -14,5 +14,5 @@ make_ctd_zip(region, vessel, year)
 \item{year}{Survey year}
 }
 \description{
-Package final files and metadata in a zip file
+Package final files and metadata in a zip file (SBEDP workflow)
 }

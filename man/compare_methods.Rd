@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_methods.R
 \name{compare_methods}
 \alias{compare_methods}
-\title{Compare methods based on spikes and make multipanel plots}
+\title{Compare methods based on spikes and make multipanel plots (SBEDP workflow)}
 \usage{
 compare_methods(
   prefix,

@@ -1,6 +1,6 @@
-#' Setup gapctd directory
+#' Setup gapctd directory (R workflow)
 #' 
-#' Setup directory for processing in R
+#' Setup directory for processing using the R-based workflow
 #' 
 #' @param processing_method "gapctd"
 #' @param ctd_dir Filepath to directory with .hex and .xmlcon files

@@ -1,4 +1,4 @@
-#' Make sections from upcasts and downcasts
+#' Make sections from upcasts and downcasts (SBEDP workflow)
 #' 
 #' Split cnv file data into upcast and downcast files based on haul event times using the SBEDataProcessing 'section' module. This is used because SBEDataProcessing split methods result in profiles that include samples while the trawl was being towed along the bottom, which results in sampling artifacts in the bottom depth bin.
 #' 

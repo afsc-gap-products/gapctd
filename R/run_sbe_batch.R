@@ -1,4 +1,4 @@
-#' Function to run SBE19 batch file
+#' Function to run SBE19 batch file (SBEDP workflow)
 #' 
 #' Wrapper function to run SBE DataProcessing on Windows using command line in the local directory. Run after gapctd::setup_ctd_processing_dir().
 #' 

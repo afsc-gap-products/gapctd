@@ -1,4 +1,4 @@
-#' Process a .cnv file using the gapctd workflow
+#' Process a .cnv file using the R workflow (R workflow)
 #' 
 #' Run all gapctd modules in order to process data from a cnv file.
 #' 
@@ -11,7 +11,7 @@
 
 run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America/Anchorage") {
   
-  # # Load haul data
+  # Load haul data
   # haul_df <- readRDS(file = here::here("output", paste0("HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
   # 
   # # Load CTD data
@@ -31,12 +31,12 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   # Lowpass and median filters -----------------------------------------------------------------------
   x <- x |> 
     gapctd:::append_haul_data(haul_df = haul_df) |>
+    gapctd:::median_filter(variables = c("temperature", "conductivity"),
+                           window = c(5,5)) |>
     gapctd:::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
                             time_constant = c(0.5, 0.5, 1),
                             precision = c(4, 6, 3),
-                            freq_n = 0.25) |>
-    gapctd:::median_filter(variables = c("temperature", "conductivity"),
-                           window = c(5,5))
+                            freq_n = 0.25)
   
   # Return results based on typical settings
   if("typical" %in% return_stages) {
@@ -160,6 +160,7 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
       gapctd:::bin_average(by = "depth", bin_width = 1)
     
     downcast_binned@metadata[['ctm']] <- ctm_pars
+    downcast_binned@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
   }
   
   if(!is.null(upcast)) {
@@ -171,6 +172,7 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
     gapctd:::bin_average(by = "depth", bin_width = 1)
   
   upcast_binned@metadata[['ctm']] <- ctm_pars
+  upcast_binned@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
   
   }
   
@@ -180,27 +182,92 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   }
   
   
-  # Inversion check ----------------------------------------------------------------------------------
+  # Check/correct density inversion; check if data are complete  -----------------------------------
   
   if(!is.null(downcast_binned)) {
     downcast_binned <- downcast_binned |>
       gapctd:::check_density_inversion(threshold  = -1e-4, 
                                        threshold_method = "bv", 
-                                       correct_inversion = TRUE)  
+                                       correct_inversion = TRUE) |>
+      gapctd:::qc_check(prop_max_flag = 0.1,
+                        prop_min_bin = 0.9)
   }
 
   if(!is.null(upcast_binned)) {
     upcast_binned <- upcast_binned |>
       gapctd:::check_density_inversion(threshold  = -1e-4, 
                                        threshold_method = "bv", 
-                                       correct_inversion = TRUE)  
+                                       correct_inversion = TRUE) |>
+      gapctd:::qc_check(prop_max_flag = 0.1,
+                        prop_min_bin = 0.9)
   }  
 
   if("final" %in% return_stages) {
     output_list[["downcast"]] <- downcast_binned
     output_list[["upcast"]] <- upcast_binned
+    output_list[["bottom"]] <- onbottom
   }
   
   return(output_list)
   
+}
+
+
+#' Wrapper function for run_ctd (R workflow)
+#' 
+#' Runs run_ctd() on all cnv files in a filepath.
+#' 
+#' @param cnv_dir_path Path to directory containing cnv files to be processed.
+#' @param processing_method Name of processing method; for saving output.
+#' @param haul_df Optional. data.frame containing haul data from RACEBASE. Must provide arguments for vessel and cruise if not provided.
+#' @param vessel Optional. Vessel code as a 1L numeric vector.
+#' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
+#' @param channel Optional. RODBC channel; only used when haul_df = NULL.
+#' @return Writes rds files with cast data to /output/[processing_method]
+#' @noRd
+
+wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
+                               processing_method,
+                               haul_df = NULL,
+                               vessel = NULL,
+                               cruise = NULL,
+                               channel = NULL) {
+  stopifnot("wrapper_run_gapctd: Output path does not exist. Make sure output/[processing_method] was created with gapctd::setup_gapctd_directory()." = dir.exists(here::here("output", processing_method)))
+  stopifnot("wrapper_run_gapctd: cnv path does not exist. Make sure cnv_dir_path was created with gapctd::setup_gapctd_directory()." = dir.exists(cnv_dir_path))
+  
+  if(is.null(haul_df)) {
+    if(is.null(channel)) {
+      channel <- gapctd::get_connected()
+    }
+    
+    haul_df <- gapctd:::get_haul_data(channel = channel,
+                                      vessel = vessel,
+                                      cruise = cruise,
+                                      tzone = "America/Anchorage")
+  }
+  
+  # Input and output files
+  cnv_files <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = TRUE)
+  cnv_short <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = FALSE)
+  rds_files <- gsub(pattern = ".cnv", replacement = ".rds", x = cnv_short)
+  
+  message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
+  
+  for(II in 1:length(cnv_files)) {
+    
+    if(!file.exists(here::here("output", rds_files[II]))) {
+      message(paste0("Processing ", cnv_short[II]))
+      # Load CTD data
+      ctd_dat <- read.oce(file = cnv_files[II])
+      
+      processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
+                                           haul_df = haul_df, 
+                                           return_stages = c("final"), 
+                                           ctd_tz = "America/Anchorage")
+      
+      saveRDS(processed_oce, file = here::here("output", processing_method, rds_files[II]))
+    } else {
+      message(paste0("skipping ", cnv_short[II]))
+    }
+  }
 }

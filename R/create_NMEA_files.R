@@ -1,4 +1,4 @@
-#' Create NMEA files with LAT/LON for Derive TEOS-10
+#' Create NMEA files with LAT/LON for Derive TEOS-10 (SBEDP workflow)
 #'
 #' Function to retrieve haul data from RACEBASE or a csv file and generate NMEA (.txt) files that match .cnv file names. Function dependencies: getPass, RODBC, oce
 #'

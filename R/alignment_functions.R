@@ -1,4 +1,4 @@
-#' Estimate time adjustment for Align CTD
+#' Estimate time adjustment for Align CTD (SBEDP workflow)
 #' 
 #' Find the time adjustment that maximizes correlations of first time difference (dx/dt) between variables, similar to Ullman and Hebert (2014) and Dever et al. (2020). 
 #' 
@@ -73,7 +73,7 @@ estimate_alignment <- function(var1, var2, time1, time2, time2_adjustments = seq
 }
 
 
-#' Wrapper function around estimate_alignment
+#' Wrapper function around estimate_alignment (SBEDP workflow)
 #' 
 #' Estimate alignment for a channel
 #' 
@@ -155,7 +155,7 @@ run_alignment_calcs <- function(profile_files = sort(c(list.files(here::here("ou
                     profile_rate = prof_rate))
 }
 
-#' Correlation between two channels
+#' Correlation between two channels (R workflow)
 #' 
 #' Calculate correlation coefficient between two channels (e.g. temperature and conductivity)
 #' 
@@ -192,7 +192,7 @@ channel_correlation <- function(x, exclude_flag = TRUE, c1 = "temperature", c2 =
 }
 
 
-#' Estimate channel alignment parameter
+#' Estimate channel alignment parameter (R workflow)
 #'
 #' Estimate optimal alignment parameter for a channel (e.g. "temperature") within a range of candidate alignment offsets. The 'best' alignment is taken to be the one that maximizes the correlation between channels.
 #' 

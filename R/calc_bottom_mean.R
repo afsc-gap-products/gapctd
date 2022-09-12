@@ -1,4 +1,4 @@
-#' Calculate station bottom temperature and salinity
+#' Calculate station bottom temperature and salinity (SBEDP workflow)
 #' 
 #' Use the OCE package to retrieve CTD bottom data from cnv files and calculate mean temperature and salinity. Run after haul events have been populated to metadata and before calc_surface_mean().
 #' 

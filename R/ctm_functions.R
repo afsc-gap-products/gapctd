@@ -1,4 +1,4 @@
-#' Optimize cell thermal mass correction parameters
+#' Optimize cell thermal mass correction parameters (R workflow)
 #' 
 #' Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the path distance of the salinity profile
 #' 
@@ -61,7 +61,7 @@ optim_ctm_pars <- function(dc = NULL,
 
 
 
-#' Objective function for cell thermal mass calculations
+#' Objective function for cell thermal mass calculations (R workflow)
 #' 
 #' Calculates area between temperature and salinity curves when upcast and downcast data are provided. Calculates path distance for salinity if only downcast or upcast is provided.
 #' 
@@ -171,7 +171,7 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 
 
 
-#' Calculate area between temperature-salinity curves
+#' Calculate area between temperature-salinity curves (R workflow)
 #' 
 #' @param dc downcast oce object
 #' @param uc upcast oce object
@@ -256,7 +256,7 @@ ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
 
 
 
-#' Perform conductivity cell thermal inertia correction and compare upcasts to downcasts
+#' Perform conductivity cell thermal inertia correction and compare upcasts to downcasts (SBEDP workflow)
 #' 
 #' Calculates conductivity cell thermal intertia correction using ctm_par_a(), ctm_par_b(), and ctm_correct_c_t(), and recalculates salinity for paired upcasts and downcasts. If argument obj_fn is set to area, the function calculates and return the value of an objective function which is the area between upcast and downcast temperature-salinity curves in 1 dbar pressure bins. If obj_fn = "none," returns a data.frame with upcast and downcast temperature, conductivity, corrected conductivity, and salinity in 1 dbar pressure bins.
 #' 
@@ -446,7 +446,7 @@ ctm_adjust_tsarea <- function(alpha = 0.04,
   }
 }
 
-#' Wrapper function around ctm_adjust_tsarea
+#' Wrapper function around ctm_adjust_tsarea (SBEDP workflow)
 #' 
 #' Estimate conductivity cell thermal inertia correction using ctm_adjust_tsarea and bbmle::mle2().
 #' 
@@ -740,7 +740,7 @@ run_ctm_adjust_tsarea <- function(profile_files = sort(c(list.files(here::here("
   
 }
 
-#' Calculate conductivity cell thermal intertia correction
+#' Calculate conductivity cell thermal intertia correction (SBEDP workflow)
 #' 
 #' Calculates conductivity cell thermal intertia correction based on alpha, inverse beta (tau[CTM]), scan interval, temperature, and conductivity, then recalculates salinity. 
 #' 
@@ -797,7 +797,7 @@ ctm_adjust_path <- function(alpha = 0.04,
 }
 
 
-#' Wrapper function around ctm_adjust_path
+#' Wrapper function around ctm_adjust_path (SBEDP workflow)
 #' 
 #' Estimate conductivity cell thermal inertia correction using ctm_adjust_path and bbmle::mle2().
 #' 
