@@ -41,6 +41,7 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
   
   # Empty directory
   repl_cnv_files <- list.files(path = here::here("cnv"), full.names = TRUE)
+  repl_rds_files <- list.files(path = here::here("output", processing_method), full.names = TRUE, pattern = ".rds")
   repl_bad_cnv_files <- list.files(path = here::here("bad_cnv"), full.names = TRUE)
   repl_meta_files <- list.files(path = here::here("metadata"), full.names = TRUE)
   repl_data_files <-  list.files(path = here::here("data"), full.names = TRUE, pattern = ".hex")
@@ -50,6 +51,7 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
   
   message(paste0("Deleting files from working directory:\n", 
                  length(repl_cnv_files), " cnv\n", 
+                 length(repl_rds_files), " rds\n", 
                  length(repl_bad_cnv_files), " bad_cnv\n", 
                  length(repl_meta_files), " metadata\n", 
                  length(repl_data_files), " .hex data\n",
@@ -58,6 +60,7 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
                  length(repl_bat_files), " .bat\n"))
   
   file.remove(repl_cnv_files)
+  file.remove(repl_rds_files)
   file.remove(repl_bad_cnv_files)
   file.remove(repl_meta_files)
   file.remove(repl_data_files)
