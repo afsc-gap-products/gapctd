@@ -7,7 +7,7 @@
 #' @param prop_min_bin Minimum proportion of depth bins with data relative to depth. Default = 0.875
 #' @param time_diff_max Maximum allowable time difference between on-bottom event and cast time.
 #' @return Returns oce object with metadata$flags field updated with flags
-#' @noRd
+#' @export
 
 qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max = 45) {
   
@@ -36,7 +36,7 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
 #' @param x oce object
 #' @param review variable to review ("density", "temperature" or "salinity"). Default = "density"
 #' @return An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.
-#' @noRd
+#' @export
 
 qc_flag_interpolate <- function(x, review = c("density")) {
   
@@ -193,7 +193,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
 #' @param append_char Characters to append to output file name.
 #' @param review Passed to qc_flag_interpolate(). Variable to review ("density", "temperature" or "salinity"). Default = "density"
 #' @return rds files with flagged conductivity and temperature removed and interpolated; derived quantities recalculated.
-#' @noRd
+#' @export
 
 wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd"),
                                      output_dir_path = NULL,

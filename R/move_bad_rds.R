@@ -4,7 +4,7 @@
 #' 
 #' @param rds_dir_path File path to directory containing rds files to be evaluated.
 #' @return Bad files moved to /bad_cnv/
-#' @noRd
+#' @export
 
 move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
   
