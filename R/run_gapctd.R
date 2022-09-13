@@ -84,6 +84,11 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
     gapctd:::section_oce(by = "datetime",
                          cast_direction = "bottom")
   
+  if(!is.null(onbottom)) {
+    onbottom <- gapctd:::derive_eos(x = onbottom)
+  }
+    
+  
   if("split" %in% return_stages) {
     output_list[["split_downcast"]] <- downcast |>
       gapctd:::derive_eos() |>
@@ -258,7 +263,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     if(!file.exists(here::here("output", rds_files[II]))) {
       message(paste0("Processing ", cnv_short[II]))
       # Load CTD data
-      ctd_dat <- read.oce(file = cnv_files[II])
+      ctd_dat <- oce::read.oce(file = cnv_files[II])
       
       processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
                                            haul_df = haul_df, 
