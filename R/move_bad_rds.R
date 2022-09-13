@@ -13,6 +13,8 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
   n_moved <- 0
   
   for(hh in 1:length(rds_path)) {
+    
+    message("move_bad_rds: Checking ", rds_path[hh])
     eval_deployment <- readRDS(rds_path[hh])
     
     dc_flag <- TRUE
@@ -22,7 +24,7 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
     
     uc_flag <- TRUE
     if("upcast" %in% names(eval_deployment)) {
-      uc_flag <- any(as.logical(eval_deployment$downcast@metadata$flags))
+      uc_flag <- any(as.logical(eval_deployment$upcast@metadata$flags))
     }
     
     # Move bad rds file
