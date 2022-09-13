@@ -377,7 +377,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
   
   for(jj in interp_col_index) {
     
-    out_dat[jj] <- oce.approx(x = out_dat$bin, 
+    out_dat[jj] <- oce::oce.approx(x = out_dat$bin, 
                                             y = out_dat[, jj],
                                             xout = out_dat$bin,
                                             method = "unesco")
