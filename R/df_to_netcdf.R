@@ -776,9 +776,6 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
                                     readRDS(file = ii))
   }
   
-  # metadata_df$deploy_id <- gsub(pattern = "_raw.*", "", x = metadata_df$cnv_file_name)
-  
-  
   metadata_df <- dplyr::bind_rows(
     metadata_df |>
       dplyr::mutate(deploy_id = paste0(deploy_id, "_downcast"),
