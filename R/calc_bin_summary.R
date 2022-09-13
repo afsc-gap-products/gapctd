@@ -1,4 +1,4 @@
-#' Calculate variable averages from accepted profiles, by depth/pressure bin
+#' Calculate variable averages from accepted profiles, by depth/pressure bin (SBEDP workflow)
 #' 
 #' Calculate temperature from the 1 db pressure bin.
 #' 

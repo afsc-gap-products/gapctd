@@ -2,7 +2,7 @@
 % Please edit documentation in R/remove_bad_station_data.R
 \name{remove_bad_station_data}
 \alias{remove_bad_station_data}
-\title{Filter out bad bottom and surface data and cnvs}
+\title{Filter out bad bottom and surface data and cnvs (SBEDP workflow)}
 \usage{
 remove_bad_station_data(
   haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),

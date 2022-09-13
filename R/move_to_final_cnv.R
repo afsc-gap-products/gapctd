@@ -1,4 +1,4 @@
-#' Move best method files to final_cnv
+#' Move best method files to final_cnv (SBEDP workflow)
 #' 
 #' Move best method files based on spikiness of profiles.
 #' 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_sbe_batch.R
 \name{run_sbe_batch}
 \alias{run_sbe_batch}
-\title{Function to run SBE19 batch file}
+\title{Function to run SBE19 batch file (SBEDP workflow)}
 \usage{
 run_sbe_batch(
   vessel,

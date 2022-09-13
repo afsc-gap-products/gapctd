@@ -1,4 +1,4 @@
-#' Compare methods based on spikes and make multipanel plots
+#' Compare methods based on spikes and make multipanel plots (SBEDP workflow)
 #' 
 #' Compare processing methods based on spikiness of profiles and make multipanel plots to compare methods/workflows for processing CTD data.
 #' 
@@ -344,6 +344,24 @@ compare_methods <- function(prefix,
             geom_path(data = best_profiles_df, 
                       aes(x = temperature, 
                           y = pressure, 
+                          color = direction),
+                      size = rel(1.4)) +
+            ggtitle(comb_df$deploy[1]) +
+            facet_wrap(~label) +
+            scale_y_reverse() +
+            scale_color_manual(values = c("red", "black")) +
+            theme_bw())
+    dev.off()
+    
+    png(file = here::here("plots", paste0(prefix, "_tsarea_", kk, ".png")), width = 8, height = 8, units = "in", res = 300)
+    print(ggplot() +
+            geom_path(data = comb_df, 
+                      aes(x = temperature, 
+                          y = salinity, 
+                          color = direction)) +
+            geom_path(data = best_profiles_df, 
+                      aes(x = temperature, 
+                          y = salinity, 
                           color = direction),
                       size = rel(1.4)) +
             ggtitle(comb_df$deploy[1]) +

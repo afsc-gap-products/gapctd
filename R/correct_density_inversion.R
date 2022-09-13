@@ -1,4 +1,4 @@
-#' Flag density inversion and correct
+#' Flag density inversion and correct (SBEDP workflow)
 #' 
 #' Screen profiles for density inversions and flag based on a threshold criteria based on density (kg m^-3) or Brunt-Vaisala buoyancy frequency (N^2), s^-2. Either  Optional: remove missing value and interpolate.
 #' 
@@ -8,7 +8,6 @@
 #' @param cnv_dir File path to cnv directory.
 #' @return Writes flagged and corrected data to csvs in output/density_corrected.
 #' @export
-#' 
 
 correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv", correct_inversion = TRUE, cnv_dir = NULL, ...) {
   
@@ -133,7 +132,7 @@ correct_density_inversion <- function(threshold  = NULL, threshold_method = "bv"
 
 
 
-#' Check density inversion
+#' Check density inversion (R workflow)
 #' 
 #' @param x oce object
 #' @param threshold Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.

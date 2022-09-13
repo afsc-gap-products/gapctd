@@ -1,4 +1,4 @@
-#' Flag slowdowns and reversals
+#' Flag slowdowns and reversals (R workflow)
 #' 
 #' Flags slowdowns and reversals in profiles based on minimum speed.
 #' 
@@ -47,7 +47,7 @@ loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
 
 
 
-#' Median window filter
+#' Median window filter (R workflow)
 #' 
 #' Applies a median window filter to variables.
 #' 
@@ -86,7 +86,7 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 
 
 
-#' Temperature sensor thermal inertia correction
+#' Temperature sensor thermal inertia correction (R workflow)
 #' 
 #' Discrete time filter to correct thermal inertia errors in temperature sensor measurements.
 #'
@@ -135,7 +135,7 @@ temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
 
 
 
-#' Conductivity cell thermal inertia correction
+#' Conductivity cell thermal inertia correction (R workflow)
 #' 
 #' Discrete time filter to correct thermal inertia errors in conductivity cell measurements.
 #' 
@@ -171,7 +171,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 
 
 
-#' Align variables in time
+#' Align variables in time (R workflow)
 #' 
 #' Offset variables in time to account for lags in sensor responses. Variables are interpolated so offsets do not need to be multiples of the scan interval.
 #' 
@@ -179,10 +179,11 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param variables Character vector of data variable names to offset.
 #' @param offset Numeric vector of offsets (in seconds) to add.
 #' @param method Interpolation method for the approx function to use.
+#' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
 #' @noRd
 
-align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear") {
+align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear", na_rm = FALSE) {
   
   in_timeS <- x@data$timeS
   
@@ -199,6 +200,14 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
     x@data$flag[is.na(x@data[[match(variables[ii], names(x@data))]])] <- -1
   }
   
+  if(na_rm) {
+    x@data <- x@data |>
+      as.data.frame() |>
+      dplyr::filter(flag != -1) |>
+      as.list()
+  }
+  
+  
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
   x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
   
@@ -207,7 +216,7 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
 
 
 
-#' Low-pass filter
+#' Low-pass filter (R workflow)
 #' 
 #' Low-pass filter variables based on time using the filter from SBE data processing.
 #' 
@@ -268,7 +277,7 @@ lowpass_filter <- function(x,
 
 
 
-#' Derive EOS and GSW
+#' Derive EOS and GSW (R workflow)
 #' 
 #' Derive salinity, absolute salinity, sound speed, density, and buoyancy frequency.
 #' 
@@ -314,7 +323,7 @@ derive_eos <- function(x, precision = NULL) {
 
 
 
-#' Bin average: Average variables by depth/pressure bin
+#' Bin average: Average variables by depth/pressure bin (R workflow)
 #' 
 #' Calculate averages for variables by depth or pressure bin.
 #'
@@ -413,7 +422,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
 
 
 
-#' Section
+#' Section (R workflow)
 #' 
 #' Extract scans within a time or scan interval from an oce object. Time- is time elapsed since measurements started.
 #' 
@@ -483,7 +492,7 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
 
 
 
-#' Get haul data from RACEBASE
+#' Get haul data from RACEBASE (R workflow)
 #' 
 #' Retrieves vessel, cruise, haul, event times, locations, bottom depth, gear temperature, surface temperature, performance, haul type, and haul start time from racebase and race_data.
 #' 
@@ -498,7 +507,7 @@ get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "Ame
   
   haul_dat <- RODBC::sqlQuery(channel = channel,
                               query =   paste0(
-                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
+                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.stationid, a.gear_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
 from racebase.haul a, race_data.cruises b, race_data.events c, race_data.hauls d, race_data.event_types e
 where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), ") and a.vessel = b.vessel_id and a.cruise = b.cruise and c.haul_id = d.haul_id and d.haul = a.haul and d.cruise_id = b.cruise_id and c.event_type_id = e.event_type_id and c.event_type_id in (3,6,7)")) |>
     dplyr::mutate(DATE_TIME = lubridate::force_tz(DATE_TIME, tzone = "UTC"),
@@ -529,7 +538,7 @@ where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), 
 
 
 
-#' Find cast times and metadata for a haul
+#' Find cast times and metadata for a haul (R workflow)
 #' 
 #' Find haul metadata for a file and appends to oce object.
 #' 
@@ -551,10 +560,10 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
   
   
   # Create cast times data.frame
-  cast_times <- data.frame(dc_start = sel_haul$ON_BOTTOM - 3600,
+  cast_times <- data.frame(dc_start = x@metadata$startTime,
                            dc_end = sel_haul$ON_BOTTOM + 30,
                            uc_start = sel_haul$HAULBACK - 30,
-                           uc_end = sel_haul$HAULBACK + 3600)
+                           uc_end = x@metadata$startTime + max(x@data$timeS))
   
   sel_haul <- cbind(sel_haul, cast_times)
 
@@ -572,6 +581,12 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
   sel_haul$missing_section <- any(c(n_down, n_up, n_bottom) < 1)
   sel_haul$filename <- x@metadata$filename
   
+  sel_haul$deploy_id <- gsub(pattern = paste0(here::here("cnv"), "/"), 
+                                replacement = "", 
+                                x = gsub(pattern = "\\\\", replacement = "/", x = sel_haul$filename))
+  sel_haul$deploy_id <- gsub(pattern = ".cnv", replacement = "", x = sel_haul$deploy_id)
+  sel_haul$deploy_id <- gsub(pattern = "_raw", replacement = "", x = sel_haul$deploy_id)
+  
   x@metadata$race_metadata <- sel_haul
   
   return(x)
@@ -579,7 +594,7 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
 
 
 
-#' Assign metadata fields
+#' Assign metadata fields (R workflow)
 #' 
 #' Assign metadata fields from x@metadata@race_metadata to the object.
 #' 
@@ -595,12 +610,14 @@ assign_metadata_fields <- function(x, cast_direction) {
   stopifnot("assign_metadata_field: Argument 'cast_direction' must be \"downcast\", \"upcast\", or \"bottom\"" = cast_direction %in% c("downcast", "upcast", "bottom"))
   
   x@metadata$waterDepth <- x@metadata$race_metadata$BOTTOM_DEPTH
+  x@metadata$gearDepth <- x@metadata$race_metadata$GEAR_DEPTH
   x@metadata$ship <- x@metadata$race_metadata$VESSEL
   x@metadata$deploymentType <- "trawl"
   x@metadata$cruise <- x@metadata$race_metadata$CRUISE
   x@metadata$date <- as.Date(x@metadata$startTime)
   x@metadata$institute <- "NOAA Alaska Fisheries Science Center"
   x@metadata$scientist <- "Groundfish Assessment Program, Resource Assessment and Conservation Engineering Division"
+  x@metadata$cast_direction <- cast_direction
   
   if(cast_direction == "downcast") {
     x@metadata$latitude <- x@metadata$race_metadata$START_LATITUDE
@@ -620,11 +637,3 @@ assign_metadata_fields <- function(x, cast_direction) {
   return(x)
   
 }
-
-#' Derive EOS
-#' 
-
-
-#' Derive GSW
-#' 
-

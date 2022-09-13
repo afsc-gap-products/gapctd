@@ -1,4 +1,4 @@
-#' Filter out bad bottom and surface data and cnvs
+#' Filter out bad bottom and surface data and cnvs (SBEDP workflow)
 #' 
 #' Filter out data bottom and surface averages that show evidence of operational error and equipment failure (e.g. CTD on while on deck, not reaching haul depth). Run after calc_surface_mean().
 #' 

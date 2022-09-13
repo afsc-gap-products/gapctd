@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{get_haul_data}
 \alias{get_haul_data}
-\title{Get haul data from RACEBASE}
+\title{Get haul data from RACEBASE (R workflow)}
 \usage{
 get_haul_data(
   channel,

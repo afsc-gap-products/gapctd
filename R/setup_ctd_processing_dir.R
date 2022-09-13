@@ -1,4 +1,4 @@
-#' Function to copy CTD files from survey directory to a working directory
+#' Function to copy CTD files from survey directory to a working directory (SBEDP workflow)
 #' 
 #' @param ctd_dir Character vector. indicating the filepath to the CTD directory.
 #' @param output_dir Character vector indicating directory for saving the output. Default NA uses the current directory.

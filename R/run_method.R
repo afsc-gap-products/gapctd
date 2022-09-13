@@ -1,4 +1,4 @@
-#' Process files using a specified batch processing method
+#' Process files using a specified batch processing method (SBEDP workflow)
 #' 
 #' Function to run a batch processing workflow and save output. Useful for comparing batch processing workflows using different sets of SBE data processing modules.
 #' 

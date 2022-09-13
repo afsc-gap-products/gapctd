@@ -1,4 +1,4 @@
-#' Change AlignCTD parameters
+#' Change AlignCTD parameters (SBEDP workflow)
 #' 
 #' Change SBE Data Processing alignment module parameters in a .psa file.
 #' 
@@ -42,7 +42,7 @@ change_psa_alignctd <- function(variable, alignment, psa_path = NULL) {
   
 }
 
-#' Change CellTM parameters
+#' Change CellTM parameters (SBEDP workflow)
 #' 
 #' Change SBE Data Processing conductivity cell thermal inertia correction module parameters in a .psa file.
 #' 

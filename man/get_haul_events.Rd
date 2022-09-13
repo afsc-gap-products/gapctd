@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get_haul_events}
 \alias{get_haul_events}
-\title{Retrieve haul event times from RACEBASE}
+\title{Retrieve haul event times from RACEBASE (SBEDP workflow)}
 \usage{
 get_haul_events(
   haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),

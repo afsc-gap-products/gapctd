@@ -1,4 +1,4 @@
-#' Calculate fixed depth temperature and salinity
+#' Calculate fixed depth temperature and salinity (SBEDP workflow)
 #' 
 #' Use the OCE package to retrieve CTD near-surface data from upcast or downcast cnv files and calculate mean temperature and salinity for a fixed depth. Run after calc_bottom_mean().
 #' 

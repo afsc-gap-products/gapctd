@@ -2,7 +2,7 @@
 % Please edit documentation in R/correct_density_inversion.R
 \name{correct_density_inversion}
 \alias{correct_density_inversion}
-\title{Flag density inversion and correct}
+\title{Flag density inversion and correct (SBEDP workflow)}
 \usage{
 correct_density_inversion(
   threshold = NULL,

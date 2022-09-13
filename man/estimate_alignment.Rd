@@ -2,7 +2,7 @@
 % Please edit documentation in R/alignment_functions.R
 \name{estimate_alignment}
 \alias{estimate_alignment}
-\title{Estimate time adjustment for Align CTD}
+\title{Estimate time adjustment for Align CTD (SBEDP workflow)}
 \usage{
 estimate_alignment(
   var1,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/move_binned_cnv.R
 \name{move_binned_cnv}
 \alias{move_binned_cnv}
-\title{Function to move final .cnv files to bad_cnv and final_cnv directories}
+\title{Function to move final .cnv files to bad_cnv and final_cnv directories (SBEDP workflow)}
 \usage{
 move_binned_cnv()
 }

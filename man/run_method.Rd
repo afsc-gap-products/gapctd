@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_method.R
 \name{run_method}
 \alias{run_method}
-\title{Process files using a specified batch processing method}
+\title{Process files using a specified batch processing method (SBEDP workflow)}
 \usage{
 run_method(
   vessel,

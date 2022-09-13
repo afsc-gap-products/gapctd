@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_cast_sections.R
 \name{make_cast_sections}
 \alias{make_cast_sections}
-\title{Make sections from upcasts and downcasts}
+\title{Make sections from upcasts and downcasts (SBEDP workflow)}
 \usage{
 make_cast_sections(
   haul_metadata_path = list.files(paste0(getwd(), "/metadata/"), full.names = TRUE),

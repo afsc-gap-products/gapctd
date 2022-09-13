@@ -2,7 +2,7 @@
 % Please edit documentation in R/setup_ctd_processing_dir.R
 \name{setup_ctd_processing_dir}
 \alias{setup_ctd_processing_dir}
-\title{Function to copy CTD files from survey directory to a working directory}
+\title{Function to copy CTD files from survey directory to a working directory (SBEDP workflow)}
 \usage{
 setup_ctd_processing_dir(ctd_dir, output_dir = NA, ctd_unit, recursive = TRUE)
 }
@@ -16,5 +16,5 @@ setup_ctd_processing_dir(ctd_dir, output_dir = NA, ctd_unit, recursive = TRUE)
 \item{unit}{Character vector indicating model of the unit. Options = sbe19plus, sbe19. Won't run if the wrong unit is used.}
 }
 \description{
-Function to copy CTD files from survey directory to a working directory
+Function to copy CTD files from survey directory to a working directory (SBEDP workflow)
 }

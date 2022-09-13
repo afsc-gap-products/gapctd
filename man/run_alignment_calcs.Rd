@@ -2,7 +2,7 @@
 % Please edit documentation in R/alignment_functions.R
 \name{run_alignment_calcs}
 \alias{run_alignment_calcs}
-\title{Wrapper function around estimate_alignment}
+\title{Wrapper function around estimate_alignment (SBEDP workflow)}
 \usage{
 run_alignment_calcs(
   profile_files = sort(c(list.files(here::here("output", "sbe19plus_v0"), full.names =

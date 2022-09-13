@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_NMEA_files.R
 \name{create_NMEA_files}
 \alias{create_NMEA_files}
-\title{Create NMEA files with LAT/LON for Derive TEOS-10}
+\title{Create NMEA files with LAT/LON for Derive TEOS-10 (SBEDP workflow)}
 \usage{
 create_NMEA_files(
   rodbc_channel = NA,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/move_to_final_cnv.R
 \name{move_to_final_cnv}
 \alias{move_to_final_cnv}
-\title{Move best method files to final_cnv}
+\title{Move best method files to final_cnv (SBEDP workflow)}
 \usage{
 move_to_final_cnv(best_df)
 }

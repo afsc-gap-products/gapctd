@@ -2,7 +2,7 @@
 % Please edit documentation in R/calc_bin_summary.R
 \name{calc_bin_summary}
 \alias{calc_bin_summary}
-\title{Calculate variable averages from accepted profiles, by depth/pressure bin}
+\title{Calculate variable averages from accepted profiles, by depth/pressure bin (SBEDP workflow)}
 \usage{
 calc_bin_summary(
   accepted_dir = here::here("output", "accepted_profiles"),

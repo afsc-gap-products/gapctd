@@ -2,7 +2,7 @@
 % Please edit documentation in R/change_psa_parameters.R
 \name{change_psa_alignctd}
 \alias{change_psa_alignctd}
-\title{Change AlignCTD parameters}
+\title{Change AlignCTD parameters (SBEDP workflow)}
 \usage{
 change_psa_alignctd(variable, alignment, psa_path = NULL)
 }
