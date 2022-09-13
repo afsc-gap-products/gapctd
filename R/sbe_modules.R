@@ -507,7 +507,7 @@ get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "Ame
   
   haul_dat <- RODBC::sqlQuery(channel = channel,
                               query =   paste0(
-                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.gear_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
+                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.stationid, a.gear_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
 from racebase.haul a, race_data.cruises b, race_data.events c, race_data.hauls d, race_data.event_types e
 where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), ") and a.vessel = b.vessel_id and a.cruise = b.cruise and c.haul_id = d.haul_id and d.haul = a.haul and d.cruise_id = b.cruise_id and c.event_type_id = e.event_type_id and c.event_type_id in (3,6,7)")) |>
     dplyr::mutate(DATE_TIME = lubridate::force_tz(DATE_TIME, tzone = "UTC"),
@@ -580,6 +580,12 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
   
   sel_haul$missing_section <- any(c(n_down, n_up, n_bottom) < 1)
   sel_haul$filename <- x@metadata$filename
+  
+  sel_haul$deploy_id <- gsub(pattern = paste0(here::here("cnv"), "/"), 
+                                replacement = "", 
+                                x = gsub(pattern = "\\\\", replacement = "/", x = sel_haul$filename))
+  sel_haul$deploy_id <- gsub(pattern = ".cnv", replacement = "", x = sel_haul$deploy_id)
+  sel_haul$deploy_id <- gsub(pattern = "_raw", replacement = "", x = sel_haul$deploy_id)
   
   x@metadata$race_metadata <- sel_haul
   
