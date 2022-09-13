@@ -7,7 +7,7 @@
 #' @param window Numeric vector (1L). Number of samples to use to calculate speeds for each observation.
 #' @param cast_direction Character vector ("downcast", "upcast") denoting the cast direction.
 #' @return oce object with flags updated to denote scans for which speeds were below the threshold.
-#' @noRd
+#' @export
 
 loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
   half_window <- (window-1)/2
@@ -55,7 +55,7 @@ loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
 #' @param variables Character vector of data variable names to filter.
 #' @param window Numeric vector of windows (i.e. number of scans to use to calculate medians)
 #' @return oce object with channels filtered
-#' @noRd
+#' @export
 
 median_filter <- function(x, variables = c("temperature", "conductivity"), window = c(5,5)) {
   
@@ -95,7 +95,7 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 #' @param beta_C Beta parameter for conductivity correction (1L numeric)
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @return oce object with correction applied to temperature.
-#' @noRd
+#' @export
 
 temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
   
@@ -145,7 +145,7 @@ temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @param method Method to use for conductivity cell thermal mass correction. Currently only "seabird" (i.e. equation in SBE Data Processing)
 #' @return oce object with correction applied to conductivity.
-#' @noRd
+#' @export
 
 conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = "seabird") {
   
@@ -181,7 +181,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param method Interpolation method for the approx function to use.
 #' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
-#' @noRd
+#' @export
 
 align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear", na_rm = FALSE) {
   
@@ -224,7 +224,7 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
 #' @param variables Character vector of data variable names to filter.
 #' @param time_constant Numeric vector of time constants for filters (in seconds).
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
-#' @noRd
+#' @export
 
 lowpass_filter <- function(x,
                            variables = c("temperature", "conductivity", "pressure"),
@@ -283,7 +283,7 @@ lowpass_filter <- function(x,
 #' 
 #' @param x oce object
 #' @param precision Optional named numeric vector with precision (decimal places) for variables.
-#' @noRd
+#' @export
 
 derive_eos <- function(x, precision = NULL) {
   
@@ -335,7 +335,7 @@ derive_eos <- function(x, precision = NULL) {
 #' @param interpolate_missing Interpolate variables when there are no good data for a depth/pressure bin.
 #' @param missing_latitude Latitude in decimal degrees to use for depth estimation if oce object does not contain latitude.
 #' @return oce object with variables binned and 'flag' column removed.
-#' @noRd
+#' @export
 
 bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, exclude_bad_flag = TRUE, interpolate_missing = TRUE, missing_latitude = 55) {
   
@@ -432,7 +432,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
 #' @param end Numeric or POSIXct. End time or scan to include.
 #' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
 #' @return An oce object that only includes variables that were collected within the time/scan interval.
-#' @noRd
+#' @export
 
 section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_direction = NULL) {
   
@@ -546,7 +546,7 @@ where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), 
 #' @param haul_df data.frame containing haul metadata
 #' @param ctd_tz timezone for the ctd as a character vector or numeric
 #' @return A data.frame with haul metadata and cast times.
-#' @noRd
+#' @export
 
 append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
   # Assign CTD timezone in oce metadata

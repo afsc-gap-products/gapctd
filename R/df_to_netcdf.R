@@ -645,7 +645,7 @@ make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "acce
 #' @param fun Function to apply to variable vectors.
 #' @param vars Variables to apply function to. Automatically assigned when NULL (default)
 #' @return A data.frame with variables calculated and race_metadata if provided (x@@metadata$race_metadata)
-#' @noRd
+#' @export
 
 calc_bottom_mean_oce <- function(x, 
                        prefix = "mean_bottom_", 
@@ -693,7 +693,7 @@ calc_bottom_mean_oce <- function(x,
 #' @param in_pattern Character vector search pattern for input files.
 #' @param output_path Output file path (.rds) where file should be saved.
 #' @return data.frame containing metadata for all deployments.
-#' @noRd
+#' @export
 
 make_metadata_file <- function(rds_dir_path = here::here("output", "gapctd"), 
                                in_pattern = "_qc.rds", 
@@ -775,9 +775,6 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
     metadata_df <- dplyr::bind_rows(metadata_df,
                                     readRDS(file = ii))
   }
-  
-  # metadata_df$deploy_id <- gsub(pattern = "_raw.*", "", x = metadata_df$cnv_file_name)
-  
   
   metadata_df <- dplyr::bind_rows(
     metadata_df |>

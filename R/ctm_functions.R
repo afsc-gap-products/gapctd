@@ -9,7 +9,7 @@
 #' @param start_alpha_C Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).
 #' @param start_beta_C Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).
 #' @return A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
-#' @noRd
+#' @export
 
 optim_ctm_pars <- function(dc = NULL, 
                            uc = NULL,
@@ -70,7 +70,7 @@ optim_ctm_pars <- function(dc = NULL,
 #' @param alpha_C Conductivity cell thermal inertia correction alpha parameter, passed to gapctd::conductivity_correction()
 #' @param beta_C Conductivity cell thermal inertia correction beta parameter, passed to gapctd::conductivity_correction()
 #' @return Area between T-S curves or path distance of salinity curve as a 1L numeric vector 
-#' @noRd
+#' @export
 
 ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
   
@@ -181,7 +181,7 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 #' @param uc upcast oce object
 #' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
-#' @noRd
+#' @export
 
 ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
   

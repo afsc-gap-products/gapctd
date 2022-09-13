@@ -165,7 +165,7 @@ run_alignment_calcs <- function(profile_files = sort(c(list.files(here::here("ou
 #' @param c2 Name of second channel as a character vector. Default = "conductivity"
 #' @param min_pressure Minimum pressure to use for correlations
 #' @return Correlation coefficient (1L numeric)
-#' @noRd
+#' @export
 
 channel_correlation <- function(x, exclude_flag = TRUE, c1 = "temperature", c2 = "conductivity", min_pressure = 4, cor_method = "pearson") {
   
@@ -203,7 +203,7 @@ channel_correlation <- function(x, exclude_flag = TRUE, c1 = "temperature", c2 =
 #' @param cor_method Correlation method, passed to gapctd::channel_correlation().
 #' @param ... Additional arguments passed to gapctd::channel_correlation()
 #' @return A named numeric vector containing the estimated optimal offset ("best_offset") and correlation for the offset ("best_corr")
-#' @noRd
+#' @export
 
 optim_align_par <- function(x, cast_direction, variable = "temperature", offsets = seq(-1,1, 0.01), cor_method = "pearson", ...) {
 

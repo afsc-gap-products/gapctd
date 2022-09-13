@@ -7,19 +7,9 @@
 #' @param return_stages Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "final"). Can return multiple stages simultaneously. Default = "final"
 #' @param ctd_tz timezone for CTD as a character vector or numeric that is valid for POSIXct.
 #' @return A list of oce objects at stages of processing specified in return_stages.
-#' @noRd
+#' @export
 
 run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America/Anchorage") {
-  
-  # Load haul data
-  # haul_df <- readRDS(file = here::here("output", paste0("HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
-  # 
-  # # Load CTD data
-  # ctd_dat <- read.oce(file = here::here("data", "sbe19plus_01908103_2021_06_03_94_0001_raw.cnv"))
-  # x = ctd_dat
-  # haul_df = haul_df
-  # return_stages = c("final")
-  # ctd_tz = "America/Anchorage"
   
   output_list <- list()
   
@@ -229,7 +219,7 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
 #' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
 #' @param channel Optional. RODBC channel; only used when haul_df = NULL.
 #' @return Writes rds files with cast data to /output/[processing_method]
-#' @noRd
+#' @export
 
 wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                processing_method,
