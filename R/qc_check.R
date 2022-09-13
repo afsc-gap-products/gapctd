@@ -191,12 +191,14 @@ qc_flag_interpolate <- function(x, review = c("density")) {
 #' @param rds_dir_path Filepath to directory containing rds files to be reviewed.
 #' @param output_path Optional. Filepath to output directory. If not provided, files are written to the rds_dir_path directory.
 #' @param append_char Characters to append to output file name.
+#' @param review Passed to qc_flag_interpolate(). Variable to review ("density", "temperature" or "salinity"). Default = "density"
 #' @return rds files with flagged conductivity and temperature removed and interpolated; derived quantities recalculated.
 #' @noRd
 
 wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd"),
                                      output_dir_path = NULL,
-                                     append_char = "_qc") {
+                                     append_char = "_qc",
+                                     review = "density") {
   
   output_dir_path <- ifelse(is.null(output_dir_path), rds_dir_path, output_dir_path)
   
@@ -213,11 +215,11 @@ wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd
       ctd_dat <- readRDS(file = rds_files[JJ])
       
       if("downcast" %in% names(ctd_dat)) {
-        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast)
+        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review)
       }
       
       if("upcast" %in% names(ctd_dat)) {
-        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast)
+        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast, review = review)
       }
       
       saveRDS(ctd_dat, file = output_files[JJ])
