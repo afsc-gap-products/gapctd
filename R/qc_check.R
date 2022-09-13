@@ -20,6 +20,9 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
   x@metadata$flags[['time_flag']] <- ifelse(abs(difftime(x@metadata$startTime, 
                                                              x@metadata$race_metadata$dc_end, units = "mins")) > time_diff_max, TRUE, FALSE)
   
+  x@processingLog$time <- c(x@processingLog$time, Sys.time())
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  
   return(x)
   
 }
@@ -172,6 +175,9 @@ qc_flag_interpolate <- function(x, review = c("density")) {
     }
   }
   
+  x@processingLog$time <- c(x@processingLog$time, Sys.time())
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  
   return(x)
   
 }
@@ -194,9 +200,9 @@ wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd
   
   output_dir_path <- ifelse(is.null(output_dir_path), rds_dir_path, output_dir_path)
   
-  rds_files <- list.files(rds_dir_path, pattern = ".rds", full.names = TRUE)
-  rds_short <- list.files(rds_dir_path, pattern = ".rds", full.names = FALSE)
-  output_files <- here::here(output_dir_path,  gsub(pattern = ".rds", 
+  rds_files <- list.files(rds_dir_path, pattern = "_raw.rds", full.names = TRUE)
+  rds_short <- list.files(rds_dir_path, pattern = "_raw.rds", full.names = FALSE)
+  output_files <- here::here(output_dir_path,  gsub(pattern = "_raw.rds", 
                                                 replacement = paste0(append_char, ".rds"), 
                                                 x = rds_short))
   
