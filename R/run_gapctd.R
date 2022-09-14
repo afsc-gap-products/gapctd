@@ -244,23 +244,33 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
   # Input and output files
   cnv_files <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = TRUE)
   cnv_short <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = FALSE)
-  rds_files <- gsub(pattern = ".cnv", replacement = ".rds", x = cnv_short)
+  rds_files <- here::here("output", processing_method, gsub(pattern = ".cnv", replacement = ".rds", x = cnv_short))
   
   message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
   
   for(II in 1:length(cnv_files)) {
     
-    if(!file.exists(here::here("output", rds_files[II]))) {
-      message(paste0("Processing ", cnv_short[II]))
+    if(!file.exists(rds_files[II])) {
+      message(paste0("wrapper_run_gapctd: Processing ", cnv_short[II]))
       # Load CTD data
       ctd_dat <- oce::read.oce(file = cnv_files[II])
+      
+      if(length(ctd_dat@data$timeS) < 1000) {
+        message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient data"))
+        next
+      }
+      
+      if(abs(diff(range(ctd_dat@data$pressure))) < 5) {
+        message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient pressure range (", abs(diff(range(ctd_dat@data$pressure))), ")."))
+        next
+      }
       
       processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
                                            haul_df = haul_df, 
                                            return_stages = c("final"), 
                                            ctd_tz = "America/Anchorage")
       
-      saveRDS(processed_oce, file = here::here("output", processing_method, rds_files[II]))
+      saveRDS(processed_oce, file = rds_files[II])
     } else {
       message(paste0("skipping ", cnv_short[II]))
     }
