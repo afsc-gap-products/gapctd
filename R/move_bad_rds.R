@@ -47,13 +47,13 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
       
       if(dc_flag & "downcast" %in% names(eval_deployment) & !uc_flag) {
         eval_deployment <- eval_deployment[-which(names(eval_deployment) == "downcast")]
-        out_path <- gsub(pattern = ".rds", replacement = "_uc.rds", x = rds_path[hh])
+        out_path <- gsub(pattern = "_raw.rds", replacement = "_uc_raw.rds", x = rds_path[hh])
         cond <- TRUE
       }
       
       if(uc_flag & "upcast" %in% names(eval_deployment) & !dc_flag) {
         eval_deployment <- eval_deployment[-which(names(eval_deployment) == "upcast")]
-        out_path <- gsub(pattern = ".rds", replacement = "_dc.rds", x = rds_path[hh])
+        out_path <- gsub(pattern = "_raw.rds", replacement = "_dc_raw.rds", x = rds_path[hh])
         cond <- TRUE
       }
       
