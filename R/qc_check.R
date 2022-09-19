@@ -125,6 +125,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
       plot(x@data$temperature, -1*x@data$pressure,
            xlab = "Temperature",
            ylab = "Pressure",
+           col = "red",
            main = "Left-click on points to be removed then press 'Esc'")
       abline(h = -1, lty = 2)
       lines(x = x@data$temperature, y = -1*x@data$pressure)
@@ -158,6 +159,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
       plot(x@data$salinity, -1*x@data$pressure,
            xlab = "Salinity",
            ylab = "Pressure",
+           col = "darkgreen",
            main = "Left-click on points to be removed then press 'Esc'")
       abline(h = -1, lty = 2)
       lines(x = x@data$salinity, y = -1*x@data$pressure)
@@ -184,7 +186,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
 
 
 
-#' Wrapper for qc_flag_interpolate
+#' Wrapper for qc_flag_interpolate (R workflow)
 #' 
 #' Visually inspect and interpolate errors. See documentation for gapctd:::qc_flag_interpolate()
 #' 
@@ -208,14 +210,40 @@ wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd
                                                 replacement = paste0(append_char, ".rds"), 
                                                 x = rds_short))
   
+  dc_files <- here::here(output_dir_path,  
+                         gsub(pattern = "_raw.rds", 
+                              replacement = "_dc_final.rds", 
+                              x = rds_short))
+  uc_files <- here::here(output_dir_path,  
+                         gsub(pattern = "_raw.rds", 
+                              replacement = "_uc_final.rds", 
+                              x = rds_short))
+
   for(JJ in 1:length(rds_files)) {
     if(!file.exists(output_files[JJ])) {
-      message(paste0("Processing ", rds_short[JJ]))
+      
       # Load CTD data
       ctd_dat <- readRDS(file = rds_files[JJ])
       
+      if(file.exists(dc_files[JJ])) {
+        message("Skipping downcast from", rds_short[JJ])
+        ctd_dat <- ctd_dat[-which(names(ctd_dat) == c("downcast"))]
+      }
+      
+      if(file.exists(uc_files[JJ])) {
+        message("Skipping downcast from", rds_short[JJ])
+        ctd_dat <- ctd_dat[-which(names(ctd_dat) == "upcast")]
+      }
+      
+      if(!any(c("upcast", "downcast") %in% names(ctd_dat))) {
+        message(paste0("skipping ", rds_short[JJ]))
+        next
+      }
+      
+      message(paste0("Processing ", rds_short[JJ]))
+      
       if("downcast" %in% names(ctd_dat)) {
-        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review)
+          ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review)
       }
       
       if("upcast" %in% names(ctd_dat)) {
