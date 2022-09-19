@@ -8,54 +8,117 @@
 #' @param optim_maxit Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.
 #' @param start_alpha_C Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).
 #' @param start_beta_C Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).
+#' @param default_parameters Named numeric vector of default parameters. Defaults is c(alpha_C = 0.04, beta_C = 0.125).
 #' @return A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
 #' @export
 
 optim_ctm_pars <- function(dc = NULL, 
                            uc = NULL,
                            optim_method = "L-BFGS-B",
-                           optim_maxit = 500,
-                           start_alpha_C = 0.04,
-                           start_beta_C = 1/8,
+                           start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
+                           start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
+                           default_parameters = c(alpha_C = 0.04, beta_C = 0.125), 
                            ...) {
   
+  both_casts <- !any(is.null(dc), is.null(uc))
+  
+  start_pars <- expand_grid(start_alpha_C = start_alpha_C  ,
+                            start_beta_C = start_beta_C,
+                            obj = 1e7)
+  
+  # Find good starting values
+  for(kk in 1:nrow(start_pars)) {
+    if(both_casts) {
+      start_pars$obj_down[kk] <- ctm_obj(dc = dc,
+                                         alpha_C = start_pars$start_alpha_C[kk],
+                                         beta_C = start_pars$start_beta_C[kk])
+      
+      start_pars$obj_up[kk] <- ctm_obj(uc = uc,
+                                       alpha_C = start_pars$start_alpha_C[kk],
+                                       beta_C = start_pars$start_beta_C[kk])
+    }
+    
+    start_pars$obj[kk] <- ctm_obj(dc = dc,
+                                  uc = uc,
+                                  alpha_C = start_pars$start_alpha_C[kk],
+                                  beta_C = start_pars$start_beta_C[kk])
+  }
+  
+  start_index_both <- which.min(start_pars$obj)
+  
+  if(both_casts) {
+    start_index_down <- which.min(start_pars$obj_down)
+    start_index_up <- which.min(start_pars$obj_up)
+  }
+  
   est_pars <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
-                              start = list(alpha_C = start_alpha_C,
-                                           beta_C = start_beta_C),
-                              data = list(dc = downcast,
-                                          uc = upcast),
-                              method = optim_method,
+                              start = list(alpha_C = start_pars$start_alpha_C[start_index_both],
+                                           beta_C = start_pars$start_beta_C[start_index_both]),
+                              data = list(dc = dc,
+                                          uc = uc),
+                              method = "L-BFGS-B",
                               lower = c(alpha_C = 0, beta_C = 1/45),
-                              upper = c(alpha_C = 1, beta_C = 1),
+                              upper = c(alpha_C = 1, beta_C = 10),
                               control = list(reltol = 1e-4, 
                                              trace = 1,
-                                             maxit = optim_maxit,
-                                             parscale = c(alpha_C = 0.01, beta_C = 0.1))), 
+                                             parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_down]), # Estimate parameter scaling for optimization
+                                                          beta_C = 0.1))),
                   silent = TRUE)
   
+  est_pars_down <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
+                                   start = list(alpha_C = start_pars$start_alpha_C[start_index_down],
+                                                beta_C = start_pars$start_beta_C[start_index_down]),
+                                   data = list(dc = dc),
+                                   method = "L-BFGS-B",
+                                   lower = c(alpha_C = 0, beta_C = 1/45),
+                                   upper = c(alpha_C = 1, beta_C = 10),
+                                   control = list(reltol = 1e-4, 
+                                                  trace = 1,
+                                                  parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_down]), # Estimate parameter scaling for optimization
+                                                               beta_C = 0.1))),
+                       silent = TRUE)
   
-  if(any(class(est_pars) == "try-error", try(est_pars@details$convergence != 0, silent = TRUE))) {
-    est_pars <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
-                                start = list(alpha_C = 0.08,
-                                             beta_C = 1/12),
-                                data = list(dc = downcast,
-                                            uc = upcast),
-                                method = optim_method,
-                                lower = c(alpha_C = 0, beta_C = 1/45),
-                                upper = c(alpha_C = 1, beta_C = 1),
-                                control = list(reltol = 1e-4, 
-                                               trace = 1,
-                                               parscale = c(alpha_C = 0.01, beta_C = 0.1))), 
-                    silent = TRUE)
+  est_pars_up <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
+                                 start = list(alpha_C = start_pars$start_alpha_C[start_index_up],
+                                              beta_C = start_pars$start_beta_C[start_index_up]),
+                                 data = list(uc = uc),
+                                 method = "L-BFGS-B",
+                                 lower = c(alpha_C = 0, beta_C = 1/45),
+                                 upper = c(alpha_C = 1, beta_C = 10),
+                                 control = list(reltol = 1e-4, 
+                                                trace = 1,
+                                                parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_down]),  # Estimate parameter scaling for optimization
+                                                             beta_C = 0.1))),
+                     silent = TRUE)
+  
+  conv_df <- data.frame(error = c(class(est_pars)[1] == "try-error",
+                                  class(est_pars_down)[1] == "try-error",
+                                  class(est_pars_up)[1] == "try-error"))
+  conv_df$convergence <- c(ifelse(!conv_df$error[1], est_pars@details$convergence == 0, FALSE),
+                           ifelse(!conv_df$error[2], est_pars_down@details$convergence == 0, FALSE),
+                           ifelse(!conv_df$error[3], est_pars_up@details$convergence == 0, FALSE))
+  
+  # Return estimate from both profiles
+  if(conv_df$convergence[1]) {
+    out <- est_pars@coef
+  } 
+  
+  # Return downcast estimates
+  if(!conv_df$convergence[1] & conv_df$convergence[2]) {
+    out <- est_pars_down@coef
   }
   
-  if(any(class(est_pars) == "try-error", try(est_pars@details$convergence != 0, silent = TRUE))) {
-    best_pars <- c(alpha_C = 0.04, beta_C = 0.125)
-  } else {
-    best_pars <- est_pars@coef
+  # Return upcast estimates
+  if(!conv_df$convergence[1] & conv_df$convergence[3]) {
+    out <- est_pars_up@coef
   }
   
-  return(best_pars)
+  # Return default
+  if(!conv_df$convergence[1] & conv_df$convergence[2] & !conv_df$convergence[3]) {
+    out <- default_parameters
+  }
+  
+  return(out)
   
 }
 
