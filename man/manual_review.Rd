@@ -2,7 +2,7 @@
 % Please edit documentation in R/manual_review.R
 \name{manual_review}
 \alias{manual_review}
-\title{Visually inspect profiles}
+\title{Visually inspect profiles (SBEDP workflow)}
 \usage{
 manual_review(csv_paths = NULL, threshold = -1e-05)
 }

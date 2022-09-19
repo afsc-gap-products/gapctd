@@ -1,4 +1,4 @@
-#' Manually flag and interpolate bad data
+#' Manually flag and interpolate bad data (SBEDP workflow)
 #' 
 #' Visually inspect plots of depth versus salinity, and depth versus pressure. Flag data for removal in a GUI and interpolate missing data. Write interpolated data to output/manual_flag
 #' 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/qc_check.R
 \name{wrapper_flag_interpolate}
 \alias{wrapper_flag_interpolate}
-\title{Wrapper for qc_flag_interpolate}
+\title{Wrapper for qc_flag_interpolate (R workflow)}
 \usage{
 wrapper_flag_interpolate(
   rds_dir_path = here::here("output", "gapctd"),

@@ -1,4 +1,4 @@
-#' Visually inspect profiles
+#' Visually inspect profiles (SBEDP workflow)
 #' 
 #' Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
 #' 
