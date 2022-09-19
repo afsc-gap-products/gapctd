@@ -22,7 +22,7 @@ optim_ctm_pars <- function(dc = NULL,
   
   both_casts <- !any(is.null(dc), is.null(uc))
   
-  start_pars <- expand_grid(start_alpha_C = start_alpha_C  ,
+  start_pars <- expand_grid(start_alpha_C = start_alpha_C,
                             start_beta_C = start_beta_C,
                             obj = 1e7)
   
