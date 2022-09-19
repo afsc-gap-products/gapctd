@@ -32,10 +32,9 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   if("typical" %in% return_stages) {
     
     output_list[["typical_downcast"]] <- x |>
-      gapctd:::align_var(x = downcast, 
-                         variables = "temperature", 
+      gapctd:::align_var(variables = "temperature", 
                          offset = -0.5, 
-                         interp_method = "linear")
+                         interp_method = "linear") |>
     gapctd:::assign_metadata_fields(cast_direction = "downcast") |>
       gapctd:::section_oce(by = "datetime",
                            cast_direction = "downcast") |>
@@ -45,10 +44,9 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
       gapctd:::bin_average(by = "depth", bin_width = 1)
     
     output_list[["typical_upcast"]] <- x |>
-      gapctd:::align_var(x = upcast, 
-                         variables = "temperature", 
+      gapctd:::align_var(variables = "temperature", 
                          offset = -0.5, 
-                         interp_method = "linear")
+                         interp_method = "linear") |>
     gapctd:::assign_metadata_fields(cast_direction = "upcast") |>
       gapctd:::section_oce(by = "datetime",
                            cast_direction = "upcast") |>
