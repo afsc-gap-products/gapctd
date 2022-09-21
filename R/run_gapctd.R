@@ -6,10 +6,11 @@
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
 #' @param return_stages Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "final"). Can return multiple stages simultaneously. Default = "final"
 #' @param ctd_tz timezone for CTD as a character vector or numeric that is valid for POSIXct.
+#' @param ctm_pars Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
 #' @return A list of oce objects at stages of processing specified in return_stages.
 #' @export
 
-run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America/Anchorage") {
+run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America/Anchorage", ctm_pars = list()) {
   
   output_list <- list()
   
@@ -135,19 +136,28 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   
   
   # Estimate conductivity cell thermal mass correction parameters ------------------------------------
-  ctm_pars <- gapctd:::optim_ctm_pars(dc = downcast, 
-                                      uc = upcast,
-                                      optim_method = "L-BFGS-B",
-                                      optim_maxit = 500,
-                                      start_alpha_C = 0.04,
-                                      start_beta_C = 1/8)
+  if(length(ctm_pars) == 0) {
+    ctm_pars <- gapctd:::optim_ctm_pars(dc = downcast, 
+                                        uc = upcast,
+                                        optim_method = "L-BFGS-B",
+                                        start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
+                                        start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
+                                        default_parameters = c(alpha_C = 0.04, beta_C = 0.125))
+    
+    ctm_alpha_C <- ctm_pars[['both']]['alpha_C']
+    ctm_beta_C <- ctm_pars[['both']]['beta_C']
+  } else {
+    message("run_gapctd: Using user-specified conductivity cell thermal inertia correction parameters.")
+    ctm_alpha_C <- ctm_pars['alpha_C']
+    ctm_beta_C <- ctm_pars['beta_C']
+  }
   downcast_binned <-NULL
   upcast_binned <- NULL
   
   if(!is.null(downcast)) {
     
     downcast_binned <- downcast |>
-      gapctd:::conductivity_correction(alpha_C = ctm_pars['alpha_C'], beta_C = ctm_pars['beta_C']) |>
+      gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C) |>
       gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
       gapctd:::derive_eos()|>
       gapctd:::bin_average(by = "depth", bin_width = 1)
@@ -159,7 +169,7 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   if(!is.null(upcast)) {
     
   upcast_binned <- upcast |>
-    gapctd:::conductivity_correction(alpha_C = ctm_pars['alpha_C'], beta_C = ctm_pars['beta_C']) |>
+    gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C) |>
     gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
     gapctd:::derive_eos() |>
     gapctd:::bin_average(by = "depth", bin_width = 1)

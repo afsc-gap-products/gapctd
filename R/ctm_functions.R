@@ -68,7 +68,8 @@ optim_ctm_pars <- function(dc = NULL,
   est_pars_down <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
                                    start = list(alpha_C = start_pars$start_alpha_C[start_index_down],
                                                 beta_C = start_pars$start_beta_C[start_index_down]),
-                                   data = list(dc = dc),
+                                   data = list(dc = dc,
+                                               uc = NULL),
                                    method = "L-BFGS-B",
                                    lower = c(alpha_C = 0, beta_C = 1/45),
                                    upper = c(alpha_C = 1, beta_C = 10),
@@ -81,7 +82,8 @@ optim_ctm_pars <- function(dc = NULL,
   est_pars_up <- try(bbmle::mle2(minuslogl = gapctd:::ctm_obj,
                                  start = list(alpha_C = start_pars$start_alpha_C[start_index_up],
                                               beta_C = start_pars$start_beta_C[start_index_up]),
-                                 data = list(uc = uc),
+                                 data = list(dc = NULL,
+                                             uc = uc),
                                  method = "L-BFGS-B",
                                  lower = c(alpha_C = 0, beta_C = 1/45),
                                  upper = c(alpha_C = 1, beta_C = 10),
@@ -91,31 +93,41 @@ optim_ctm_pars <- function(dc = NULL,
                                                              beta_C = 0.1))),
                      silent = TRUE)
   
-  conv_df <- data.frame(error = c(class(est_pars)[1] == "try-error",
+  conv_df <- data.frame(cast_direction = c("both", "downcast", "upcast"),
+                        error = c(class(est_pars)[1] == "try-error",
                                   class(est_pars_down)[1] == "try-error",
                                   class(est_pars_up)[1] == "try-error"))
   conv_df$convergence <- c(ifelse(!conv_df$error[1], est_pars@details$convergence == 0, FALSE),
                            ifelse(!conv_df$error[2], est_pars_down@details$convergence == 0, FALSE),
                            ifelse(!conv_df$error[3], est_pars_up@details$convergence == 0, FALSE))
   
+  out <- list()
   # Return estimate from both profiles
   if(conv_df$convergence[1]) {
-    out <- est_pars@coef
+    out[['both']] <- est_pars@coef
   } 
   
   # Return downcast estimates
   if(!conv_df$convergence[1] & conv_df$convergence[2]) {
-    out <- est_pars_down@coef
+    out[['both']] <- est_pars_down@coef
   }
   
   # Return upcast estimates
-  if(!conv_df$convergence[1] & conv_df$convergence[3]) {
-    out <- est_pars_up@coef
+  if(!conv_df$convergence[1]  & !conv_df$convergence[2] & conv_df$convergence[3]) {
+    out[['both']] <- est_pars_up@coef
   }
   
   # Return default
-  if(!conv_df$convergence[1] & conv_df$convergence[2] & !conv_df$convergence[3]) {
-    out <- default_parameters
+  if(!conv_df$convergence[1] & !conv_df$convergence[2] & !conv_df$convergence[3]) {
+    out[['both']] <- default_parameters
+  }
+  
+  if(conv_df$convergence[2]) {
+    out[['downcast']] <- est_pars_down@coef
+  }
+  
+  if(conv_df$convergence[3]) {
+    out[['upcast']] <- est_pars_up@coef
   }
   
   return(out)
