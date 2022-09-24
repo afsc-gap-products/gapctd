@@ -27,23 +27,6 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
                               replacement = "_uc_final.rds", 
                               x = rds_short))
   
-  accept_response <- function(valid_responses, prompt) {
-    
-    accept <- FALSE 
-    
-    while(!accept) {
-      entry <- readline(prompt = prompt)
-      
-      if((entry %in% valid_responses) & length(entry) == 1) {
-        accept <- TRUE
-      } else {
-        message("Invalid entry, please try again. Must be one of ", paste(valid_responses, sep = ", "))
-      }
-    }
-    return(entry)
-  }
-  
-  
   for(ii in 1:length(rds_files)) {
     
     if(!file.exists(out_files[ii])) {
@@ -86,8 +69,8 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
         abline(v = threshold, lwd = 3, col = "brown")
         abline(h = 1, lwd = 3, col = "black", lty = 2)
         
-        response <- accept_response(valid_responses = c(0, 1, "d", "u"),
-                                    prompt = "Accept none (0), both (1), downcast (d), upcast (u)?: ")
+        response <- gapctd:::accept_response(valid_responses = c(0, 1, "d", "u"),
+                                             prompt = "Accept none (0), both (1), downcast (d), upcast (u)?: ")
         
         keep_dc <- response %in% c(1,"d")
         keep_uc <- response %in% c(1,"u")
@@ -108,8 +91,8 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
         abline(v = threshold, lwd = 3, col = "brown")
         abline(h = 1, lwd = 3, col = "black", lty = 2)
         
-        response <- accept_response(valid_responses = c(0, "d"),
-                                    prompt = "Accept none (0) or downcast (d)?: ")
+        response <- gapctd:::accept_response(valid_responses = c(0, "d"),
+                                             prompt = "Accept none (0) or downcast (d)?: ")
         keep_dc <- response == "d"
         remove_rds <- !keep_dc
         
@@ -122,8 +105,8 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
         abline(v = threshold, lwd = 3, col = "brown")
         abline(h = 1, lwd = 3, col = "black", lty = 2)
         
-        response <- accept_response(valid_responses = c(0, "u"),
-                                    prompt = "Accept none (0) or upcast (u)?: ")
+        response <- gapctd:::accept_response(valid_responses = c(0, "u"),
+                                             prompt = "Accept none (0) or upcast (u)?: ")
         keep_uc <- response == "u"
         remove_rds <- !keep_uc
       }
