@@ -176,12 +176,12 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
     
     dc_flag <- TRUE
     if("downcast" %in% names(eval_deployment)) {
-      dc_flag <- any(as.logical(eval_deployment$downcast@metadata$flags))
+      dc_flag <- any(as.logical(eval_deployment$downcast@metadata$flags), na.rm = TRUE)
     }
     
     uc_flag <- TRUE
     if("upcast" %in% names(eval_deployment)) {
-      uc_flag <- any(as.logical(eval_deployment$upcast@metadata$flags))
+      uc_flag <- any(as.logical(eval_deployment$upcast@metadata$flags), na.rm = TRUE)
     }
     
     # Move bad rds file
@@ -223,5 +223,43 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
   }
   
   message(paste0("move_bad_rds: Moved ", n_moved, " files to /bad_cnv/"))
+  
+}
+
+
+
+#' Move good and bad profiles to final directories (R workflow)
+#' 
+#' @param rds_dir_path Path to directory containing rds files
+#' @export
+
+finalize_data <- function(rds_dir_path = here::here("output", processing_method)) {
+  
+  
+  bad_files <- c(list.files(rds_dir_path, pattern = "_uc_uc_raw.rds", full.names = TRUE),
+                 list.files(rds_dir_path, pattern = "_dc_dc_raw.rds", full.names = TRUE))
+  
+  if(length(bad_files) > 0) {
+    bad_cnv_path <- gsub(pattern = rds_dir_path,
+                         replacement = here::here("bad_cnv"),
+                         x = bad_files)
+    
+    message("finalize_data: Moving ", length(bad_files), " files to ", here::here("bad_cnv"))
+    
+    file.rename(from = bad_files, 
+                to = bad_cnv_path)    
+  }
+  
+  
+  good_files <- list.files(rds_dir_path, pattern = "_final.rds", full.names = TRUE)
+  
+  good_cnv_path <- gsub(pattern = rds_dir_path,
+                        replacement = here::here("final_cnv"),
+                        x = good_files)
+  
+  message("finalize_data: Moving ", length(good_files), " files to ", here::here("final_cnv"))
+  
+  file.rename(from = good_files, 
+              to = good_cnv_path)
   
 }
