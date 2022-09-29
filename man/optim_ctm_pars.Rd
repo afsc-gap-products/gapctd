@@ -8,9 +8,9 @@ optim_ctm_pars(
   dc = NULL,
   uc = NULL,
   optim_method = "L-BFGS-B",
-  optim_maxit = 500,
-  start_alpha_C = 0.04,
-  start_beta_C = 1/8,
+  start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
+  start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
+  default_parameters = c(alpha_C = 0.04, beta_C = 0.125),
   ...
 )
 }
@@ -21,11 +21,13 @@ optim_ctm_pars(
 
 \item{optim_method}{Optimization method for optim(). Default is the Broyden-Fletcher-Goldfarb-Shanno with constraints algorithm ("L-BFGS-B")}
 
-\item{optim_maxit}{Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.}
-
 \item{start_alpha_C}{Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).}
 
 \item{start_beta_C}{Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).}
+
+\item{default_parameters}{Named numeric vector of default parameters. Defaults is c(alpha_C = 0.04, beta_C = 0.125).}
+
+\item{optim_maxit}{Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.}
 }
 \value{
 A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.

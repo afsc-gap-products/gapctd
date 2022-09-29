@@ -481,157 +481,31 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
   x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
   
-  if(!(length(x@data[[1]]) > 1)) {
+  # Remove bad cast
+  bad_profile <- FALSE
+  if(!(length(x@data[[1]]) > 1) | !any(!is.na(x@data[[1]]))) {
+    # No scans
     warning(paste0("No scans in ", cast_direction))
+    bad_profile <- TRUE
+  } else {
+    if(cast_direction != "bottom") {
+      if(diff(range(x@data$pressure)) < 5) {
+        # Total pressure range less than 5 dbar
+        warning(paste0("Insufficient pressure range in ", cast_direction))
+        bad_profile <- TRUE
+      }
+      
+      if(min(x@data$pressure) > 5) {
+        # Minimum pressure greater than 5 dbar
+        warning(paste0("Insufficient pressure range in ", cast_direction))
+        bad_profile <- TRUE
+      }
+    }
+  }
+  
+  # Return NULL if the profile is bad
+  if(bad_profile) {
     x <- NULL
-  }
-  
-  return(x)
-  
-}
-
-
-
-#' Get haul data from RACEBASE (R workflow)
-#' 
-#' Retrieves vessel, cruise, haul, event times, locations, bottom depth, gear temperature, surface temperature, performance, haul type, and haul start time from racebase and race_data.
-#' 
-#' @param channel RODBC connection.
-#' @param vessel Vessel code as a 1L numeric vector.
-#' @param cruise Cruise code as a numeric vector (can include more than one).
-#' @param out_path Optional. Filepath for the output R data file (.rds).
-#' @param tzone Time zone for events and star_time.
-#' @return Returns a data.frame containing haul data. Also saves haul data to an rds file.
-
-get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "America/Anchorage") {
-  
-  haul_dat <- RODBC::sqlQuery(channel = channel,
-                              query =   paste0(
-                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.stationid, a.gear_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
-from racebase.haul a, race_data.cruises b, race_data.events c, race_data.hauls d, race_data.event_types e
-where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), ") and a.vessel = b.vessel_id and a.cruise = b.cruise and c.haul_id = d.haul_id and d.haul = a.haul and d.cruise_id = b.cruise_id and c.event_type_id = e.event_type_id and c.event_type_id in (3,6,7)")) |>
-    dplyr::mutate(DATE_TIME = lubridate::force_tz(DATE_TIME, tzone = "UTC"),
-                  START_TIME = lubridate::force_tz(START_TIME, tzone = tzone))
-  
-  haul_dat <- haul_dat |>
-    dplyr::inner_join(data.frame(EVENT_TYPE_ID = c(3,6,7),
-                                 EVENT_NAME = c("ON_BOTTOM", "HAULBACK", "OFF_BOTTOM")),
-                      by = "EVENT_TYPE_ID") |>
-    tidyr::pivot_wider(id_cols = c("VESSEL", "CRUISE", "HAUL"),
-                       names_from = c("EVENT_NAME"),
-                       values_from = "DATE_TIME") |>
-    dplyr::inner_join(haul_dat, by = c("VESSEL", "CRUISE", "HAUL")) |>
-    dplyr::select(-NAME, -EVENT_TYPE_ID, -DATE_TIME) |>
-    unique() |>
-    as.data.frame()
-  
-  if(is.null(out_path)) {
-    out_path <- here::here("output", paste0("HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds"))
-  }
-
-  message(paste0("get_haul_data: Writing haul data to ", out_path, ". ",   nrow(haul_dat), " haul records." ))
-  
-  saveRDS(haul_dat, file = out_path)
-  
-  return(haul_dat)
-}
-
-
-
-#' Find cast times and metadata for a haul (R workflow)
-#' 
-#' Find haul metadata for a file and appends to oce object.
-#' 
-#' @param x oce object
-#' @param haul_df data.frame containing haul metadata
-#' @param ctd_tz timezone for the ctd as a character vector or numeric
-#' @return A data.frame with haul metadata and cast times.
-#' @export
-
-append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
-  # Assign CTD timezone in oce metadata
-  delta_time <- abs(difftime(haul_df$START_TIME, 
-                             x@metadata$startTime,
-                             units = "secs"))
-  min_delta_time <- min(delta_time)
-  
-  # Select haul data for the closest haul
-  sel_haul <- haul_df[which.min(delta_time), ]
-  
-  
-  # Create cast times data.frame
-  cast_times <- data.frame(dc_start = x@metadata$startTime,
-                           dc_end = sel_haul$ON_BOTTOM + 30,
-                           uc_start = sel_haul$HAULBACK - 30,
-                           uc_end = x@metadata$startTime + max(x@data$timeS))
-  
-  sel_haul <- cbind(sel_haul, cast_times)
-
-  
-  # Check for upcasts and downcasts
-  scan_times <-   x@metadata$startTime + x@data$timeS
-  n_down <- sum(scan_times < sel_haul$dc_end)
-  n_up <- sum(scan_times > sel_haul$uc_start)
-  n_bottom <- sum(scan_times > sel_haul$dc_end & scan_times < sel_haul$uc_start)
-  
-  message(paste0("find_cast_times: Scans found: ",  n_down, " downcast, ",
-                 n_up, " upcast, ",
-                 n_bottom, " bottom." ))
-  
-  sel_haul$missing_section <- any(c(n_down, n_up, n_bottom) < 1)
-  sel_haul$filename <- x@metadata$filename
-  
-  sel_haul$deploy_id <- gsub(pattern = paste0(here::here("cnv"), "/"), 
-                                replacement = "", 
-                                x = gsub(pattern = "\\\\", replacement = "/", x = sel_haul$filename))
-  sel_haul$deploy_id <- gsub(pattern = ".cnv", replacement = "", x = sel_haul$deploy_id)
-  sel_haul$deploy_id <- gsub(pattern = "_raw", replacement = "", x = sel_haul$deploy_id)
-  
-  x@metadata$race_metadata <- sel_haul
-  
-  return(x)
-}
-
-
-
-#' Assign metadata fields (R workflow)
-#' 
-#' Assign metadata fields from x@metadata@race_metadata to the object.
-#' 
-#' @param x oce object that contains
-#' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
-#' @return oce object with metadata fields updated with latitude, longitude, ship, bottom depth, deployment type, cruise, date, institute, scientist.
-
-assign_metadata_fields <- function(x, cast_direction) {
-  
-  cast_direction <- tolower(cast_direction)
-  
-  stopifnot("assign_meta_data_field: x must contain a data.frame named race_metadata in the metadata field." = "race_metadata" %in% names(x@metadata))
-  stopifnot("assign_metadata_field: Argument 'cast_direction' must be \"downcast\", \"upcast\", or \"bottom\"" = cast_direction %in% c("downcast", "upcast", "bottom"))
-  
-  x@metadata$waterDepth <- x@metadata$race_metadata$BOTTOM_DEPTH
-  x@metadata$gearDepth <- x@metadata$race_metadata$GEAR_DEPTH
-  x@metadata$ship <- x@metadata$race_metadata$VESSEL
-  x@metadata$deploymentType <- "trawl"
-  x@metadata$cruise <- x@metadata$race_metadata$CRUISE
-  x@metadata$date <- as.Date(x@metadata$startTime)
-  x@metadata$institute <- "NOAA Alaska Fisheries Science Center"
-  x@metadata$scientist <- "Groundfish Assessment Program, Resource Assessment and Conservation Engineering Division"
-  x@metadata$cast_direction <- cast_direction
-  
-  if(cast_direction == "downcast") {
-    x@metadata$latitude <- x@metadata$race_metadata$START_LATITUDE
-    x@metadata$longitude <- x@metadata$race_metadata$START_LONGITUDE
-  }
-  
-  if(cast_direction == "upcast") {
-    x@metadata$latitude <- x@metadata$race_metadata$END_LATITUDE
-    x@metadata$longitude <- x@metadata$race_metadata$END_LONGITUDE
-  }
-  
-  if(cast_direction == "bottom") {
-    x@metadata$latitude <- (x@metadata$race_metadata$START_LATITUDE + x@metadata$race_metadata$END_LATITUDE)/2
-    x@metadata$longitude <- (x@metadata$race_metadata$START_LONGITUDE + x@metadata$race_metadata$END_LONGITUDE)/2
   }
   
   return(x)

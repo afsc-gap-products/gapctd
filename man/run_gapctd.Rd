@@ -8,7 +8,8 @@ run_gapctd(
   x,
   haul_df,
   return_stages = c("final"),
-  ctd_tz = "America/Anchorage"
+  ctd_tz = "America/Anchorage",
+  ctm_pars = list()
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ run_gapctd(
 \item{return_stages}{Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "final"). Can return multiple stages simultaneously. Default = "final"}
 
 \item{ctd_tz}{timezone for CTD as a character vector or numeric that is valid for POSIXct.}
+
+\item{ctm_pars}{Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.}
 }
 \value{
 A list of oce objects at stages of processing specified in return_stages.
