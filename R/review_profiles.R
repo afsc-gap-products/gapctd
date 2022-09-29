@@ -18,18 +18,23 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
                                x = rds_short))
   
   dc_files <- here::here(rds_dir_path, 
-                          gsub(pattern = in_pattern, 
-                               replacement = "_dc_final.rds", 
-                               x = rds_short))
+                         gsub(pattern = in_pattern, 
+                              replacement = "_dc_final.rds", 
+                              x = rds_short))
   
   uc_files <- here::here(rds_dir_path, 
                          gsub(pattern = in_pattern, 
                               replacement = "_uc_final.rds", 
                               x = rds_short))
   
+  dc_files2 <- gsub(pattern = "_uc", replacement = "_dc", x = uc_files)
+  uc_files2 <- gsub(pattern = "_dc", replacement = "_uc", x = dc_files)
+  
   for(ii in 1:length(rds_files)) {
     
-    if(!file.exists(out_files[ii])) {
+    output_exists <- any(file.exists(out_files[ii], dc_files[ii], uc_files[ii], dc_files2[ii], uc_files2[ii]))
+    
+    if(!output_exists) {
       
       message("review_profiles: Reviewing ", rds_files[ii])
       ctd_dat <- readRDS(file = rds_files[ii])
@@ -111,11 +116,11 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
         remove_rds <- !keep_uc
       }
       
-        if(remove_rds) {
-          message(paste0("manual_review: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
-          file.remove(rds_files[ii])
-        }
-
+      if(remove_rds) {
+        message(paste0("manual_review: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
+        file.remove(rds_files[ii])
+      }
+      
       # Keep only an upcast or a downcast
       if(!(keep_dc == keep_uc)) {
         if(keep_dc & !keep_uc) {
@@ -130,6 +135,14 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
         } 
       }
       
+    } else {
+      
+      file_vec <- c(out_files[ii], dc_files[ii], uc_files[ii], dc_files2[ii], uc_files2[ii])
+      
+      message("review_profiles: Skipping ", 
+              rds_files[ii], 
+              " because a final profile already exists for the deployment (", file_vec[which(file.exists(file_vec))],
+              ").")
     }
-  }
+  } 
 }

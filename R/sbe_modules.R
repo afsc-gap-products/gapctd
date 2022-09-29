@@ -483,7 +483,7 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
   
   # Remove bad cast
   bad_profile <- FALSE
-  if(!(length(x@data[[1]]) > 1)) {
+  if(!(length(x@data[[1]]) > 1) | !any(!is.na(x@data[[1]]))) {
     # No scans
     warning(paste0("No scans in ", cast_direction))
     bad_profile <- TRUE

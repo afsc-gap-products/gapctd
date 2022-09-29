@@ -42,7 +42,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
   
   for(II in 1:length(cnv_files)) {
     
-    if(any(!file.exists(rds_files[II]), !file.exists(rds_dc[II]), !file.exists(rds_uc[II]))) {
+    if(all(!file.exists(rds_files[II]), !file.exists(rds_dc[II]), !file.exists(rds_uc[II]))) {
       message(paste0("wrapper_run_gapctd: Processing ", cnv_short[II]))
       # Load CTD data
       ctd_dat <- oce::read.oce(file = cnv_files[II])
@@ -62,7 +62,13 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                            return_stages = c("final"), 
                                            ctd_tz = "America/Anchorage")
       
-      saveRDS(processed_oce, file = rds_files[II])
+      if(is.null(processed_oce)) {
+        message("wrapper_run_gapctd: No data in ", cnv_files[II], ". Removing cast.")
+        file.remove(cnv_files[II])
+        
+      } else {
+        saveRDS(processed_oce, file = rds_files[II])
+      }
     } else {
       message(paste0("skipping ", cnv_short[II]))
     }
@@ -141,10 +147,15 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
     gapctd:::assign_metadata_fields(cast_direction = "upcast") |>
     gapctd:::section_oce(by = "datetime",
                          cast_direction = "upcast")
-  
+
   onbottom <- x|> 
     gapctd:::section_oce(by = "datetime",
                          cast_direction = "bottom")
+  
+  # Return NULL if no data are available
+  if(is.null(downcast) & is.null(upcast) & is.null(onbottom)) {
+    return(NULL)
+  }
   
   if(!is.null(onbottom)) {
     onbottom <- gapctd:::derive_eos(x = onbottom)
@@ -399,6 +410,7 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
 #' @param x oce object that contains
 #' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
 #' @return oce object with metadata fields updated with latitude, longitude, ship, bottom depth, deployment type, cruise, date, institute, scientist.
+#' @export
 
 assign_metadata_fields <- function(x, cast_direction) {
   

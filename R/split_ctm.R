@@ -98,9 +98,9 @@ remedial_ctm <- function(rds_path = here::here("output", "gapctd"), haul_df, thr
   # Find _raw.rds that do not have corresponding _final.rds, _dc_final.rds, _uc_final.rds, _dc_raw.rds, or _uc_raw.rds
   check_final <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_final.rds")
   check_dc <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_dc_final.rds")
-  check_dc2 <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_dc_dc_final.rds")
+  check_dc2 <- gsub(x = check_dc, pattern = "_uc_", replacement = "_dc_")
   check_uc <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_uc_final.rds")
-  check_uc2 <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_uc_uc_final.rds")
+  check_uc2 <- gsub(x = check_uc, pattern = "_dc_", replacement = "_uc_")
   check_dc_raw <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_dc_raw.rds")
   check_uc_raw <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_uc_raw.rds")
   
