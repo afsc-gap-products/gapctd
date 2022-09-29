@@ -3114,3 +3114,211 @@ compare_methods <- function(prefix,
                 best_df = best_df))
   }
 }
+
+
+
+#' Make netCDF from profiles and metadata (SBEDP workflow)
+#' 
+#' Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise. Must provide the following global_attributes to the function in a list: references, id, cdm_data_type, cruise, institution, contributor_name, creator_name, creator_institution, creator_email,publisher, publisher_type, publisher_url, geospatial_bounds_crs, license, metadata_link, instrument, standard_name_vocabulary, Conventions, source.
+#' 
+#' @param fpath Path to accepted profiles.
+#' @param metadata_path Path to metadata files.
+#' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).
+#' @noRd
+
+make_ctd_ncdf <- function(fpath = c(list.files(path = here::here("output", "accepted_profiles"), full.names = TRUE)),
+                          metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE, full.names = TRUE)), 
+                          output_file = "output.nc",
+                          global_attributes = list(title = "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey",
+                                                   references = "CTD TEAM...",
+                                                   id = "doi",
+                                                   cdm_data_type = "Point",
+                                                   cruise = "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",
+                                                   institution = "NOAA Alaska Fisheries Science Center",
+                                                   contributor_name = "",
+                                                   creator_name = "",
+                                                   creator_institution = "NOAA Alaska Fisheries Science Center",
+                                                   creator_email = "",
+                                                   publisher = "NOAA Alaska Fisheries Science Center",
+                                                   publisher_type = "institution",
+                                                   publisher_url = "https://www.fisheries.noaa.gov/about/alaska-fisheries-science-center",
+                                                   geospatial_bounds_crs = "EPSG:4326",
+                                                   license = "These data may be redistributed and used without restriction.",
+                                                   metadata_link = "[DOI]",
+                                                   instrument = "CTD",
+                                                   Conventions = "CF-1.8",
+                                                   standard_name_vocabulary = "CF Standard Name Table v79",
+                                                   source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))) {
+  
+  req_attributes <- c("title", "references", "id", "cdm_data_type", "cruise", "institution", "contributor_name",
+                      "creator_name", "creator_institution", "creator_email","publisher", "publisher_type", 
+                      "publisher_url", "geospatial_bounds_crs", "license", "metadata_link", "instrument", "standard_name_vocabulary", "Conventions", "source")
+  
+  if(!all(req_attributes %in% names(global_attributes))) {
+    stop(paste0("make_ctd_ncdf: The follow required global attribute(s) were not found in global_attributes : ", req_attributes[which(!(req_attributes %in% names(global_attributes)))]))
+  }
+  
+  metadata_df <- data.frame()
+  all_profiles <- data.frame()
+  
+  for(ii in metadata_path) {
+    metadata_df <- dplyr::bind_rows(metadata_df,
+                                    read.csv(file = ii))
+  }
+  
+  metadata_df$deploy_id <- gsub(pattern = "_raw.*", "", x = metadata_df$cnv_file_name)
+  
+  
+  metadata_df <- dplyr::bind_rows(
+    metadata_df |>
+      dplyr::mutate(deploy_id = paste0(deploy_id, "_downcast"),
+                    CASTTIME = ON_BOTTOM) |>
+      dplyr::select(-END_LONGITUDE, -END_LATITUDE) |>
+      dplyr::rename(LONGITUDE = START_LONGITUDE,
+                    LATITUDE = START_LATITUDE),
+    metadata_df |>
+      dplyr::mutate(deploy_id = paste0(deploy_id, "_upcast"),
+                    CASTTIME = HAULBACK) |>
+      dplyr::select(-START_LONGITUDE, -START_LATITUDE) |>
+      dplyr::rename(LONGITUDE = END_LONGITUDE,
+                    LATITUDE = END_LATITUDE))
+  
+  for(jj in 1:length(fpath)) {
+    
+    new_profile <- read.csv(file = fpath[jj])
+    
+    if(any(table(new_profile$depth) > 1)) {
+      # Corner case. Not sure why this happens but it likely has to do with some issue that can occur with the identify function.
+      stop(paste0("make_ctd_ncdf: Duplicate depth values found in ", fpath[jj], ". Please remove duplicates from the file then rerun make_ctd_ncdf()."))
+    }
+    
+    if(jj > 1) {
+      if(new_profile$deploy_id[1] %in% all_profiles$deploy_id) {
+        stop(paste0("make_ctd_ncdf: ", fpath[jj], " cannot be added to profile_df because ", new_profile$deploy_id[1], " has already been added. Please check that deploy_id values are unique for each profile (i.e. no two hex/cnv files can have the same file name)."))
+      }
+    }
+    
+    profile_df <- dplyr::inner_join(new_profile, metadata_df, by = "deploy_id")
+    
+    all_profiles <- dplyr::bind_rows(all_profiles, profile_df)
+  }
+  
+  
+  # Convert times to UTC
+  all_profiles$CASTTIME <- as.POSIXct(all_profiles$CASTTIME, tz = "America/Anchorage")
+  all_profiles$CASTTIME <- lubridate::with_tz(all_profiles$CASTTIME, tz = "UTC")
+  
+  
+  # Define temporal coverage
+  time_coverage <- paste0(as.character(range(all_profiles$CASTTIME)), " UTC")
+  
+  
+  # Convert time to character for netCDF NC_STRING format
+  all_profiles$CASTTIME <- as.character(all_profiles$CASTTIME)
+  
+  # Rename columns to match CF naming conventions
+  names(all_profiles) <- tolower(names(all_profiles))
+  
+  all_profiles <- all_profiles |>
+    dplyr::rename(time = casttime,
+                  profile = deploy_id,
+                  stationid = stationid,
+                  vessel = vessel,
+                  cruise = cruise,
+                  haul = haul,
+                  haul_depth = ctd_mean_haul_depth,
+                  sea_floor_temperature = ctd_mean_bottom_temperature_c,
+                  sea_floor_salinity = ctd_mean_bottom_salinity_sa,
+                  sea_floor_practical_salinity = ctd_mean_bottom_salinity_sp,
+                  sea_floor_sound_speed_in_sea_water = ctd_mean_bottom_soundspeed,
+                  time_elapsed = times,
+                  sea_water_pressure = pressure,
+                  sea_water_temperature = temperature,
+                  sea_water_practical_salinity = salinity,
+                  sea_water_salinity = gsw_saa0,
+                  sea_water_density = gsw_densitya0,
+                  sea_water_electrical_conductivity = conductivity,
+                  sound_speed_in_sea_water = soundspeed,
+                  buoyancy_frequency = n2,
+                  quality_flag = flag)
+  
+  # Define spatial extent of data set using WKT polygon
+  geospatial_bounds <- cbind(
+    c(
+      min(all_profiles$latitude),
+      min(all_profiles$latitude),
+      max(all_profiles$latitude),
+      max(all_profiles$latitude),
+      min(all_profiles$latitude)),
+    c(
+      min(all_profiles$longitude), 
+      max(all_profiles$longitude),
+      max(all_profiles$longitude),
+      min(all_profiles$longitude),
+      min(all_profiles$longitude))
+  )
+  
+  geospatial_bounds <- paste0("POLYGON ((",
+                              paste(apply(X = geospatial_bounds, MARGIN = 1, FUN = paste, collapse = " "), collapse = ", "),
+                              "))")
+  
+  instrument_df <- all_profiles |>
+    dplyr::select(vessel, ctd_serial_number, ctd_calibration_date) |>
+    unique()
+  
+  # Set up global attributes list
+  g_attributes <- list(references = global_attributes$references,
+                       id = global_attributes$id,
+                       cruise =  global_attributes$cruise,
+                       institution = global_attributes$institution,
+                       contributor_name = global_attributes$contributor_name,
+                       creator_name = global_attributes$creator_name,
+                       creator_institution = global_attributes$creator_institution,
+                       creator_email = global_attributes$creator_email,
+                       publisher = global_attributes$publisher,
+                       publisher_type = global_attributes$publisher_type,
+                       publisher_url = global_attributes$publisher_url,
+                       geospatial_bounds = geospatial_bounds,
+                       geospatial_bounds_crs = global_attributes$geospatial_bounds_crs,
+                       license = global_attributes$license,
+                       metadata_link = global_attributes$metadata_link,
+                       date_created = as.character(Sys.Date()),
+                       instrument = global_attributes$instrument,
+                       Conventions = global_attributes$Conventions,
+                       standard_name_vocabulary = global_attributes$standard_name_vocabulary,
+                       cdm_data_type = global_attributes$cdm_data_type,
+                       time_coverage_start = time_coverage[1],
+                       time_coverage_end = time_coverage[2],
+                       source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))
+  
+  
+  # Create netCDF file
+  gapctd::df_to_ncdf(x = all_profiles,
+                     output_filename = output_file,
+                     dim_names_2d = c("latitude", "longitude", "time"),
+                     dim_units_2d = c("degree_north", "degree_east", "time"),
+                     dim_long_names_2d = c("Latitude (decimal degrees)", "Longitude (decimal degrees)", "Time in Coordinated Universal Time (UTC)"),
+                     var_names_2d = c("stationid", "profile", "vessel", "cruise", "haul", "haul_depth", "sea_floor_temperature", "sea_floor_practical_salinity", "sea_floor_salinity", "sea_floor_sound_speed_in_sea_water"),
+                     var_long_names_2d = c("AFSC/RACE/GAP Survey Station Name", "Profile Number and Direction", "AFSC/RACE/GAP Vessel Code", "AFSC/RACE/GAP Cruise Code", "Haul Number", "Mean towed depth of CTD during haul", "Mean bottom temperature (ITS-90) at towed depth", "Mean Practical Salinity (PSS-78) at towed depth", "Mean Absolute Salinity (TEOS-10 GSW) at towed depth", "Mean speed of sound during haul (Chen-Millero)"),
+                     var_units_2d = c("1", "1", "1", "1", "1", "m", "degree_C", "1", "g kg-1", "m s-1"),
+                     dim_names_3d = c("depth"),
+                     dim_long_names_3d = c("Depth in meters"),
+                     dim_positive_3d = list("depth" = "down"),
+                     dim_units_3d = c("m"),
+                     dim_sort_3d = c(TRUE),
+                     var_names_3d = c("time_elapsed", "sea_water_pressure", "sea_water_temperature", "sea_water_practical_salinity", "sea_water_salinity", "sea_water_density", "buoyancy_frequency", "sea_water_electrical_conductivity", "sound_speed_in_sea_water", "quality_flag"),
+                     var_long_names_3d = c("Time Elapsed Since Start of Deployment", "Strain Gauge Pressure", "ITS-90 Temperature", "PSS-78 Practical Salinity", "TEOS-10 GSW Absolute Salinity", "TEOS-10 GSW Density", "Squared Brunt-Vaisala Buoyancy Frequency", "Electrical Conductivity", "Speed of Sound (Chen-Millero)", "Data Quality Assurance Flag"),
+                     var_flag_values_3d = list("quality_flag" = c(-6,0,6,7)),
+                     var_flag_meanings_3d = list("quality_flag" = c("Interpolated value. Density inversion error detected based on buoyancy frequency and remains after automatic removal and interpolation of point.",
+                                                                    "Good quality, no issues detected.",
+                                                                    "Interpolated value. Density inversion error detected based on buoyancy frequency and corrected using automatic removal and interpolation of point.",
+                                                                    "Interpolated value. Point mannually flagged and removed during visual inspection then estimated through interpolation.")),
+                     var_units_3d = c("s", "dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-2", "S m-1)", "m s-1", "1"),
+                     instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel"),
+                     instrument_values = list(make_model = "Sea-Bird SBE19plus V2",
+                                              serial_number = instrument_df$ctd_serial_number,
+                                              calibration_date = instrument_df$ctd_calibration_date,
+                                              vessel = instrument_df$vessel),
+                     global_attributes = g_attributes)
+  
+}
