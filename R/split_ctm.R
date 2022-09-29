@@ -17,7 +17,7 @@ split_ctm <- function(rds_path, haul_df) {
     rds_downcast <- gsub(pattern = "_raw.rds", replacement = "_dc_raw.rds", x = rds_path)
   }
   
-  if(grepl(pattern = "_dc_", x = rds_path)) {
+  if(grepl(pattern = "_uc_", x = rds_path)) {
     rds_upcast <- rds_path
   } else {
     rds_upcast <- gsub(pattern = "_raw.rds", replacement = "_uc_raw.rds", x = rds_path)
