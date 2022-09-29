@@ -124,12 +124,12 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       # Keep only an upcast or a downcast
       if(!(keep_dc == keep_uc)) {
         if(keep_dc & !keep_uc) {
-          saveRDS(ctd_dat, 
+          saveRDS(ctd_dat[which(names(ctd_dat) %in% c("downcast", "bottom"))], 
                   gsub(pattern = "_final.rds", replacement = "_dc_final.rds",  x = out_files[ii]))
         } 
         
         if(!keep_dc & keep_uc) {
-          saveRDS(ctd_dat, 
+          saveRDS(ctd_dat[which(names(ctd_dat) %in% c("upcast", "bottom"))], 
                   gsub(pattern = "_final.rds", replacement = "_uc_final.rds",  x = out_files[ii]))
           
         } 
