@@ -53,5 +53,6 @@ doc/*.html
 /Presentation/
 /plots/
 /output/
+/analysis/
 
 *.nc
