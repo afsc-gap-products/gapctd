@@ -524,15 +524,26 @@ make_metadata_file <- function(rds_dir_path = here::here("output", "gapctd"),
 #' 
 #' Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise. Must provide the following global_attributes to the function in a list: references, id, cdm_data_type, cruise, institution, contributor_name, creator_name, creator_institution, creator_email,publisher, publisher_type, publisher_url, geospatial_bounds_crs, license, metadata_link, instrument, standard_name_vocabulary, Conventions, source.
 #' 
-#' @param fpath Path to accepted profiles.
-#' @param metadata_path Path to metadata files.
+#' @param cast_files Paths to accepted profiles.
+#' @param metadata_files Paths to metadata files.
 #' @param output_file Output filepath for netCDF file.
+#' @param precision Precision to use for variables as a named numeric vector.
 #' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).
 #' @export
 
-make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", processing_method), full.names = TRUE, pattern = "qc.rds")),
-                          metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE)), 
+make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv", processing_method), full.names = TRUE, pattern = "final.rds")),
+                          metadata_files = c(list.files(path = here::here("metadata"), full.names = TRUE)), 
                           output_file = "output.nc",
+                          precision = c(temperature = 4,
+                            conductivity = 6,
+                            salinity = 4,
+                            absolute_salinity = 4,
+                            sound_speed = 3,
+                            density = 3,
+                            pressure = 3,
+                            oxygen = 5,
+                            ph = 4,
+                            velocity = 3),
                           global_attributes = list(title = "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey",
                                                    references = "CTD TEAM...",
                                                    id = "doi",
@@ -565,7 +576,7 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
   metadata_df <- data.frame()
   all_profiles <- data.frame()
   
-  for(ii in metadata_path) {
+  for(ii in metadata_files) {
     metadata_df <- dplyr::bind_rows(metadata_df,
                                     readRDS(file = ii))
   }
@@ -584,9 +595,9 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
       dplyr::rename(LONGITUDE = END_LONGITUDE,
                     LATITUDE = END_LATITUDE))
   
-  for(jj in 1:length(fpath)) {
+  for(jj in 1:length(cast_files)) {
     
-    deployment_dat <- readRDS(file = fpath[jj])
+    deployment_dat <- readRDS(file = cast_files[jj])
     
     cast_dir <- c("downcast", "upcast")[c("downcast", "upcast") %in% names(deployment_dat)]
     
@@ -597,12 +608,12 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
       
       if(any(table(new_profile@data$depth) > 1)) {
         # Corner case. Not sure why this happens but it likely has to do with some issue that can occur with the identify function.
-        stop(paste0("make_ctd_ncdf: Duplicate depth values found in ", fpath[jj], ". Please remove duplicates from the file then rerun make_ctd_ncdf()."))
+        stop(paste0("make_ctd_ncdf: Duplicate depth values found in ", cast_files[jj], ". Please remove duplicates from the file then rerun make_ctd_ncdf()."))
       }
       
       if(jj > 1) {
         if(new_profile@metadata$race_metadata$deploy_id[1] %in% all_profiles$deploy_id) {
-          stop(paste0("make_ctd_ncdf: ", fpath[jj], " cannot be added to profile_df because ", new_profile@metadata$race_metadata$deploy_id[1], " has already been added. Please check that deploy_id values are unique for each profile (i.e. no two hex/cnv files can have the same file name)."))
+          stop(paste0("make_ctd_ncdf: ", cast_files[jj], " cannot be added to profile_df because ", new_profile@metadata$race_metadata$deploy_id[1], " has already been added. Please check that deploy_id values are unique for each profile (i.e. no two hex/cnv files can have the same file name)."))
         }
       }
       
@@ -618,12 +629,29 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
   # Define temporal coverage
   time_coverage <- paste0(as.character(range(all_profiles$CASTTIME)), " UTC")
   
-  
   # Convert time to character for netCDF NC_STRING format
   all_profiles$CASTTIME <- as.character(all_profiles$CASTTIME)
   
   # Rename columns to match CF naming conventions
   names(all_profiles) <- tolower(names(all_profiles))
+  
+  # Set precision
+  if(!is.null(precision)) {
+
+    precision_index <- which(names(all_profiles) %in% names(precision))
+    
+    for(ii in 1:length(precision_index)) {
+
+      n_digits <- precision[which(names(precision) == names(all_profiles)[precision_index[ii]])]
+      
+      message("make_oce_ncdf: Setting precision of ", names(all_profiles)[precision_index[ii]], " to ", n_digits)
+      
+      all_profiles[, precision_index[ii]] <- round(all_profiles[, precision_index[ii]], n_digits)
+      
+    }
+  }
+
+  
   
   all_profiles <- all_profiles |>
     dplyr::rename(time = casttime,
@@ -734,5 +762,98 @@ make_oce_ncdf <- function(fpath = c(list.files(path = here::here("output", proce
                                               calibration_date = instrument_df$ctd_calibration_date,
                                               vessel = instrument_df$vessel),
                      global_attributes = g_attributes)
+  
+}
+
+
+
+#' Write cast data to an oce or rds file
+#' 
+#' @param cast_files Paths to accepted profiles.
+#' @param output_file Output filepath for netCDF file.
+#' @param precision Precision to use for variables as a named numeric vector.
+#' @export
+
+make_oce_table <- function(cast_files,
+                           precision = c(temperature = 4,
+                                         conductivity = 6,
+                                         salinity = 4,
+                                         absolute_salinity = 4,
+                                         sound_speed = 3,
+                                         density = 3,
+                                         pressure = 3,
+                                         oxygen = 5,
+                                         ph = 4,
+                                         velocity = 3),
+                           output_file) {
+  
+  stopifnot("make_oce_table: output_file extension must be .csv or .rds" = any(grepl(pattern = ".csv", x = output_file, ignore.case = TRUE),
+                                                                               grepl(pattern = ".rds", x = output_file, ignore.case = TRUE)))
+  
+  cast_df <- data.frame()
+  
+  for(ii in 1:length(cast_files)) {
+    
+    dat <- readRDS(file = cast_files[ii])
+    
+    if("downcast" %in% names(dat)) {
+      sel_cast <- dat$downcast
+      sel_cast_data <- as.data.frame(sel_cast@data) |>
+        dplyr::mutate(vessel = sel_cast@metadata$race_metadata$VESSEL,
+                      cruise = sel_cast@metadata$race_metadata$CRUISE,
+                      haul = sel_cast@metadata$race_metadata$HAUL,
+                      timeS = sel_cast@metadata$startTime + timeS,
+                      serial_number = sel_cast@metadata$serialNumberTemperature,
+                      sample_interval = sel_cast@metadata$sampleInterval,
+                      cast_direction = "downcast")
+      cast_df <- dplyr::bind_rows(cast_df, sel_cast_data)
+    }
+    
+    if("upcast" %in% names(dat)) {
+      sel_cast <- dat$upcast
+      sel_cast_data <- as.data.frame(sel_cast@data) |>
+        dplyr::mutate(vessel = sel_cast@metadata$race_metadata$VESSEL,
+                      cruise = sel_cast@metadata$race_metadata$CRUISE,
+                      haul = sel_cast@metadata$race_metadata$HAUL,
+                      timeS = sel_cast@metadata$startTime + timeS,
+                      serial_number = sel_cast@metadata$serialNumberTemperature,
+                      sample_interval = sel_cast@metadata$sampleInterval,
+                      cast_direction = "upcast")
+      cast_df <- dplyr::bind_rows(cast_df, sel_cast_data)
+    }
+  }
+  
+  # Add oxygen and ph fields if not included
+  if(!("oxygen" %in% names(cast_df))) {
+    cast_df$oxygen <- NA
+  }
+  
+  if(!("ph" %in% names(cast_df))) {
+    cast_df$ph <- NA 
+  }
+  
+  if(!is.null(precision)) {
+    # Set precision
+    precision_index <- which(names(cast_df) %in% names(precision))
+    
+    for(ii in 1:length(precision_index)) {
+      
+      n_digits <- precision[which(names(precision) == names(cast_df)[precision_index[ii]])]
+      
+      message("make_oce_ncdf: Setting precision of ", names(cast_df)[precision_index[ii]], " to ", n_digits)
+      
+      cast_df[, precision_index[ii]] <- round(cast_df[, precision_index[ii]], n_digits)
+      
+    }
+  }
+  
+  message("make_oce_ncdf: Writing ", nrow(cast_df), " records to ", output_file)
+  if(grepl(pattern = ".csv", x = output_file, ignore.case = TRUE)) {
+    write.csv(x = cast_df, file = output_file, row.names = FALSE)
+  }
+  
+  if(grepl(pattern = ".rds", x = output_file, ignore.case = TRUE)) {
+    saveRDS(object = cast_df, file = output_file)
+  }
   
 }

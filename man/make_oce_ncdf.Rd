@@ -5,10 +5,12 @@
 \title{Make netCDF from profile and metadata rds files (R workflow)}
 \usage{
 make_oce_ncdf(
-  fpath = c(list.files(path = here::here("output", processing_method), full.names = TRUE,
-    pattern = "qc.rds")),
-  metadata_path = c(list.files(path = here::here("metadata"), full.names = TRUE)),
+  cast_files = c(list.files(path = here::here("final_cnv", processing_method), full.names
+    = TRUE, pattern = "final.rds")),
+  metadata_files = c(list.files(path = here::here("metadata"), full.names = TRUE)),
   output_file = "output.nc",
+  precision = c(temperature = 4, conductivity = 6, salinity = 4, absolute_salinity = 4,
+    sound_speed = 3, density = 3, pressure = 3, oxygen = 5, ph = 4, velocity = 3),
   global_attributes = list(title = "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey",
     references = "CTD TEAM...", id = "doi", cdm_data_type = "Point", cruise =
     "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",
@@ -26,11 +28,13 @@ make_oce_ncdf(
 )
 }
 \arguments{
-\item{fpath}{Path to accepted profiles.}
+\item{cast_files}{Paths to accepted profiles.}
 
-\item{metadata_path}{Path to metadata files.}
+\item{metadata_files}{Paths to metadata files.}
 
 \item{output_file}{Output filepath for netCDF file.}
+
+\item{precision}{Precision to use for variables as a named numeric vector.}
 
 \item{global_attributes}{List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).}
 }
