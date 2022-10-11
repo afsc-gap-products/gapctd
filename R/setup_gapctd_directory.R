@@ -10,10 +10,6 @@
 
 setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_file = NULL) {
   
-  # ctd_dir = "G:/RACE_CTD/data/2021/ebs/v94_ctd1"
-  # processing_method = "gapctd"
-  # bat_file = NULL
-  
   storage_directory <- here::here("output", processing_method)
   
   # Copy hex and xmlcon files to processing directory ---- 
@@ -103,17 +99,17 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
     dir.create("output")
   }
   
-  if(!dir.exists(here::here("output", "density_corrected"))) {
-    dir.create(here::here("output",  "density_corrected"))
-  }
-  
-  if(!dir.exists(here::here("output", "manual_flag"))) {
-    dir.create(here::here("output", "manual_flag"))
-  }
-  
-  if(!dir.exists(here::here("output", "accepted_profiles"))) {
-    dir.create(here::here("output", "accepted_profiles"))
-  }
+  # if(!dir.exists(here::here("output", "density_corrected"))) {
+  #   dir.create(here::here("output",  "density_corrected"))
+  # }
+  # 
+  # if(!dir.exists(here::here("output", "manual_flag"))) {
+  #   dir.create(here::here("output", "manual_flag"))
+  # }
+  # 
+  # if(!dir.exists(here::here("output", "accepted_profiles"))) {
+  #   dir.create(here::here("output", "accepted_profiles"))
+  # }
   
   if(!dir.exists("plots")) {
     dir.create("plots")
