@@ -69,20 +69,20 @@ gapctd::make_oce_ncdf(
 # Open a connection to the object
 con <- RNetCDF::open.nc("example_gapctd.nc")
 
-# Examine the contents of the object
-RNetCDF::print.nc(con)
-
-# Open an attribute
+# Examine variables and attributes
 RNetCDF::var.get.nc(con, variable = "depth")
 
+# Temperature profiles from two casts at a single station
 RNetCDF::var.get.nc(con, variable = "sea_water_temperature")
 RNetCDF::att.get.nc(con, variable = "sea_water_temperature", attribute = "units")
 RNetCDF::att.get.nc(con, variable = "sea_water_temperature", attribute = "long_name")
 
+# Bottom salinity from the station
 RNetCDF::var.get.nc(con, variable = "sea_floor_practical_salinity")
 RNetCDF::att.get.nc(con, variable = "sea_floor_practical_salinity", attribute = "units")
 RNetCDF::att.get.nc(con, variable = "sea_floor_practical_salinity", attribute = "long_name")
 
+# Station and haul number
 RNetCDF::var.get.nc(con, variable = "stationid")
 RNetCDF::var.get.nc(con, variable = "haul")
 ```

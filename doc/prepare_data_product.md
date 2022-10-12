@@ -191,136 +191,7 @@ gapctd::make_oce_ncdf(
 # Open a connection to the object
 con <- RNetCDF::open.nc("example_gapctd.nc")
 
-# Examine the contents of the object
-RNetCDF::print.nc(con)
-```
-
-    ## netcdf netcdf4 {
-    ## dimensions:
-    ##  index = 2 ;
-    ##  depth = 37 ;
-    ## variables:
-    ##  NC_INT index(index) ;
-    ##      NC_STRING index:long_name = "Sample index" ;
-    ##  NC_INT depth(depth) ;
-    ##      NC_STRING depth:units = "m" ;
-    ##      NC_STRING depth:long_name = "Depth in meters" ;
-    ##      NC_STRING depth:positive = "down" ;
-    ##  NC_FLOAT latitude(index) ;
-    ##      NC_STRING latitude:units = "degree_north" ;
-    ##      NC_STRING latitude:long_name = "Latitude (decimal degrees)" ;
-    ##  NC_FLOAT longitude(index) ;
-    ##      NC_STRING longitude:units = "degree_east" ;
-    ##      NC_STRING longitude:long_name = "Longitude (decimal degrees)" ;
-    ##  NC_STRING time(index) ;
-    ##      NC_STRING time:units = "time" ;
-    ##      NC_STRING time:long_name = "Time in Coordinated Universal Time (UTC)" ;
-    ##  NC_STRING stationid(index) ;
-    ##      NC_STRING stationid:units = "1" ;
-    ##      NC_STRING stationid:long_name = "AFSC/RACE/GAP Survey Station Name" ;
-    ##  NC_STRING profile(index) ;
-    ##      NC_STRING profile:units = "1" ;
-    ##      NC_STRING profile:long_name = "Profile Number and Direction" ;
-    ##  NC_INT vessel(index) ;
-    ##      NC_STRING vessel:units = "1" ;
-    ##      NC_STRING vessel:long_name = "AFSC/RACE/GAP Vessel Code" ;
-    ##  NC_INT cruise(index) ;
-    ##      NC_STRING cruise:units = "1" ;
-    ##      NC_STRING cruise:long_name = "AFSC/RACE/GAP Cruise Code" ;
-    ##  NC_INT haul(index) ;
-    ##      NC_STRING haul:units = "1" ;
-    ##      NC_STRING haul:long_name = "Haul Number" ;
-    ##  NC_INT haul_depth(index) ;
-    ##      NC_STRING haul_depth:units = "m" ;
-    ##      NC_STRING haul_depth:long_name = "Mean towed depth of CTD during haul" ;
-    ##  NC_FLOAT sea_floor_temperature(index) ;
-    ##      NC_STRING sea_floor_temperature:units = "degree_C" ;
-    ##      NC_STRING sea_floor_temperature:long_name = "Mean bottom temperature (ITS-90) at towed depth" ;
-    ##  NC_FLOAT sea_floor_practical_salinity(index) ;
-    ##      NC_STRING sea_floor_practical_salinity:units = "1" ;
-    ##      NC_STRING sea_floor_practical_salinity:long_name = "Mean Practical Salinity (PSS-78) at towed depth" ;
-    ##  NC_FLOAT sea_floor_salinity(index) ;
-    ##      NC_STRING sea_floor_salinity:units = "g kg-1" ;
-    ##      NC_STRING sea_floor_salinity:long_name = "Mean Absolute Salinity (TEOS-10 GSW) at towed depth" ;
-    ##  NC_FLOAT sea_floor_sound_speed_in_sea_water(index) ;
-    ##      NC_STRING sea_floor_sound_speed_in_sea_water:units = "m s-1" ;
-    ##      NC_STRING sea_floor_sound_speed_in_sea_water:long_name = "Mean speed of sound during haul (Chen-Millero)" ;
-    ##  NC_FLOAT time_elapsed(depth, index) ;
-    ##      NC_FLOAT time_elapsed:_FillValue = -9999 ;
-    ##      NC_STRING time_elapsed:units = "s" ;
-    ##      NC_STRING time_elapsed:long_name = "Time Elapsed Since Start of Deployment" ;
-    ##  NC_FLOAT sea_water_pressure(depth, index) ;
-    ##      NC_FLOAT sea_water_pressure:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_pressure:units = "dbar" ;
-    ##      NC_STRING sea_water_pressure:long_name = "Strain Gauge Pressure" ;
-    ##  NC_FLOAT sea_water_temperature(depth, index) ;
-    ##      NC_FLOAT sea_water_temperature:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_temperature:units = "degree_C" ;
-    ##      NC_STRING sea_water_temperature:long_name = "ITS-90 Temperature" ;
-    ##  NC_FLOAT sea_water_practical_salinity(depth, index) ;
-    ##      NC_FLOAT sea_water_practical_salinity:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_practical_salinity:units = "1" ;
-    ##      NC_STRING sea_water_practical_salinity:long_name = "PSS-78 Practical Salinity" ;
-    ##  NC_FLOAT sea_water_salinity(depth, index) ;
-    ##      NC_FLOAT sea_water_salinity:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_salinity:units = "g kg-1" ;
-    ##      NC_STRING sea_water_salinity:long_name = "TEOS-10 GSW Absolute Salinity" ;
-    ##  NC_FLOAT sea_water_density(depth, index) ;
-    ##      NC_FLOAT sea_water_density:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_density:units = "kg m-3" ;
-    ##      NC_STRING sea_water_density:long_name = "TEOS-10 GSW Density" ;
-    ##  NC_FLOAT buoyancy_frequency(depth, index) ;
-    ##      NC_FLOAT buoyancy_frequency:_FillValue = -9999 ;
-    ##      NC_STRING buoyancy_frequency:units = "s-2" ;
-    ##      NC_STRING buoyancy_frequency:long_name = "Squared Brunt-Vaisala Buoyancy Frequency" ;
-    ##  NC_FLOAT sea_water_electrical_conductivity(depth, index) ;
-    ##      NC_FLOAT sea_water_electrical_conductivity:_FillValue = -9999 ;
-    ##      NC_STRING sea_water_electrical_conductivity:units = "S m-1)" ;
-    ##      NC_STRING sea_water_electrical_conductivity:long_name = "Electrical Conductivity" ;
-    ##  NC_FLOAT sound_speed_in_sea_water(depth, index) ;
-    ##      NC_FLOAT sound_speed_in_sea_water:_FillValue = -9999 ;
-    ##      NC_STRING sound_speed_in_sea_water:units = "m s-1" ;
-    ##      NC_STRING sound_speed_in_sea_water:long_name = "Speed of Sound (Chen-Millero)" ;
-    ##  NC_INT quality_flag(depth, index) ;
-    ##      NC_INT quality_flag:_FillValue = -9999 ;
-    ##      NC_STRING quality_flag:units = "1" ;
-    ##      NC_STRING quality_flag:long_name = "Data Quality Assurance Flag" ;
-    ##      NC_INT quality_flag:flag_values = -6, 0, 6, 7 ;
-    ##      NC_STRING quality_flag:flag_meanings = "Interpolated value. Density inversion error detected based on buoyancy frequency and remains after automatic removal and interpolation of point.", "Good quality, no issues detected.", "Interpolated value. Density inversion error detected based on buoyancy frequency and corrected using automatic removal and interpolation of point.", "Interpolated value. Point mannually flagged and removed during visual inspection then estimated through interpolation." ;
-    ##  NC_STRING instrument ;
-    ##      NC_STRING instrument:make_model = "Sea-Bird SBE19plus V2" ;
-    ##      NC_STRING instrument:serial_number = "01908102" ;
-    ##      NC_STRING instrument:calibration_date = "07-Jan-21" ;
-    ##      NC_INT instrument:vessel = 162 ;
-    ## 
-    ## // global attributes:
-    ##      NC_STRING :references = "" ;
-    ##      NC_STRING :id = "doi" ;
-    ##      NC_STRING :cruise = "EXAMPLE  2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Surveys" ;
-    ##      NC_STRING :institution = "NOAA Alaska Fisheries Science Center" ;
-    ##      NC_STRING :contributor_name = "CTD Team" ;
-    ##      NC_STRING :creator_name = "Creator name" ;
-    ##      NC_STRING :creator_institution = "NOAA Alaska Fisheries Science Center" ;
-    ##      NC_STRING :creator_email = "Cretor email" ;
-    ##      NC_STRING :publisher = "NOAA Alaska Fisheries Science Center" ;
-    ##      NC_STRING :publisher_type = "institution" ;
-    ##      NC_STRING :publisher_url = "https://github.com/afsc-gap-products/gapctd" ;
-    ##      NC_STRING :geospatial_bounds = "POLYGON ((60.00184 -168.70713, 60.00184 -168.65472, 60.00488 -168.65472, 60.00488 -168.70713, 60.00184 -168.70713))" ;
-    ##      NC_STRING :geospatial_bounds_crs = "EPSG:4326" ;
-    ##      NC_STRING :license = "http://www.usa.gov/publicdomain/label/1.0/" ;
-    ##      NC_STRING :metadata_link = "" ;
-    ##      NC_STRING :date_created = "2022-10-12" ;
-    ##      NC_STRING :instrument = "CTD" ;
-    ##      NC_STRING :Conventions = "CF-1.8" ;
-    ##      NC_STRING :standard_name_vocabulary = "CF Standard Name Table v79" ;
-    ##      NC_STRING :cdm_data_type = "Point" ;
-    ##      NC_STRING :time_coverage_start = "2021-06-24 15:06:37 UTC" ;
-    ##      NC_STRING :time_coverage_end = "2021-06-24 15:35:59 UTC" ;
-    ##      NC_STRING :source = "CTD data processed using gapctd 1.0.6" ;
-    ## }
-
-``` r
-# Open an attribute
+# Examine variables and attributes
 RNetCDF::var.get.nc(con, variable = "depth")
 ```
 
@@ -328,6 +199,7 @@ RNetCDF::var.get.nc(con, variable = "depth")
     ## [26] 26 27 28 29 30 31 32 33 34 35 36 37
 
 ``` r
+# Temperature profiles from two casts at a single station
 RNetCDF::var.get.nc(con, variable = "sea_water_temperature")
 ```
 
@@ -383,6 +255,7 @@ RNetCDF::att.get.nc(con, variable = "sea_water_temperature", attribute = "long_n
     ## [1] "ITS-90 Temperature"
 
 ``` r
+# Bottom salinity from the station
 RNetCDF::var.get.nc(con, variable = "sea_floor_practical_salinity")
 ```
 
@@ -401,6 +274,7 @@ RNetCDF::att.get.nc(con, variable = "sea_floor_practical_salinity", attribute = 
     ## [1] "Mean Practical Salinity (PSS-78) at towed depth"
 
 ``` r
+# Station and haul number
 RNetCDF::var.get.nc(con, variable = "stationid")
 ```
 
