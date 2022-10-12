@@ -75,7 +75,7 @@ The tzone = "America/Anchorage" argument specifies the timezone to use for haul 
 
 ## 5. Run gapctd processing methods on CTD files
 
-The `wrapper_run_gapctd` function implements the `run_gapctd` function on each CTD file in the working directory. The `run_gapctd` function processes data for a single CTD data file (.cnv) using the [processing steps](/batch_processing_steps.md) we have found works best for our deployments across bottom trawl survey regions.
+The `wrapper_run_gapctd` function implements the `run_gapctd` function on each CTD file in the working directory. The `run_gapctd` function processes data for a single CTD data file (.cnv) using the [processing steps](/doc/assets/batch_processing_steps.md) we have found works best for our deployments across bottom trawl survey regions.
 
 *Note: wrapper_run_gapctd takes 8+ hours to run for a full vessel/cruise.*
 
@@ -86,7 +86,7 @@ gapctd:::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"), # Path to decoded 
                             haul_df = haul_df) # Haul data from step 4
 ```
 
-Outputs from `wrapper_run_gapctd` are stored in oce objects that are saved in R data (.rds) files in /output/gapctd/ [(example)](/ctd_data_files.md). The files include three segments for each deployment (downcast, bottom, upcast). Haul metadata are included with each of the segments. If any segment is missing, it will not be included in the file (i.e., if the CTD shut-off during the deployment and there is no upcast data, there will not be an upcast file in the object).
+Outputs from `wrapper_run_gapctd` are stored in oce objects that are saved in R data (.rds) files in /output/gapctd/ [(example)](/doc/assets/ctd_data_files.md). The files include three segments for each deployment (downcast, bottom, upcast). Haul metadata are included with each of the segments. If any segment is missing, it will not be included in the file (i.e., if the CTD shut-off during the deployment and there is no upcast data, there will not be an upcast file in the object).
 
 ![](/doc/assets/r_process/5_run_gapctd.png)
 <p align = "center"><b>Top: Console messages while running wrapper_run_gapctd(). Bottom: Contents of the &#47;output&#47;gapctd&#47; directory after successfully running wrapper_run_gapctd().</b></p>

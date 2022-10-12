@@ -1,0 +1,38 @@
+---
+title: "Batch processing steps"
+output:
+  md_document:
+    variant: gfm
+---
+
+# Batch Processing Steps
+
+This document lists data processing steps that are used to produce GAP CTD data. Steps 2-13 are performed inside of the `run_gapctd()` function.
+
+| Step | Description |
+|------------------------------------|------------------------------------|
+| 1    | Convert CTD data from .hex to .cnv, extracting Pressure, Conductivity, Time Elapsed, and Data Flags. This is performed using the `gapctd::setup_gapctd_directory()` function, which uses system commands to run SBE Data Processing with .hex files and .xmlcon files from G:/RACE_CTD/. The batch script (.bat) and program setup file (.psa) needed to execute the system command are in the [/inst/extdata/gapctd/](/inst/extdata/gapctd/) directory of the gapctd repo (i.e., /extdata/gapctd/ of the package directory when the package is installed). |
+| 2    | Median filter to temperature and conductivity channels with five (5) scan windows for each channel |
+| 3    | Low pass filter temperature, conductivity and pressure using 0.5, 0.5, and 1.0 second time constants, respectively. |
+| 4    | Split data in `ctd` object into downcast, bottom, and upcast data.
+| 5    | For each upcast and downcast, use grid search to estimate optimal alignment offset parameter for temperature, where the optimal offset maximizes the correlation between the first derivatives of temperature and first derivative of conductivity with respect to time (e.g. Ullman and Hebert, 2014). Estimation to the nearest 0.01 s within the range of -1.25 to + 1.25 s |
+| 6    | Apply optimal alignment from step #5 to temperature channel |
+| 7    | For each downcast-upcast pair, estimate the optimal conductivity cell thermal mass correction parameters (alpha and beta) by using numerical optimization to find parameter values that minimize the area between temperature-salinity curves from upcasts and downcasts (Garau et al., 2011). If only one cast is available, find parameter values that minimizes the path distance of salinity. Due to the presence of local minima, optimization first requires grid search to find a search neighborhood for parameters. Initial search parameters for alpha: 0.001, 0.01, 0.02, 0.04, 0.08, 0.12; beta: 1, 1/2, 1/4, 1/8, 1/12, 1/24. If optimizations do not converge, use the typical values recommended by the manufacturer (alpha = 0.04, beta = 0.125). |
+| 8    | Apply optimal conducticity cell thermal mass correction parameters from step #7 to downcast and upcaste data. |
+| 9    | Flag data where the mean ascent/descent speed of the CTD for a five scan window around an observation was < 0.1 meters per second |
+| 10   | Derive depth, salinity, density, absolute salinity, sound speed, and squared buoyancy frequency for downcast, bottom, and upcast data. |
+| 11   | Calculate averages by 1-m depth bin for all variable channels (excluding scans flagged 'bad') |
+| 12   | Check for unreasonable density inversions based on the squared buoyancy frequency, N2, where inversions are considered unrealistic when N2 < -1e-4. |
+| 13   | Check for casts with an unreasonable amount of missing data using `gapctd::qc_check`. |
+| 14   | Visually inspect downcast and upcast profile data for errors. Remove and interpolate the errors. |
+| 15   | Review downcast and upcast profile data for quality and select profiles to include in the final data product. |
+| 16   | For deployments where neither the downcast or upcast was selected for the final data product, repeat steps #2-15. However, for step #7, estimate different conductivity cell thermal mass correction parameters for each cast based on salinity path distance instead of estimating a parameters for both casts simultaneously based on the area between temperature-salinity curves.
+| 17   | Perform steps 1-16 for each vessel/cruise/CTD combination during a year.
+| 18   | Package the final CTD data into data products with pertinent metadata fields properly filled. |
+
+
+## References
+
+Garau, B., Ruiz, S., Zhang, W. G., Pascual, A., Heslop, E., Kerfoot, J., & Tintoré, J. (2011). Thermal lag correction on slocum CTD glider data. Journal of Atmospheric and Oceanic Technology, 28(9), 1065–1071. [https://doi.org/10.1175/JTECH-D-10-05030.1](https://doi.org/10.1175/JTECH-D-10-05030.1)
+
+Ullman, D. S., & Hebert, D. (2014). Processing of underway CTD data. Journal of Atmospheric and Oceanic Technology, 31(4), 984–998. [https://doi.org/10.1175/JTECH-D-13-00200.1](https://doi.org/10.1175/JTECH-D-13-00200.1)
