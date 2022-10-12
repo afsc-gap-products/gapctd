@@ -11,6 +11,8 @@ objects with class ctd, a class from the oce package. Each of the
 objects contains data from different segments of the deployment:
 downcast, bottom, and upcast.
 
+## Load and inspect data
+
 ``` r
 library(gapctd)
 

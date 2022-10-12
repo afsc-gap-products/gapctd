@@ -16,6 +16,8 @@ library(gapctd)
 
 ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
 ```
+## Load and inspect data
+
 ```{r load_libraries_2, include=TRUE, eval=FALSE}
 library(gapctd)
 
