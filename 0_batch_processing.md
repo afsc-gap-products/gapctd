@@ -243,7 +243,7 @@ and density (right).</b>
 <b>Set 2 plots: Rate of change in salinity (left) and salinity
 (right).</b>
 </p>
-![](./doc/assets/r_process/8_flag_interpolate.png)
+<br> ![](./doc/assets/r_process/8_flag_interpolate.png)
 <p align="center">
 <b>Example of selecting and interpolating showing set 1 profiles before
 (top) and after (bottom) removing data from the shallowest depth

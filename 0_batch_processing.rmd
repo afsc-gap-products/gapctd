@@ -160,8 +160,10 @@ _The goal of this step is to flag large transient errors. Pay careful attention 
 ![](./doc/assets/r_process/8_flag_interpolate_4.png)
 <p align = "center"><b>Set 2 plots: Rate of change in salinity (left) and salinity (right).</b></p>
 
+<br>
 ![](./doc/assets/r_process/8_flag_interpolate.png)
 <p align = "center"><b>Example of selecting and interpolating showing set 1 profiles before (top) and after (bottom) removing data from the shallowest depth bin.</b></p>
+
 
 
 ## 9. Select profiles to include in data product (first round)
