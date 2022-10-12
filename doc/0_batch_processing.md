@@ -101,8 +101,8 @@ showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
 The `wrapper_run_gapctd` function implements the `run_gapctd` function
 on each CTD file in the working directory. The `run_gapctd` function
 processes data for a single CTD data file (.cnv) using the [processing
-steps](/doc/assets/batch_processing_steps.md) we have found works best
-for our deployments across bottom trawl survey regions.
+steps](/doc/batch_processing_steps.md) we have found works best for our
+deployments across bottom trawl survey regions.
 
 *Note: wrapper_run_gapctd takes 8+ hours to run for a full
 vessel/cruise.*
@@ -116,10 +116,10 @@ gapctd:::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"), # Path to decoded 
 
 Outputs from `wrapper_run_gapctd` are stored in oce objects that are
 saved in R data (.rds) files in /output/gapctd/
-[(example)](/doc/assets/ctd_data_files.md). The files include three
-segments for each deployment (downcast, bottom, upcast). Haul metadata
-are included with each of the segments. If any segment is missing, it
-will not be included in the file (i.e., if the CTD shut-off during the
+[(example)](/doc/ctd_data_files.md). The files include three segments
+for each deployment (downcast, bottom, upcast). Haul metadata are
+included with each of the segments. If any segment is missing, it will
+not be included in the file (i.e., if the CTD shut-off during the
 deployment and there is no upcast data, there will not be an upcast file
 in the object).
 
