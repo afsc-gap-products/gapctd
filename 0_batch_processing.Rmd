@@ -1,17 +1,15 @@
 ---
-title: "Process GAP's CTD data using gapctd"
+title: "Process CTD data in R"
 output:
   md_document:
     variant: gfm
 ---
 
-# Process GAP's CTD data using gapctd
+# Process CTD data in R using gapctd
 
-*WARNING: Knitting the .Rmd version of this document will not process any data. To process data using the code below, use [this script](./processing_files/2021/2021_VEST_8103.R).*
+The gapctd package was developed to processes CTD data collected during Alaska Fisheries Science Center bottom trawl surveys and generate data products. The full data processing workflow is run in R aside from the data decoding step that requires SBE Data Processing Software. The gapctd package uses the [oce package](https://dankelley.github.io/oce/) (Kelley et al., 2022) for handling CTD data. Data are processed using R implementations of modules from SBE Data Processing software and methods for optimizing module parameters that have been applied to underway CTD and glider data (Garau et al., 2011; Ullman and Hebert, 2014). 
 
-## Introduction
-
-The gapctd package processes CTD data collected on Alaska Fisheries Science Center bottom trawl surveys and generates data products. The entire data processing workflow is run in R using R functions aside from the data decoding step, which requires SBE Data Processing Software. The package uses methods from the oce package, R implementations of SBE Data Processing Modules, and optimization methods from the underway CTD and glider literature. Processing requires a connection to the AFSC RACEBASE and RACE_DATA. Data processing methods were developed and optimized for Sea-Bird SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands.
+The data processing workflow described below was developed for processing data from Sea-Bird SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands.
 
 ## 1. Installation
 
@@ -234,3 +232,12 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 ## 14. Prepare the data product
 
 [Prepare the data product](./doc/prepare_data_product.md) if all data from the survey have been processed and are in different directories.
+
+
+## References
+
+Garau, B., Ruiz, S., Zhang, W. G., Pascual, A., Heslop, E., Kerfoot, J., & Tintoré, J. (2011). Thermal lag correction on slocum CTD glider data. Journal of Atmospheric and Oceanic Technology, 28(9), 1065–1071. [https://doi.org/10.1175/JTECH-D-10-05030.1](https://doi.org/10.1175/JTECH-D-10-05030.1)
+
+Kelley, D. E., Richards, C., & Layton, C. (2022). oce: an R package for Oceanographic Analysis. Journal of Open Source Software, 7(71), 3594. [https://doi.org/10.21105/joss.03594](https://doi.org/10.21105/joss.03594)
+
+Ullman, D. S., & Hebert, D. (2014). Processing of underway CTD data. Journal of Atmospheric and Oceanic Technology, 31(4), 984–998. [https://doi.org/10.1175/JTECH-D-13-00200.1](https://doi.org/10.1175/JTECH-D-13-00200.1)
