@@ -56,3 +56,4 @@ doc/*.html
 /analysis/
 
 *.nc
+/*.rds
