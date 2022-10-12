@@ -1,3 +1,5 @@
+# Overview
+
 The gapctd package includes modules (filters and operations) for
 processing CTD data that are based on modules in SBE Data Processing
 (SBEDP) software. The gapctd modules replicate the output of SBEDP
@@ -5,7 +7,7 @@ modules. However, the gapctd modules do not always include the full
 range of processing options that are available in SBEDEP modules because
 the gapctd modules are intended for limited use cases.
 
-Modules accept and return oce objects and are designed to be
+Modules accept and return `ctd` objects and are designed to be
 interchangable (i.e., the order in which they are used can be swapped).
 This document describes the modules and demonstrates their use for
 processing CTD data.
@@ -146,8 +148,9 @@ dc_5 <- gapctd::loop_edit(dc_4,
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-Note that the module flags slowdowns and reversals but does not remove
-them, so the plots above are identical.
+Note that `loop_edit()` flags slowdowns and reversals but does not
+remove them. As such, the plots above are identical even though
+slowdowns and reversals were flagged in the data:
 
 ``` r
 dc_4@data$flag[409:415]
@@ -237,25 +240,11 @@ dc_8 <- dc |>
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
-### Comparison with gapctd output
-
-The processing steps above are similar to the process that is
-implemented in the package when processing using the full gapctd
-workflow. The plots below show the results after bin average and the
-same profile processed using the full processing method in the gapctd
-package.
-
-``` r
-final_data <- readRDS(file = system.file("extdata/example/2021_06_24_0001_final.rds", package = "gapctd"))
-```
-
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
-
-### Modules for working with GAP data
+## Modules for working with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD.
 However, some modules are specifically been developed for processing
-GAP’s CTD data,
+GAP’s CTD data, and their use is demonstrated below.
 
 | Module                     | Purpose                                                                                                                                |
 |----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
@@ -263,10 +252,8 @@ GAP’s CTD data,
 | `assign_metadata_fields()` | Assigns metadata fields to downcast or upcast fields based on user-specified cast_direction                                            |
 | `section_oce()`            | Extracts a section (downcast, bottom, or upcast) from a ctd object based on scan time stamps and event time stamps in metadata fields. |
 
-The use of thse functions within the data processing workflow is
-illustrated below.
-
 ``` r
+# Haul data from the same vessel/cruise/CTD as the data file
 ex_haul <- readRDS(file = system.file("extdata/example/HAUL_DATA_162_202101_202102.rds", 
                                       package = "gapctd"))
 
@@ -293,7 +280,7 @@ dc_9 <- dc |>
 plot(dc_9)
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 The modules for working with GAP CTD data appended location data to the
 metadata object so now the location of the cast can be shown in the
