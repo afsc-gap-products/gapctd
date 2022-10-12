@@ -41,7 +41,12 @@ dc <- oce::ctdTrim(ctd_data, method = "sbe")
 # Assign correct time zone for CTD data (survey time)
 dc@metadata$startTime <- lubridate::force_tz(dc@metadata$startTime, 
                                              tz = "America/Anchorage")
+
+# Generate standard oce plot
+plot(dc)
 ```
+
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ## Modules
 
@@ -246,7 +251,7 @@ final_data <- readRDS(file = system.file("extdata/example/2021_06_24_0001_final.
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
-### Modules for workign with GAP data
+### Modules for working with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD.
 However, some modules are specifically been developed for processing
@@ -284,11 +289,7 @@ dc_9 <- dc |>
   gapctd::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1)
-```
 
-    ## append_haul_data: Scans found: 1419 downcast, 329 upcast, 6807 bottom.
-
-``` r
 plot(dc_9)
 ```
 

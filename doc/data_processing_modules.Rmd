@@ -44,9 +44,12 @@ dc <- oce::ctdTrim(ctd_data, method = "sbe")
 # Assign correct time zone for CTD data (survey time)
 dc@metadata$startTime <- lubridate::force_tz(dc@metadata$startTime, 
                                              tz = "America/Anchorage")
+
+# Generate standard oce plot
+plot(dc)
 ```
 
-```{r, include=FALSE}
+```{r, echo = FALSE}
 plot(dc)
 ```
 
@@ -244,7 +247,7 @@ text(x = 31.57, y = 33, labels = "Processed w/\ngapctd")
 ```
 
 
-### Modules for workign with GAP data
+### Modules for working with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD. However, some modules are specifically been developed for processing GAP's CTD data,
 
@@ -256,7 +259,7 @@ The modules above can be used with any `ctd` object data from any CTD. However, 
 
 The use of thse functions within the data processing workflow is illustrated below.
 
-```{r}
+```{r, message=FALSE}
 ex_haul <- readRDS(file = system.file("extdata/example/HAUL_DATA_162_202101_202102.rds", 
                                       package = "gapctd"))
 
