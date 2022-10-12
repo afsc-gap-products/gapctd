@@ -1,0 +1,37 @@
+The gapctd package includes modules (filters and operations) for
+processing CTD data that are based on modules in SBE Data Processing
+(SBEDP) software. The gapctd modules replicate the output of SBEDP
+modules. However, the gapctd modules do not always include the full
+range of processing options that are available in SBEDEP modules because
+the gapctd modules are intended for limited use cases.
+
+Modules accept and return oce objects and are designed to be
+interchangable (i.e., the order in which they are used can be swapped).
+This document describes the modules and demonstrates their use for
+processing CTD data.
+
+## Load example data
+
+Read-in the example CTD deployment file (.cnv) using the `read.oce`
+function from the oce package. The raw file contains a header and five
+variable columns that are populated in the oce object.
+
+| cnv Variable | oce Variable | Description                   |
+|--------------|--------------|-------------------------------|
+| timeS        | timeS        | Time, Elapsed \[seconds\]     |
+| tv290C       | temperature  | Temperature \[ITS-90, deg C\] |
+| prdM         | pressure     | Pressure, Strain Gauge \[db\] |
+| c0S/m        | conductivity | Conductivity \[S/m\]          |
+| flag         | flag         | Data quality flag             |
+|              | salinity     | Salinity \[PSS-78\]           |
+
+A sixth field, practical salinity (simply called ‘salinity’), is derived
+when the data are read-in using `read.oce`.
+
+``` r
+library(gapctd)
+
+cnv_data <- oce::read.oce(file = system.file("extdata/example/2021_06_24_0001_raw.cnv", package = "gapctd"))
+```
+
+## 
