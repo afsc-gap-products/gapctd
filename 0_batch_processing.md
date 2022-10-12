@@ -44,6 +44,8 @@ ctd_dir <- "G:/RACE_CTD/data/2021/ebs/v94_ctd1" # Directory w/ CTD data (.hex) a
 processing_method <- "gapctd"
 ```
 
+![](./doc/assets/r_process/1_setup_directory.png)
+
 ## 3. Setup directory for processing
 
 The `setup_gapctd_directory` function sets up the working directory for
@@ -58,7 +60,6 @@ that get saved in the /cnv/ directory.
 cruise/vessel/CTD combination.*
 
 ``` r
-# Setup directory
 gapctd:::setup_gapctd_directory(processing_method = processing_method, 
                                 ctd_dir = ctd_dir)
 ```
@@ -177,25 +178,31 @@ change in salinity and salinity.
 
 ### 8.1 How to review plots
 
-The goal of this step is to flag and remove large and sporadic errors.
-Small errors and errors that persist for multiple depth bins should not
+The goal of this step is to flag large, transient errors. Small errors
+and errors that persist for multiple consecutive depth bins should not
 be removed.
 
 Set 1: Pressure versus temperature (left), salinity (center), and
-density (right) 1. Review the right panel for density errors. 2. Left
-click on any points in the right panel (density) that should be removed
-and interpolated. Do not select the points if there are errors in
-salinity that do not produce large errors in density. 3. Press Esc. If
-any points were selected, conductivity and temperature for the selected
-pressure bin will be removed and salinity and pressure will be
-recalculated. 4. Repeat 1-3 until there are no more errors to remove.
+density (right)
 
-Set 2: Rate of change in salinity (left) and salinity (right) 1. Review
-the panels for salinity errors. 2. Left click on any points in the left
-panel (salinity) that should be removed and interpolated. 3. Press Esc.
-If any points were selected, conductivity and temperature for the
-selected pressure bin will be removed and salinity and pressure will be
-recalculated. 4. Repeat 1-3 until there are no more errors to remove.
+1.  Review the right panel for density errors.
+2.  Left-click on any points in the right panel (density) that should be
+    removed and interpolated. Do not select the points if there are
+    errors in salinity that do not produce large errors in density.
+3.  Press Esc. If any points were selected, conductivity and temperature
+    for the selected pressure bin will be removed and salinity and
+    pressure will be recalculated.
+4.  Repeat 1-3 until there are no more errors to remove.
+
+Set 2: Rate of change in salinity (left) and salinity (right)
+
+1.  Review the panels for salinity errors.
+2.  Left-click on any points in the left panel (salinity) that should be
+    removed and interpolated.
+3.  Press Esc. If any points were selected, conductivity and temperature
+    for the selected pressure bin will be removed and salinity and
+    pressure will be recalculated.
+4.  Repeat 1-3 until there are no more errors to remove.
 
 ## 9. Select profiles to include in data product (first round)
 
@@ -230,8 +237,6 @@ be reviewed again after processing.
 The goal of this step is to select the profile(s) without remaining
 dynamic errors (e.g., unreasonable salinity spikes or density
 inversions).
-
-![](./doc/assets/batch_screenshots/align_plot.png)
 
 ## 10. Remedial corrections for conductivity cell thermal intertia errors
 
@@ -272,11 +277,6 @@ gapctd:::wrapper_flag_interpolate(rds_dir_path = here::here("output", processing
                                   review = c("density", "salinity"))
 ```
 
-![](./doc/assets/batch_screenshots/batch_9.png)
-
-<i>Output directory after Step 6 contains a subdirectory called
-‘sbe19plus_v0_align’.</i>
-
 ## 12. Select profiles to include in data product (first round)
 
 Same as step \#9 except downcast and upcast data are displayed one at a
@@ -292,9 +292,9 @@ gapctd:::review_profiles(rds_dir_path = here::here("output", processing_method),
                          in_pattern = "_qc.rds")
 ```
 
-# 13. Finalize data
+## 13. Finalize data
 
-Finally, move all of the accepted profiles from /output/gapctd/ to the
+Move all of the accepted profiles from /output/gapctd/ to the
 /final_cnv/ directory.
 
 ``` r
