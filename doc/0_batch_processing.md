@@ -364,8 +364,8 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 
 ## 14. Prepare the data product
 
-[Prepare the data product](/prepare_data_product.md) if all data from
-the survey have been processed and are in different directories.
+[Prepare the data product](/doc/prepare_data_product.md) if all data
+from the survey have been processed and are in different directories.
 
 ## References
 
