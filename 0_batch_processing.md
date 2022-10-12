@@ -1,4 +1,4 @@
-# Process CTD data in R using gapctd
+# Batch process CTD data in R
 
 The gapctd package processes CTD data collected during Alaska Fisheries
 Science Center bottom trawl surveys. The entire data processing workflow

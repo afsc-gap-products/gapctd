@@ -1,0 +1,24 @@
+---
+title: "Data Processing Modules in R"
+output:
+  md_document:
+    variant: gfm
+---
+
+The gapctd package includes modules (filters and operations) for processing CTD data that are based on modules in SBE Data Processing (SBEDP) software. The gapctd modules replicate the output of SBEDP modules. However, the gapctd modules do not always include the full range of processing options that are available in SBEDEP modules because the gapctd modules are intended for limited use cases.
+
+Modules accept and return oce objects and are designed to be interchangable (i.e., the order in which they are used can be swapped). This document describes the modules and demonstrates their use for processing CTD data.
+
+## Load example data
+
+```{r load_libraries, warnings=FALSE, message=FALSE, include=FALSE, echo=FALSE, eval=TRUE}
+library(gapctd)
+
+ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
+```
+
+```{r load_libraries_2, include=TRUE, eval=FALSE}
+library(gapctd)
+
+cnv_data <- oce::read.oce(file = system.file("extdata/example/2021_06_24_0001.raw"))
+```

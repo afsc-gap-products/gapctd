@@ -14,14 +14,14 @@ Load the gapctd package and read in data from a fully-processed deployment using
 ```{r load_libraries, warnings=FALSE, message=FALSE, include=FALSE, echo=FALSE, eval=TRUE}
 library(gapctd)
 
-ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
+ctd_data <- readRDS(file = system.file("extdata/example/ex_ctd_file.rds", package = "gapctd"))
 ```
-## Load and inspect data
+## Load and inspect example R data file
 
 ```{r load_libraries_2, include=TRUE, eval=FALSE}
 library(gapctd)
 
-ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
+ctd_data <- readRDS(file = system.file("extdata/example/ex_ctd_file.rds", package = "gapctd"))
 
 class(ctd_data)
 summary(ctd_data)
