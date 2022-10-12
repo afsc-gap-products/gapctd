@@ -11,7 +11,7 @@ During processing, the gapctd package saves output to R data files (.rds) to pre
 
 Load the gapctd package and read in data from a fully-processed deployment using the readRDS function. The file contains a list of three objects with class ctd, a class from the oce package. Each of the objects contains data from different segments of the deployment: downcast, bottom, and upcast.
 
-```{r load_libraries}
+```{r load_libraries, warnings=false, messages=false}
 library(gapctd)
 
 ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
