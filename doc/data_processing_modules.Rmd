@@ -11,7 +11,7 @@ The gapctd package includes modules (filters and operations) for processing CTD 
 
 Modules accept and return `ctd` objects and are designed to be interchangable (i.e., the order in which they are used can be swapped). This document describes the modules and demonstrates their use for processing CTD data.
 
-## Load example data
+# Load example data
 
 Read-in the example CTD deployment file (.cnv) as a `ctd` object using the `read.oce` function from the oce package. The deployment file contains five variable columns that are populated in the oce object. A sixth field, salinity (simply called 'salinity'), is derived when the data are read-in using `read.oce`.
 
@@ -55,9 +55,9 @@ plot(dc)
 plot(dc)
 ```
 
-## Modules
+# Modules
 
-### Median window filter
+## Median window filter
 
 The `median_filter()` module is based on the median filter option in the SBEDP Window Filter (Wfilter) module. It calculates the median for selected channels within a specified scan window. Below, the median window filter is applied to temperature and conductivity channels for five (5) scan windows (corresponding with 1.25 seconds for the SBE19plus V2) and salinity is recalculated.
 
@@ -75,7 +75,7 @@ text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
 ```
 
 
-### Lowpass filter
+## Lowpass filter
 
 The `lowpass_filter()` module is based on the SBEDP Filter module. Below, the filter is applied to temperature, conductivity, and pressure channels with time constants of 0.5 s, 0.5 s, and 1 s, respectively. Salinity is then recalculated.
 
@@ -97,7 +97,7 @@ text(x = 31.56, y = 35, labels = "(3) Low pass filter")
 ```
 
 
-### Align channel
+## Align channel
 
 The `align_var()` module is based on the SBEDP Align (AlignCTD) module. The module shifts channel data in time and interpolates between measurements when alignment parameters are not factors of the scan interval. In the example below, temperature is advanced by 0.5 seconds and salinity is recalculated. Plots showing a close-up of the section between 10 and 12 dbar.
 
@@ -117,7 +117,7 @@ text(x = 31.55, y = 11.85, labels = "(4) Align T")
 ```
 
 
-### Conductivity cell thermal mass correction
+## Conductivity cell thermal mass correction
 
 The `conductivity_correction()` module is based on the SBEDP Conductivity Cell Thermal Mass Correction (CellTM) module. The module implements a discrete time filter on conductivity based on the sample interval (freq_n), the initial conductivity error (alpha_C), and a time decay constant (beta_C). The function uses the sample interval in the data to estimate the sample interval if it is not provided.
 
@@ -140,7 +140,7 @@ text(x = 31.58, y = 35, labels = "(5) Correct C")
 ```
 
 
-### Loop edit
+## Loop edit
 
 The `loop_edit()` module is based on the SBEDP Loop Edit (loopedit) module that flags slowdowns and reversals in scan data based on a threshold. 
 
@@ -167,7 +167,7 @@ dc_4@data$flag[409:415]
 dc_5@data$flag[409:415]
 ```
 
-### Derive EOS
+## Derive EOS
 
 The `derive_eos()` module uses functions from the oce package to calculate the following variables from scan data:
 
@@ -186,7 +186,7 @@ head(as.data.frame(dc_6@data))
 ```
 
 
-### Bin average
+## Bin average
 
 The `bin_average()` module is based on the SBDEP Bin Average (BinAvg) module. The module calculates means of variables by depth or pressure bin, with bad scan (flag < 0) data excluded. Binning can be performed by pressure or depth bins and surface data can be excluded based on a user-specified depth or pressure threshold (default = 0.5). In the example below, means are calculated for 1 m depth bins and data from < 0.5 m depth are excluded.
 
@@ -203,7 +203,7 @@ text(x = 31.58, y = 35, labels = "(7) Bin average")
 ```
 
 
-### Linking modules with pipe operators
+# Linking modules with pipe operators
 
 To declutter the workspace, the entire workflow can be run using pipe operators (native `|>` or magrittr `%>%` instead of producing output at every step. This is because each module accepts and returns a `ctd` object.
 
@@ -232,7 +232,7 @@ text(x = 31.58, y = 35, labels = "(8) Piped")
 ```
 
 
-## Modules for working with GAP data
+# Modules for working with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD. However, some modules are specifically been developed for processing GAP's CTD data, and their use is demonstrated below.
 

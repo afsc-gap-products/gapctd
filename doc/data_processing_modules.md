@@ -12,7 +12,7 @@ interchangable (i.e., the order in which they are used can be swapped).
 This document describes the modules and demonstrates their use for
 processing CTD data.
 
-## Load example data
+# Load example data
 
 Read-in the example CTD deployment file (.cnv) as a `ctd` object using
 the `read.oce` function from the oce package. The deployment file
@@ -50,9 +50,9 @@ plot(dc)
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
-## Modules
+# Modules
 
-### Median window filter
+## Median window filter
 
 The `median_filter()` module is based on the median filter option in the
 SBEDP Window Filter (Wfilter) module. It calculates the median for
@@ -76,7 +76,7 @@ text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
-### Lowpass filter
+## Lowpass filter
 
 The `lowpass_filter()` module is based on the SBEDP Filter module.
 Below, the filter is applied to temperature, conductivity, and pressure
@@ -92,7 +92,7 @@ dc_2@data$salinity <- oce::swSCTp(dc_2) # Calculate salinity
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
-### Align channel
+## Align channel
 
 The `align_var()` module is based on the SBEDP Align (AlignCTD) module.
 The module shifts channel data in time and interpolates between
@@ -110,7 +110,7 @@ dc_3@data$salinity <- oce::swSCTp(dc_3) # Calculate salinity
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-### Conductivity cell thermal mass correction
+## Conductivity cell thermal mass correction
 
 The `conductivity_correction()` module is based on the SBEDP
 Conductivity Cell Thermal Mass Correction (CellTM) module. The module
@@ -133,7 +133,7 @@ dc_4@data$salinity <- oce::swSCTp(dc_4)
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-### Loop edit
+## Loop edit
 
 The `loop_edit()` module is based on the SBEDP Loop Edit (loopedit)
 module that flags slowdowns and reversals in scan data based on a
@@ -164,7 +164,7 @@ dc_5@data$flag[409:415]
 
     ## [1] -9 -9 -9 -9 -9 -9 -9
 
-### Derive EOS
+## Derive EOS
 
 The `derive_eos()` module uses functions from the oce package to
 calculate the following variables from scan data:
@@ -198,7 +198,7 @@ head(as.data.frame(dc_6@data))
     ## 5 0.117           31.5357     1463.99 1024.989 -0.0002074
     ## 6 0.117           31.5356     1463.98 1024.989 -0.0002074
 
-### Bin average
+## Bin average
 
 The `bin_average()` module is based on the SBDEP Bin Average (BinAvg)
 module. The module calculates means of variables by depth or pressure
@@ -214,7 +214,7 @@ dc_7 <- gapctd::bin_average(dc_6, by = "depth", bin_width = 1)
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
-### Linking modules with pipe operators
+# Linking modules with pipe operators
 
 To declutter the workspace, the entire workflow can be run using pipe
 operators (native `|>` or magrittr `%>%` instead of producing output at
@@ -240,7 +240,7 @@ dc_8 <- dc |>
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
-## Modules for working with GAP data
+# Modules for working with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD.
 However, some modules are specifically been developed for processing
