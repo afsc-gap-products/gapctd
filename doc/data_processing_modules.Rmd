@@ -36,17 +36,17 @@ library(gapctd)
 
 ctd_data <- oce::read.oce(file = system.file("extdata/example/2021_06_24_0001_raw.cnv", package = "gapctd"))
 dc <- oce::ctdTrim(ctd_data, method = "sbe")
-
-plot(dc)
 ```
 
+```{r, include=FALSE}
+plot(dc)
+```
 
 ## Modules
 
 ### Median window filter
 
 The `median_filter` module is based on the median filter option in the SBEDP Window Filter (Wfilter) module. It calculates the median for selected channels within a specified scan window. Below, the median window filter is applied to temperature and conductivity channels for five (5) scan windows (corresponding with 1.25 seconds for the SBE19plus V2) and salinity is recalculated.
-
 
 ```{r}
 dc_1 <- gapctd::median_filter(dc, 
@@ -72,14 +72,16 @@ dc_2 <-   gapctd::lowpass_filter(dc_1,
                                  variables = c("temperature", "conductivity", "pressure"),
                                  time_constant = c(0.5, 0.5, 1))
 dc_2@data$salinity <- oce::swSCTp(dc_2) # Calculate salinity
+```
 
+
+```{r, include=FALSE}
 par(mfrow = c(1,2))
 plot(dc_1, which = 1, type = 'l')
 text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
 plot(dc_2, which = 1, type = 'l')
 text(x = 31.56, y = 35, labels = "(3) Low pass filter")
 ```
-
 
 
 ### Align channel

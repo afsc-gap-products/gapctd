@@ -37,8 +37,6 @@ library(gapctd)
 
 ctd_data <- oce::read.oce(file = system.file("extdata/example/2021_06_24_0001_raw.cnv", package = "gapctd"))
 dc <- oce::ctdTrim(ctd_data, method = "sbe")
-
-plot(dc)
 ```
 
 ## Modules
@@ -65,7 +63,7 @@ plot(dc_1, which = 1, type = 'l')
 text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ### Lowpass filter
 
@@ -79,15 +77,7 @@ dc_2 <-   gapctd::lowpass_filter(dc_1,
                                  variables = c("temperature", "conductivity", "pressure"),
                                  time_constant = c(0.5, 0.5, 1))
 dc_2@data$salinity <- oce::swSCTp(dc_2) # Calculate salinity
-
-par(mfrow = c(1,2))
-plot(dc_1, which = 1, type = 'l')
-text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
-plot(dc_2, which = 1, type = 'l')
-text(x = 31.56, y = 35, labels = "(3) Low pass filter")
 ```
-
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ### Align channel
 
@@ -111,7 +101,7 @@ plot(dc_3, which = 1, type = 'l', plim = c(12,10))
 text(x = 31.55, y = 11.85, labels = "(4) Align T")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ### Conductivity cell thermal mass correction
 
@@ -140,7 +130,7 @@ plot(dc_4, which = 1, type = 'l')
 text(x = 31.58, y = 35, labels = "(5) Correct C")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ### Loop edit
 
@@ -172,7 +162,7 @@ plot(dc_5, which = 1, type = 'l')
 text(x = 31.58, y = 35, labels = "(6) Loop edit")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 Note that the module flags slowdowns and reversals but does not remove
 them, so the plots above are identical.
@@ -231,7 +221,7 @@ plot(dc_7, which = 1, type = 'l')
 text(x = 31.58, y = 35, labels = "(7) Bin average")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ### Linking modules with pipe operators
 
@@ -260,14 +250,14 @@ plot(dc_7, which = 1, type = 'l')
 text(x = 31.58, y = 35, labels = "(8) Binned")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 plot(dc_8, which = 1, type = 'l')
 text(x = 31.58, y = 35, labels = "(9) Piped")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 ### Comparison with gapctd output
 
@@ -287,7 +277,7 @@ plot(final_data$downcast, which = 1, type = 'l')
 text(x = 31.57, y = 33, labels = "Processed w/\ngapctd")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### Modules for workign with GAP data
 
