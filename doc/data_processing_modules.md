@@ -37,13 +37,17 @@ library(gapctd)
 
 ctd_data <- oce::read.oce(file = system.file("extdata/example/2021_06_24_0001_raw.cnv", package = "gapctd"))
 dc <- oce::ctdTrim(ctd_data, method = "sbe")
+
+# Assign correct time zone for CTD data (survey time)
+dc@metadata$startTime <- lubridate::force_tz(dc@metadata$startTime, 
+                                             tz = "America/Anchorage")
 ```
 
 ## Modules
 
 ### Median window filter
 
-The `median_filter` module is based on the median filter option in the
+The `median_filter()` module is based on the median filter option in the
 SBEDP Window Filter (Wfilter) module. It calculates the median for
 selected channels within a specified scan window. Below, the median
 window filter is applied to temperature and conductivity channels for
@@ -67,8 +71,8 @@ text(x = 31.56, y = 35, labels = "(2) Median Filter\nT+C")
 
 ### Lowpass filter
 
-The `lowpass_filter` module is based on the SBEDP Filter module. Below,
-the filter is applied to temperature, conductivity, and pressure
+The `lowpass_filter()` module is based on the SBEDP Filter module.
+Below, the filter is applied to temperature, conductivity, and pressure
 channels with time constants of 0.5 s, 0.5 s, and 1 s, respectively.
 Salinity is then recalculated.
 
@@ -79,9 +83,11 @@ dc_2 <-   gapctd::lowpass_filter(dc_1,
 dc_2@data$salinity <- oce::swSCTp(dc_2) # Calculate salinity
 ```
 
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
 ### Align channel
 
-The `align_var` module is based on the SBEDP Align (AlignCTD) module.
+The `align_var()` module is based on the SBEDP Align (AlignCTD) module.
 The module shifts channel data in time and interpolates between
 measurements when alignment parameters are not factors of the scan
 interval. In the example below, temperature is advanced by 0.5 seconds
@@ -93,24 +99,18 @@ dc_3 <-   gapctd::align_var(dc_2,
                             variables = "temperature", 
                             offset = -0.5)
 dc_3@data$salinity <- oce::swSCTp(dc_3) # Calculate salinity
-
-par(mfrow = c(1,2))
-plot(dc_2, which = 1, type = 'l', plim = c(12,10))
-text(x = 31.55, y = 11.85, labels = "(3) Low pass filter")
-plot(dc_3, which = 1, type = 'l', plim = c(12,10))
-text(x = 31.55, y = 11.85, labels = "(4) Align T")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 ### Conductivity cell thermal mass correction
 
-The `conductivity_correction` module is based on the SBEDP Conductivity
-Cell Thermal Mass Correction (CellTM) module. The module implements a
-discrete time filter on conductivity based on the sample interval
-(freq_n), the initial conductivity error (alpha_C), and a time decay
-constant (beta_C). The function uses the sample interval in the data to
-estimate the sample interval if it is not provided.
+The `conductivity_correction()` module is based on the SBEDP
+Conductivity Cell Thermal Mass Correction (CellTM) module. The module
+implements a discrete time filter on conductivity based on the sample
+interval (freq_n), the initial conductivity error (alpha_C), and a time
+decay constant (beta_C). The function uses the sample interval in the
+data to estimate the sample interval if it is not provided.
 
 Below, the conductivity correction is applied using the typical
 parameters recommended by the CTD manufacturer and salinity is
@@ -122,27 +122,29 @@ dc_4 <- gapctd::conductivity_correction(dc_3,
                                         beta_C = 1/8,
                                         freq_n  = 0.25)
 dc_4@data$salinity <- oce::swSCTp(dc_4)
-
-par(mfrow = c(1,2))
-plot(dc_3, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(4) Align T")
-plot(dc_4, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(5) Correct C")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ### Loop edit
 
-The `loop_edit` module is based on the SBEDP Loop Edit (loopedit) module
-that flags slowdowns and reversals in scan data based on a threshold.
+The `loop_edit()` module is based on the SBEDP Loop Edit (loopedit)
+module that flags slowdowns and reversals in scan data based on a
+threshold.
 
 ``` r
 dc_5 <- gapctd::loop_edit(dc_4,
                           min_speed = 0.1, 
                           window = 5, 
                           cast_direction = "downcast")
+```
 
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+Note that the module flags slowdowns and reversals but does not remove
+them, so the plots above are identical.
+
+``` r
 dc_4@data$flag[409:415]
 ```
 
@@ -154,23 +156,10 @@ dc_5@data$flag[409:415]
 
     ## [1] -9 -9 -9 -9 -9 -9 -9
 
-``` r
-par(mfrow = c(1,2))
-plot(dc_4, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(5) Correct C")
-plot(dc_5, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(6) Loop edit")
-```
-
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-Note that the module flags slowdowns and reversals but does not remove
-them, so the plots above are identical.
-
 ### Derive EOS
 
-The `derive_eos` module uses functions from the oce package to calculate
-the following variables from scan data:
+The `derive_eos()` module uses functions from the oce package to
+calculate the following variables from scan data:
 
 | Variable          | Description                                     | Method  | `oce` function       |
 |-------------------|-------------------------------------------------|---------|----------------------|
@@ -203,7 +192,7 @@ head(as.data.frame(dc_6@data))
 
 ### Bin average
 
-The `bin_average` module is based on the SBDEP Bin Average (BinAvg)
+The `bin_average()` module is based on the SBDEP Bin Average (BinAvg)
 module. The module calculates means of variables by depth or pressure
 bin, with bad scan (flag \< 0) data excluded. Binning can be performed
 by pressure or depth bins and surface data can be excluded based on a
@@ -213,15 +202,9 @@ example below, means are calculated for 1 m depth bins and data from \<
 
 ``` r
 dc_7 <- gapctd::bin_average(dc_6, by = "depth", bin_width = 1)
-
-par(mfrow = c(1,2))
-plot(dc_5, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(6) Loop edit")
-plot(dc_7, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(7) Bin average")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### Linking modules with pipe operators
 
@@ -245,19 +228,9 @@ dc_8 <- dc |>
                     cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1)
-
-plot(dc_7, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(8) Binned")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
-
-``` r
-plot(dc_8, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(9) Piped")
-```
-
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->![](data_processing_modules_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
 
 ### Comparison with gapctd output
 
@@ -269,22 +242,58 @@ package.
 
 ``` r
 final_data <- readRDS(file = system.file("extdata/example/2021_06_24_0001_final.rds", package = "gapctd"))
-
-par(mfrow=c(1,2))
-plot(dc_7, which = 1, type = 'l')
-text(x = 31.58, y = 35, labels = "(7) Binned")
-plot(final_data$downcast, which = 1, type = 'l')
-text(x = 31.57, y = 33, labels = "Processed w/\ngapctd")
 ```
 
-![](data_processing_modules_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ### Modules for workign with GAP data
 
 The modules above can be used with any `ctd` object data from any CTD.
-However, there are some modules that have specifically been developed
-for processing GAP’s CTD data:
+However, some modules are specifically been developed for processing
+GAP’s CTD data,
 
-| Module              | Description |
-|---------------------|-------------|
-| `append_hau_data()` |             |
+| Module                     | Purpose                                                                                                                                |
+|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `append_haul_data()`       | Adds haul metadata from RACEBASE to ctd objects based on CTD time stamps and event time stamps in RACEBASE.                            |
+| `assign_metadata_fields()` | Assigns metadata fields to downcast or upcast fields based on user-specified cast_direction                                            |
+| `section_oce()`            | Extracts a section (downcast, bottom, or upcast) from a ctd object based on scan time stamps and event time stamps in metadata fields. |
+
+The use of thse functions within the data processing workflow is
+illustrated below.
+
+``` r
+ex_haul <- readRDS(file = system.file("extdata/example/HAUL_DATA_162_202101_202102.rds", 
+                                      package = "gapctd"))
+
+dc@metadata$startTime <- lubridate::force_tz(dc@metadata$startTime, 
+                                             tz = "America/Anchorage")
+
+dc_9 <- dc |>
+  gapctd:::append_haul_data(haul_df = ex_haul) |>
+  gapctd::median_filter(variables = c("temperature", "conductivity"),
+                        window = c(5,5)) |>
+  gapctd::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
+                         time_constant = c(0.5, 0.5, 1)) |>
+  gapctd::align_var(variables = "temperature", 
+                    offset = -0.5) |>
+  gapctd:::assign_metadata_fields(cast_direction = "downcast") |>
+  gapctd:::section_oce(by = "datetime",
+                       cast_direction = "downcast") |>
+  gapctd::conductivity_correction(alpha_C = 0.04, 
+                                  beta_C = 1/8) |>
+  gapctd::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+  gapctd::derive_eos() |>
+  gapctd::bin_average(by = "depth", bin_width = 1)
+```
+
+    ## append_haul_data: Scans found: 1419 downcast, 329 upcast, 6807 bottom.
+
+``` r
+plot(dc_9)
+```
+
+![](data_processing_modules_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+The modules for working with GAP CTD data appended location data to the
+metadata object so now the location of the cast can be shown in the
+standard oce plots.
