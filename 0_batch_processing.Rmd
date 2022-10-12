@@ -7,7 +7,7 @@ output:
 
 # Process CTD data in R using gapctd
 
-The gapctd package was developed to processes CTD data collected during Alaska Fisheries Science Center bottom trawl surveys and generate data products. The full data processing workflow is run in R aside from the data decoding step that requires SBE Data Processing Software. The gapctd package uses the [oce package](https://dankelley.github.io/oce/) (Kelley et al., 2022) for handling CTD data. Data are processed using R implementations of modules from SBE Data Processing software and methods for optimizing module parameters that have been applied to underway CTD and glider data (Garau et al., 2011; Ullman and Hebert, 2014). 
+The gapctd package processes CTD data collected during Alaska Fisheries Science Center bottom trawl surveys. The entire data processing workflow is run in R aside from decoding of raw data files in SBE Data Processing Software. The gapctd package uses the [oce package](https://dankelley.github.io/oce/) (Kelley et al., 2022) for handling CTD data. Data are processed using R versions of modules from SBE Data Processing software and methods for optimizing module parameters that have been applied to underway CTD and glider data (Garau et al., 2011; Ullman and Hebert, 2014). 
 
 The data processing workflow described below was developed for processing data from Sea-Bird SBE19plus V2 CTDs with induction pumps that are deployed on bottom-trawl survey gear in the eastern Bering Sea, Gulf of Alaska, and Aleutian Islands.
 
