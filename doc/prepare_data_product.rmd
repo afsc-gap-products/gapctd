@@ -5,4 +5,84 @@ output:
     variant: gfm
 ---
 
+# Preparing data products
 
+Finalized CTD data from GAP surveys are packaged in netCDF files that contain vertical profiles, station level data, and metadata. Variables and metadata in the files follow [CF Metadata Conventions](https://cfconventions.org/index.html) to facilitate data sharing and transfer. Because the gapctd package is still in development, the code below is shared as a placeholder for a full working example.
+
+```{r}
+# Generate data products using make_oce_ncdf()
+library(gapctd)
+
+# Example cast file.
+cast_files <- c(
+  system.file("extdata/example/2021_06_24_0001_final.rds", package = "gapctd")
+)
+
+# Example metadata file that includes metadata for the example cast
+metadata_files <- c(
+  system.file("extdata/example/ex_metadata.rds", package = "gapctd")
+)
+
+# Example data for required fields
+data_set_name <- "EXAMPLE CTD Data from AFSC 2021 EBS Shelf and NBS Bottom Trawl Surveys"
+cruise_name <- "EXAMPLE  2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Surveys"
+ctd_team <- "CTD Team"
+creator_name <- "Creator name"
+creator_email <- "Cretor email"
+dataset_doi <- "doi"
+ctd_unit <- "SBE19plus V2"
+
+
+# Make an example netCDF file called example_gapctd.nc
+gapctd::make_oce_ncdf(
+  cast_files = cast_files,
+  metadata_files = metadata_files,
+  output_file = "example_gapctd.nc",
+  global_attributes = list(title = data_set_name, 
+                           references = "",
+                           id = dataset_doi,
+                           cdm_data_type = "Point",
+                           cruise = cruise_name,
+                           institution = "NOAA Alaska Fisheries Science Center",
+                           contributor_name = ctd_team,
+                           creator_name = creator_name,
+                           creator_institution = "NOAA Alaska Fisheries Science Center",
+                           creator_email = creator_email,
+                           publisher = "NOAA Alaska Fisheries Science Center",
+                           publisher_type = "institution",
+                           publisher_url = "https://github.com/afsc-gap-products/gapctd",
+                           geospatial_bounds_crs = "EPSG:4326",
+                           license = "http://www.usa.gov/publicdomain/label/1.0/",
+                           metadata_link = "",
+                           instrument = "CTD",
+                           Conventions = c("CF-1.8"),
+                           standard_name_vocabulary = "CF Standard Name Table v79",
+                           source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd"))
+  )
+)
+```
+
+
+# Examine the contents of the file
+
+```{r}
+# Open a connection to the object
+con <- RNetCDF::open.nc("example_gapctd.nc")
+
+# Examine the contents of the object
+RNetCDF::print.nc(con)
+
+# Open an attribute
+RNetCDF::var.get.nc(con, variable = "depth")
+
+RNetCDF::var.get.nc(con, variable = "sea_water_temperature")
+RNetCDF::att.get.nc(con, variable = "sea_water_temperature", attribute = "units")
+RNetCDF::att.get.nc(con, variable = "sea_water_temperature", attribute = "long_name")
+
+RNetCDF::var.get.nc(con, variable = "sea_floor_practical_salinity")
+RNetCDF::att.get.nc(con, variable = "sea_floor_practical_salinity", attribute = "units")
+RNetCDF::att.get.nc(con, variable = "sea_floor_practical_salinity", attribute = "long_name")
+
+RNetCDF::var.get.nc(con, variable = "stationid")
+RNetCDF::var.get.nc(con, variable = "haul")
+```
