@@ -245,8 +245,9 @@ and density (right).</b>
 </p>
 ![](./doc/assets/r_process/8_flag_interpolate.png)
 <p align="center">
-<b>Selecting and interpolating the shallowest density bin, showing set 1
-profiles before (top) and after (bottom).</b>
+<b>Example of selecting and interpolating showing set 1 profiles before
+(top) and after (bottom) removing data from the shallowest depth
+bin.</b>
 </p>
 
 ## 9. Select profiles to include in data product (first round)
