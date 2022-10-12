@@ -13,71 +13,14 @@ downcast, bottom, and upcast.
 
 ``` r
 library(gapctd)
-```
 
-    ## Loading required package: ggplot2
-
-    ## Warning: package 'ggplot2' was built under R version 4.1.3
-
-    ## Loading required package: dplyr
-
-    ## Warning: package 'dplyr' was built under R version 4.1.3
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-    ## Loading required package: tidyr
-
-    ## Warning: package 'tidyr' was built under R version 4.1.3
-
-    ## Loading required package: oce
-
-    ## Warning: package 'oce' was built under R version 4.1.3
-
-    ## Loading required package: gsw
-
-    ## Loading required package: here
-
-    ## here() starts at C:/Users/sean.rohan/Work/afsc/gapctd
-
-    ## Loading required package: bbmle
-
-    ## Warning: package 'bbmle' was built under R version 4.1.3
-
-    ## Loading required package: stats4
-
-    ## 
-    ## Attaching package: 'bbmle'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     slice
-
-    ## Loading required package: sf
-
-    ## Warning: package 'sf' was built under R version 4.1.3
-
-    ## Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 7.2.1; sf_use_s2() is TRUE
-
-``` r
 ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
 
 class(ctd_data)
+summary(ctd_data)
 ```
 
     ## [1] "list"
-
-``` r
-summary(ctd_data)
-```
 
     ##          Length Class Mode
     ## downcast 1      ctd   S4  
@@ -98,19 +41,19 @@ head(
 ```
 
     ##   depth flag    timeS temperature conductivity salinity        C_corr  velocity
-    ## 1 1.001    7 268.4936    4.373045     2.874601  30.1566 -1.056410e-05 0.1427179
-    ## 2 2.003    0 367.3977    4.373045     2.874601  30.1561 -3.181818e-06 0.1668182
-    ## 3 3.003    0 372.5000    4.371038     2.874613  30.1576 -3.307692e-06 0.3063846
-    ## 4 4.005    0 378.7614    4.369141     2.874598  30.1586 -1.954545e-06 0.1476364
-    ## 5 5.006    0 384.6250    4.368505     2.874618  30.1590 -4.500000e-07 0.2086000
-    ## 6 6.008    0 389.3750    4.368050     2.874643  30.1592 -7.222222e-07 0.2232222
-    ##   absolute_salinity sound_speed  density      N2 pressure
-    ## 1           30.1566     1461.98 1023.905 2.8e-06    1.009
-    ## 2           30.1561     1461.99 1023.909 5.6e-06    2.019
-    ## 3           30.1576     1462.00 1023.916 8.5e-06    3.028
-    ## 4           30.1586     1462.01 1023.921 6.9e-06    4.038
-    ## 5           30.1590     1462.03 1023.926 3.9e-06    5.047
-    ## 6           30.1592     1462.04 1023.931 2.2e-06    6.057
+    ## 1 1.001    7 259.0574    6.520643     3.178194  31.6054 -3.905410e-04 0.1395574
+    ## 2 2.003    0 358.2903    6.520643     3.178194  31.6049 -1.567742e-05 0.1242258
+    ## 3 3.003    0 427.6500    6.510448     3.179684  31.6303 -3.200000e-06 0.1387333
+    ## 4 4.004    0 435.8810    6.510214     3.179694  31.6302 -4.022658e-23 0.1504762
+    ## 5 5.006    0 442.8750    6.512266     3.179927  31.6303  1.192308e-06 0.1592692
+    ## 6 6.007    0 449.2500    6.505379     3.179368  31.6301 -5.200000e-06 0.1552800
+    ##   absolute_salinity sound_speed  density        N2 pressure
+    ## 1           31.6054     1472.55 1024.812  7.31e-05    1.009
+    ## 2           31.6049     1472.56 1024.816  7.60e-05    2.019
+    ## 3           31.6303     1472.57 1024.842  6.34e-05    3.028
+    ## 4           31.6302     1472.59 1024.847  3.31e-05    4.037
+    ## 5           31.6303     1472.61 1024.851  8.40e-06    5.047
+    ## 6           31.6301     1472.60 1024.857 -9.30e-06    6.056
 
 Note that the data are binned averages for 1-m depth bins.
 
@@ -129,12 +72,12 @@ View the first six lines of the header.
 head(ctd_data$downcast@metadata$header)
 ```
 
-    ## [1] "* Sea-Bird SBE19plus  Data File:"                                                         
-    ## [2] "* FileName = C:\\CTD\\202101_94_L1\\2021_06_06\\SBE19plus_01908105_2021_06_06_94_0001.hex"
-    ## [3] "* Software version 2.8.0.119"                                                             
-    ## [4] "* Temperature SN = 8105"                                                                  
-    ## [5] "* Conductivity SN = 8105"                                                                 
-    ## [6] "* System UpLoad Time = Jun 06 2021 21:25:17"
+    ## [1] "* Sea-Bird SBE19plus  Data File:"                                                       
+    ## [2] "* FileName = C:\\CTD\\202201_162_L2\\2022_06_27\\SBE19plus_01908101_2022_06_27_0003.hex"
+    ## [3] "* Software version 2.8.0.119"                                                           
+    ## [4] "* Temperature SN = 8101"                                                                
+    ## [5] "* Conductivity SN = 8101"                                                               
+    ## [6] "* System UpLoad Time = Jun 27 2022 18:14:56"
 
 #### Survey metadata
 
@@ -145,7 +88,7 @@ such as:
 ctd_data$downcast@metadata$latitude
 ```
 
-    ## [1] 59.00566
+    ## [1] 57.65684
 
 Other types of metadata are unique to gapctd processing because they are
 useful for analyzing survey data. For example, the metadata list
@@ -155,20 +98,22 @@ includes a data.frame with metada data from the AFSC database:
 ctd_data$downcast@metadata$race_metadata
 ```
 
-    ##    VESSEL CRUISE HAUL           ON_BOTTOM            HAULBACK
-    ## 91     94 202101   31 2021-06-06 14:58:12 2021-06-06 15:28:45
-    ##             OFF_BOTTOM BOTTOM_DEPTH STATIONID GEAR_DEPTH GEAR_TEMPERATURE
-    ## 91 2021-06-06 15:30:20           23      M-08         20              4.3
-    ##    SURFACE_TEMPERATURE PERFORMANCE HAUL_TYPE          START_TIME START_LATITUDE
-    ## 91                 4.2           0         3 2021-06-06 06:58:12       59.00566
-    ##    START_LONGITUDE END_LATITUDE END_LONGITUDE            dc_start
-    ## 91       -163.3406     58.97924     -163.3413 2021-06-06 06:49:57
-    ##                 dc_end            uc_start              uc_end missing_section
-    ## 91 2021-06-06 14:58:42 2021-06-06 15:28:15 2021-06-06 07:35:52           FALSE
-    ##                                                                                                   filename
-    ## 91 C:\\Users\\sean.rohan\\Work\\afsc\\WIP\\2021_VEST_1\\cnv\\sbe19plus_01908105_2021_06_06_94_0001_raw.cnv
-    ##                                deploy_id
-    ## 91 sbe19plus_01908105_2021_06_06_94_0001
+    ##     VESSEL CRUISE HAUL           ON_BOTTOM            HAULBACK
+    ## 174    162 202201   98 2022-06-27 22:11:55 2022-06-27 22:41:34
+    ##              OFF_BOTTOM BOTTOM_DEPTH STATIONID GEAR_DEPTH GEAR_TEMPERATURE
+    ## 174 2022-06-27 22:42:54           69      I-19         67              0.9
+    ##     SURFACE_TEMPERATURE PERFORMANCE HAUL_TYPE          START_TIME
+    ## 174                 6.3           0         3 2022-06-27 14:11:55
+    ##     START_LATITUDE START_LONGITUDE END_LATITUDE END_LONGITUDE
+    ## 174       57.65684       -169.0341     57.68195     -169.0453
+    ##                dc_start              dc_end            uc_start
+    ## 174 2022-06-27 14:00:09 2022-06-27 22:12:25 2022-06-27 22:41:04
+    ##                  uc_end missing_section
+    ## 174 2022-06-27 14:50:06           FALSE
+    ##                                                                                              filename
+    ## 174 C:\\Users\\sean.rohan\\Work\\afsc\\WIP\\2022_AKK\\cnv\\sbe19plus_01908101_2022_06_27_0003_raw.cnv
+    ##                              deploy_id
+    ## 174 sbe19plus_01908101_2022_06_27_0003
 
 #### Data processing parameters
 
@@ -183,15 +128,15 @@ ctd_data$downcast@metadata$align
 ```
 
     ## best_offset   best_corr 
-    ##  -1.0000000  -0.4943155
+    ##  -0.5700000   0.9998825
 
 ``` r
 # Conductivity cell thermal mass correction
 ctd_data$downcast@metadata$ctm$downcast
 ```
 
-    ## alpha_C  beta_C 
-    ##   0.001   1.000
+    ##    alpha_C     beta_C 
+    ## 0.01892234 0.25370295
 
 #### Processing Log
 
@@ -209,4 +154,4 @@ the metadata to show the location where the data were collected:
 plot(ctd_data$downcast)
 ```
 
-![](ctd_data_files_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](ctd_data_files_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
