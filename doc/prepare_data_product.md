@@ -11,61 +11,7 @@ working example.
 ``` r
 # Generate data products using make_oce_ncdf()
 library(gapctd)
-```
 
-    ## Loading required package: ggplot2
-
-    ## Warning: package 'ggplot2' was built under R version 4.1.3
-
-    ## Loading required package: dplyr
-
-    ## Warning: package 'dplyr' was built under R version 4.1.3
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-    ## Loading required package: tidyr
-
-    ## Warning: package 'tidyr' was built under R version 4.1.3
-
-    ## Loading required package: oce
-
-    ## Warning: package 'oce' was built under R version 4.1.3
-
-    ## Loading required package: gsw
-
-    ## Loading required package: here
-
-    ## here() starts at C:/Users/sean.rohan/Work/afsc/gapctd
-
-    ## Loading required package: bbmle
-
-    ## Warning: package 'bbmle' was built under R version 4.1.3
-
-    ## Loading required package: stats4
-
-    ## 
-    ## Attaching package: 'bbmle'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     slice
-
-    ## Loading required package: sf
-
-    ## Warning: package 'sf' was built under R version 4.1.3
-
-    ## Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 7.2.1; sf_use_s2() is TRUE
-
-``` r
 # Example cast file.
 cast_files <- c(
   system.file("extdata/example/2021_06_24_0001_final.rds", package = "gapctd")
@@ -114,77 +60,6 @@ gapctd::make_oce_ncdf(
   )
 )
 ```
-
-    ## make_oce_ncdf: Setting precision of temperature to 4
-
-    ## make_oce_ncdf: Setting precision of conductivity to 6
-
-    ## make_oce_ncdf: Setting precision of salinity to 4
-
-    ## make_oce_ncdf: Setting precision of velocity to 3
-
-    ## make_oce_ncdf: Setting precision of absolute_salinity to 4
-
-    ## make_oce_ncdf: Setting precision of sound_speed to 3
-
-    ## make_oce_ncdf: Setting precision of density to 3
-
-    ## make_oce_ncdf: Setting precision of pressure to 3
-
-    ## make_oce_ncdf: Converting on_bottom to character.make_oce_ncdf: Converting haulback to character.make_oce_ncdf: Converting off_bottom to character.make_oce_ncdf: Converting start_time to character.make_oce_ncdf: Converting dc_start to character.make_oce_ncdf: Converting dc_end to character.make_oce_ncdf: Converting uc_start to character.make_oce_ncdf: Converting uc_end to character.
-
-    ## Joining, by = c("stationid", "profile", "vessel", "cruise", "haul",
-    ## "haul_depth", "sea_floor_temperature", "sea_floor_practical_salinity",
-    ## "sea_floor_salinity", "sea_floor_sound_speed_in_sea_water")
-    ## Adding index for 2 samples/locations.
-    ## Adding 3D dimension depth with units m
-    ## Adding 2D variable latitude with units degree_north
-    ## Adding 2D variable longitude with units degree_east
-    ## Adding 2D variable time with units time
-    ## Adding 2D variable stationid with units 1
-    ## Adding 2D variable profile with units 1
-    ## Adding 2D variable vessel with units 1
-    ## Adding 2D variable cruise with units 1
-    ## Adding 2D variable haul with units 1
-    ## Adding 2D variable haul_depth with units m
-    ## Adding 2D variable sea_floor_temperature with units degree_C
-    ## Adding 2D variable sea_floor_practical_salinity with units 1
-    ## Adding 2D variable sea_floor_salinity with units g kg-1
-    ## Adding 2D variable sea_floor_sound_speed_in_sea_water with units m s-1
-    ## Adding 3D variable time_elapsed with units s
-    ## Adding 3D variable sea_water_pressure with units dbar
-    ## Adding 3D variable sea_water_temperature with units degree_C
-    ## Adding 3D variable sea_water_practical_salinity with units 1
-    ## Adding 3D variable sea_water_salinity with units g kg-1
-    ## Adding 3D variable sea_water_density with units kg m-3
-    ## Adding 3D variable buoyancy_frequency with units s-2
-    ## Adding 3D variable sea_water_electrical_conductivity with units S m-1)
-    ## Adding 3D variable sound_speed_in_sea_water with units m s-1
-    ## Adding 3D variable quality_flag with units 1
-    ## Adding instrument attributes
-    ## Adding global attribute references
-    ## Adding global attribute id
-    ## Adding global attribute cruise
-    ## Adding global attribute institution
-    ## Adding global attribute contributor_name
-    ## Adding global attribute creator_name
-    ## Adding global attribute creator_institution
-    ## Adding global attribute creator_email
-    ## Adding global attribute publisher
-    ## Adding global attribute publisher_type
-    ## Adding global attribute publisher_url
-    ## Adding global attribute geospatial_bounds
-    ## Adding global attribute geospatial_bounds_crs
-    ## Adding global attribute license
-    ## Adding global attribute metadata_link
-    ## Adding global attribute date_created
-    ## Adding global attribute instrument
-    ## Adding global attribute Conventions
-    ## Adding global attribute standard_name_vocabulary
-    ## Adding global attribute cdm_data_type
-    ## Adding global attribute time_coverage_start
-    ## Adding global attribute time_coverage_end
-    ## Adding global attribute source
 
     ## netcdf netcdf4 {
     ## dimensions:

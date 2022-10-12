@@ -9,7 +9,7 @@ output:
 
 Finalized CTD data from GAP surveys are packaged in netCDF files that contain vertical profiles, station level data, and metadata. Variables and metadata in the files follow [CF Metadata Conventions](https://cfconventions.org/index.html) to facilitate data sharing and transfer. Because the gapctd package is still in development, the code below is shared as a placeholder for a full working example.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 # Generate data products using make_oce_ncdf()
 library(gapctd)
 
