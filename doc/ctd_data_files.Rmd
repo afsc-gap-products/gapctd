@@ -1,0 +1,85 @@
+---
+title: "CTD Data Files"
+output:
+  md_document:
+    variant: gfm
+---
+
+## Introduction
+
+During processing, the gapctd package saves output to R data files (.rds) to preserve data formats. These are subsequently used to generate data products in netCDF files. Here, we show how the contents of the rds files are structured.
+
+Load the gapctd package and read in data from a fully-processed deployment using the readRDS function. The file contains a list of three objects with class ctd, a class from the oce package. Each of the objects contains data from different segments of the deployment: downcast, bottom, and upcast.
+
+```{r load_libraries}
+library(gapctd)
+
+ctd_data <- readRDS(file = system.file("extdata/ex_ctd_file.rds", package = "gapctd"))
+
+class(ctd_data)
+summary(ctd_data)
+```
+
+## Data
+
+Data from a segment are stored in a list named *data* that contains vectors of data for the individual variables. Below, the contents of the *data* list are shown after conversion to a data.frame for the purpose of illustration.
+
+```{r data}
+head(
+  as.data.frame(ctd_data$downcast@data)
+  )
+```
+
+Note that the data are binned averages for 1-m depth bins.
+
+## Metadata
+
+Metadata from a segment are stored in a list named *metadata* that contains vectors, lists, and data.frames of metadata. These data include headers that were read-in from initial CTD data files, cast metadata, and parameters used in SBE Data Processing modules.
+
+#### Header from initial CTD data file
+
+View the first six lines of the header.
+
+```{r}
+head(ctd_data$downcast@metadata$header)
+```
+
+#### Survey metadata
+
+There are two types of cast metadata. Some are standard for oce objects, such as:
+
+```{r}
+ctd_data$downcast@metadata$latitude
+```
+
+Other types of metadata are unique to gapctd processing because they are useful for analyzing survey data. For example, the metadata list includes a data.frame with metada data from the AFSC database:
+
+```{r}
+ctd_data$downcast@metadata$race_metadata
+```
+
+
+#### Data processing parameters
+
+The object includes parameter settings that were used to run data processing modules. For this cast, there are parameters that were estimated for temperature alignment and conductivity cell thermal mass correction:
+
+```{r}
+# Temperature alignment
+ctd_data$downcast@metadata$align
+
+# Conductivity cell thermal mass correction
+ctd_data$downcast@metadata$ctm$downcast
+```
+
+#### Processing Log
+
+Processing steps that were applied to the segment are stored in a list named *processingLog* that contains vectors of processing steps and time stamps.
+
+
+## Plotting
+
+The oce package includes convenient methods for plotting data in ctd objects using base R, such as this four-panel plot below that utilizes the metadata to show the location where the data were collected:
+
+```{r}
+plot(ctd_data$downcast)
+```
