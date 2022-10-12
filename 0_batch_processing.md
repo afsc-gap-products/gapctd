@@ -59,10 +59,12 @@ gapctd:::setup_gapctd_directory(processing_method = processing_method,
                                 ctd_dir = ctd_dir)
 ```
 
-![Left: SBE Data Processing converting raw data files after calling the
+![](./doc/assets/r_process/1_setup_directory.png)
+<p align="center">
+<b>Left: SBE Data Processing converting raw data files after calling the
 setup_gapctd_directory(). Right: Contents of the working directory after
-successfully running
-setup_gapctd_directory().](./doc/assets/r_process/1_setup_directory.png)
+successfully running setup_gapctd_directory().</b>
+</p>
 
 ## 4. Retrieve haul data from RACEBASE
 
@@ -88,9 +90,11 @@ haul_df <- readRDS(file = here::here("output",
 The tzone = “America/Anchorage” argument specifies the timezone to use
 for haul event times in RACEBASE that are stored in UTC.
 
-![Contents of the /output/ directory after running get_haul_data(),
-showing the haul data file
-(HAUL_DATA_94_202101_202102.rds).](./doc/assets/r_process/4_get_haul_data.png)
+![](./doc/assets/r_process/4_get_haul_data.png)
+<p align="center">
+<b>Contents of the /output/ directory after running get_haul_data(),
+showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
+</p>
 
 ## 5. Run gapctd processing methods on CTD files
 
@@ -123,6 +127,10 @@ in the object).
 Contents of the /output/gapctd/ directory after successfully running
 wrapper_run_gapctd().](./doc/assets/r_process/5_run_gapctd.png)
 
+<p align="center">
+<b></b>
+</p>
+
 ## 6. Make metadata file
 
 The `make_metadata_file` function reads in R data (.rds) files from each
@@ -144,6 +152,10 @@ gapctd:::make_metadata_file(rds_dir_path = here::here("output", "gapctd"),
 make_metadata_file(), showing the metadata file
 (CTD_HAUL_DATA_94_202101_202202.rds)](./doc/assets/r_process/6_make_metadata_file.png)
 
+<p align="center">
+<b></b>
+</p>
+
 ## 7. Run basic data quality checks
 
 The `move_bad_rds` function checks data files from each deployment for
@@ -160,6 +172,9 @@ gapctd:::move_bad_rds(rds_dir_path = here::here("output", processing_method))
 
 !\[![Contents of the /bad_cnv/ directory after running
 move_bad_rds()](./doc/assets/r_process/7_move_bad_rds.png)
+<p align="center">
+<b></b>
+</p>
 
 ## 8. Visually inspect, flag, and interpolate bad data (first round)
 
@@ -213,6 +228,10 @@ errors.
 ![Set 1 plots: Pressure versus temperature (left), salinity (center),
 and density (right).](./doc/assets/r_process/8_flag_interpolate_3.png)
 
+<p align="center">
+<b></b>
+</p>
+
 #### Set 2
 
 1.  Review the panels for salinity errors.
@@ -226,9 +245,17 @@ and density (right).](./doc/assets/r_process/8_flag_interpolate_3.png)
 ![Set 2 plots: Rate of change in salinity (left) and salinity
 (right)](./doc/assets/r_process/8_flag_interpolate_4.png)
 
+<p align="center">
+<b></b>
+</p>
+
 ![Selecting and interpolating the shallowest density bin, showing set 1
 profiles before (top) and after
 (bottom).](./doc/assets/r_process/8_flag_interpolate.png)
+
+<p align="center">
+<b></b>
+</p>
 
 ## 9. Select profiles to include in data product (first round)
 
@@ -265,6 +292,10 @@ structure of the water column could be considered unstable. R Console
 output: User interface for selecting
 casts.](./doc/assets/r_process/9_review_profiles.png)
 
+<p align="center">
+<b></b>
+</p>
+
 ## 10. Remedial corrections for conductivity cell thermal intertia errors
 
 During this step, use the `remedial_ctm` to select deployments that
@@ -288,6 +319,10 @@ gapctd:::remedial_ctm(rds_path = here::here("output", processing_method),
 ![R console user interface for choosing casts for alternative
 conductivity cell thermal intertia
 correction.](./doc/assets/r_process/10_remedial_ctm.png)
+
+<p align="center">
+<b></b>
+</p>
 
 ## 11. Visually inspect, flag, and interpolate bad data (first round)
 
@@ -335,6 +370,10 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 
 ![Final profile data in the /final_cnv/
 directory.](./doc/assets/r_process/13_finalize_data.png)
+
+<p align="center">
+<b></b>
+</p>
 
 ## 14. Prepare the data product
 
