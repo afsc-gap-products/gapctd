@@ -123,12 +123,11 @@ not be included in the file (i.e., if the CTD shut-off during the
 deployment and there is no upcast data, there will not be an upcast file
 in the object).
 
-![Top: Console messages while running wrapper_run_gapctd(). Bottom:
-Contents of the /output/gapctd/ directory after successfully running
-wrapper_run_gapctd().](./doc/assets/r_process/5_run_gapctd.png)
-
+![](./doc/assets/r_process/5_run_gapctd.png)
 <p align="center">
-<b></b>
+<b>Top: Console messages while running wrapper_run_gapctd(). Bottom:
+Contents of the /output/gapctd/ directory after successfully running
+wrapper_run_gapctd().</b>
 </p>
 
 ## 6. Make metadata file
@@ -148,12 +147,11 @@ gapctd:::make_metadata_file(rds_dir_path = here::here("output", "gapctd"),
                                                      paste0("CTD_HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
 ```
 
-![Contents of the /metadata/ directory after running
-make_metadata_file(), showing the metadata file
-(CTD_HAUL_DATA_94_202101_202202.rds)](./doc/assets/r_process/6_make_metadata_file.png)
-
+![](./doc/assets/r_process/6_make_metadata_file.png)
 <p align="center">
-<b></b>
+<b>Contents of the /metadata/ directory after running
+make_metadata_file(), showing the metadata file
+(CTD_HAUL_DATA_94_202101_202202.rds)</b>
 </p>
 
 ## 7. Run basic data quality checks
@@ -170,10 +168,9 @@ fails data quality checks, the good profile is retained in the
 gapctd:::move_bad_rds(rds_dir_path = here::here("output", processing_method))
 ```
 
-!\[![Contents of the /bad_cnv/ directory after running
-move_bad_rds()](./doc/assets/r_process/7_move_bad_rds.png)
+![](./doc/assets/r_process/7_move_bad_rds.png)
 <p align="center">
-<b></b>
+<b>Contents of the /bad_cnv/ directory after running move_bad_rds()</b>
 </p>
 
 ## 8. Visually inspect, flag, and interpolate bad data (first round)
@@ -225,11 +222,10 @@ errors.
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![Set 1 plots: Pressure versus temperature (left), salinity (center),
-and density (right).](./doc/assets/r_process/8_flag_interpolate_3.png)
-
+![](./doc/assets/r_process/8_flag_interpolate_3.png)
 <p align="center">
-<b></b>
+<b>Set 1 plots: Pressure versus temperature (left), salinity (center),
+and density (right).</b>
 </p>
 
 #### Set 2
@@ -242,19 +238,15 @@ and density (right).](./doc/assets/r_process/8_flag_interpolate_3.png)
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![Set 2 plots: Rate of change in salinity (left) and salinity
-(right)](./doc/assets/r_process/8_flag_interpolate_4.png)
-
+![](./doc/assets/r_process/8_flag_interpolate_4.png)
 <p align="center">
-<b></b>
+<b>Set 2 plots: Rate of change in salinity (left) and salinity
+(right).</b>
 </p>
-
-![Selecting and interpolating the shallowest density bin, showing set 1
-profiles before (top) and after
-(bottom).](./doc/assets/r_process/8_flag_interpolate.png)
-
+![](./doc/assets/r_process/8_flag_interpolate.png)
 <p align="center">
-<b></b>
+<b>Selecting and interpolating the shallowest density bin, showing set 1
+profiles before (top) and after (bottom).</b>
 </p>
 
 ## 9. Select profiles to include in data product (first round)
@@ -283,17 +275,15 @@ selected, data from the cast will be reprocessed using a different
 approach to conductivity cell thermal mass correction and profiles will
 be reviewed again after processing.
 
-![Plots: Downcast (top row of profile plots) and upcast (bottom row of
+![](./doc/assets/r_process/9_review_profiles.png)
+<p align="center">
+<b>Plots: Downcast (top row of profile plots) and upcast (bottom row of
 profile plots). Left-side panels show temperature (red) and salinity
 (green) versus depth. Right-side panel show density anomaly (blue) and
 buoyancy frequency (brown) versus depth. A vertical line on the right
 panels shows the buoyancy frequency threshold below which the density
 structure of the water column could be considered unstable. R Console
-output: User interface for selecting
-casts.](./doc/assets/r_process/9_review_profiles.png)
-
-<p align="center">
-<b></b>
+output: User interface for selecting casts.</b>
 </p>
 
 ## 10. Remedial corrections for conductivity cell thermal intertia errors
@@ -316,12 +306,10 @@ gapctd:::remedial_ctm(rds_path = here::here("output", processing_method),
                       haul_df = haul_df)
 ```
 
-![R console user interface for choosing casts for alternative
-conductivity cell thermal intertia
-correction.](./doc/assets/r_process/10_remedial_ctm.png)
-
+![](./doc/assets/r_process/10_remedial_ctm.png)
 <p align="center">
-<b></b>
+<b>R console user interface for choosing casts for alternative
+conductivity cell thermal intertia correction.</b>
 </p>
 
 ## 11. Visually inspect, flag, and interpolate bad data (first round)
@@ -368,11 +356,9 @@ Move all of the accepted profiles from /output/gapctd/ to the
 finalize_data(rds_dir_path = here::here("output", processing_method))
 ```
 
-![Final profile data in the /final_cnv/
-directory.](./doc/assets/r_process/13_finalize_data.png)
-
+![](./doc/assets/r_process/13_finalize_data.png)
 <p align="center">
-<b></b>
+<b>Final profile data in the /final_cnv/ directory.</b>
 </p>
 
 ## 14. Prepare the data product
