@@ -92,7 +92,7 @@ for haul event times in RACEBASE that are stored in UTC.
 
 ![](./doc/assets/r_process/4_get_haul_data.png)
 <p align="center">
-<b>Contents of the /output/ directory after running get_haul_data(),
+<b>Contents of the output directory after running get_haul_data(),
 showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
 </p>
 
