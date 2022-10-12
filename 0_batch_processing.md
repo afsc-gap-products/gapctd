@@ -44,8 +44,6 @@ ctd_dir <- "G:/RACE_CTD/data/2021/ebs/v94_ctd1" # Directory w/ CTD data (.hex) a
 processing_method <- "gapctd"
 ```
 
-![](./doc/assets/r_process/1_setup_directory.png)
-
 ## 3. Setup directory for processing
 
 The `setup_gapctd_directory` function sets up the working directory for
@@ -63,6 +61,8 @@ cruise/vessel/CTD combination.*
 gapctd:::setup_gapctd_directory(processing_method = processing_method, 
                                 ctd_dir = ctd_dir)
 ```
+
+![](./doc/assets/r_process/1_setup_directory.png)
 
 ## 4. Retrieve haul data from RACEBASE
 
@@ -85,8 +85,10 @@ haul_df <- readRDS(file = here::here("output",
                                      paste0("HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
 ```
 
-The tzone argument (tzone=“America/Anchorage”) specifies the timezone to
-use for haul event times in RACEBASE that are stored in UTC.
+The tzone = “America/Anchorage” argument specifies the timezone to use
+for haul event times in RACEBASE that are stored in UTC.
+
+![](./doc/assets/r_process/4_get_haul_data.png)
 
 ## 5. Run gapctd processing methods on CTD files
 
@@ -96,8 +98,8 @@ processes data for a single CTD data file (.cnv) using the [processing
 steps](./doc/batch_processing_steps.md) we have found works best for our
 deployments across bottom trawl survey regions.
 
-*Note: Running wrapper_run_gapctd the first time takes 10-18 hours for a
-full vessel/cruise.*
+*Note: wrapper_run_gapctd takes 8+ hours to run for a full
+vessel/cruise.*
 
 ``` r
 # Run data processing algorithm on files. Write .rds
@@ -108,12 +110,14 @@ gapctd:::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"), # Path to decoded 
 
 Outputs from `wrapper_run_gapctd` are stored in oce objects that are
 saved in R data (.rds) files in /output/gapctd/
-[(example)](./doc/example_cast_file.md). The files include three
-segments for each deployment (downcast, bottom, upcast). Haul metadata
-are included with each of the segments. If any segment is missing, it
-will not be included in the file (i.e., if the CTD shut-off during the
+[(example)](./doc/ctd_data_files.md). The files include three segments
+for each deployment (downcast, bottom, upcast). Haul metadata are
+included with each of the segments. If any segment is missing, it will
+not be included in the file (i.e., if the CTD shut-off during the
 deployment and there is no upcast data, there will not be an upcast file
 in the object).
+
+![](./doc/assets/r_process/5_run_gapctd.png)
 
 ## 6. Make metadata file
 
@@ -132,7 +136,9 @@ gapctd:::make_metadata_file(rds_dir_path = here::here("output", "gapctd"),
                                                      paste0("CTD_HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
 ```
 
-## 7. Run data quality checks
+![](./doc/assets/r_process/6_make_metadata_file.png)
+
+## 7. Run basic data quality checks
 
 The `move_bad_rds` function checks data files from each deployment for
 common errors in downcast and upcast profiles. Files with bad upcasts or
@@ -146,10 +152,12 @@ fails data quality checks, the good profile is retained in the
 gapctd:::move_bad_rds(rds_dir_path = here::here("output", processing_method))
 ```
 
+![](./doc/assets/r_process/7_move_bad_rds.png)
+
 ## 8. Visually inspect, flag, and interpolate bad data (first round)
 
-*VERY IMPORTANT: If using R Studio, your display/GUI must be set to
-Actual Size! Use the drop down menu (View \> Actual Size) to set your R
+*IMPORTANT: For this step, your display/GUI must be set to Actual Size
+in R Studio! Use the drop down menu (View \> Actual Size) to set your R
 Studio display to Actual Size*
 
 There are often dynamic errors in profiles after the automated
@@ -172,18 +180,19 @@ gapctd:::wrapper_flag_interpolate(rds_dir_path = here::here("output", processing
                                   review = c("density", "salinity"))
 ```
 
-You will review two sets of plots for every cast. Set \#1 shows
+There are two sets of plots to review for every cast. Set \#1 shows
 temperature, salinity, and density profiles. Set \#2 shows the rate of
 change in salinity and salinity.
 
-### 8.1 How to review plots
+*The goal of this step is to flag large transient errors. Pay careful
+attention to the range on the x-axis when assessing the magnitude of
+spikes in the data.* Flags should not be applied to small errors and/or
+errors that persist for multiple consecutive depth bins. Correcting
+small and persistent errors is unnecessary because the other cast from a
+deployment is often suitable or subsequent corrections may resolve the
+errors.
 
-The goal of this step is to flag large, transient errors. Small errors
-and errors that persist for multiple consecutive depth bins should not
-be removed.
-
-Set 1: Pressure versus temperature (left), salinity (center), and
-density (right)
+#### Set 1
 
 1.  Review the right panel for density errors.
 2.  Left-click on any points in the right panel (density) that should be
@@ -194,7 +203,11 @@ density (right)
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-Set 2: Rate of change in salinity (left) and salinity (right)
+![](./doc/assets/r_process/8_flag_interpolate_3.png) Set 1 plots:
+Pressure versus temperature (left), salinity (center), and density
+(right)
+
+#### Set 2: Rate of change in salinity (left) and salinity (right)
 
 1.  Review the panels for salinity errors.
 2.  Left-click on any points in the left panel (salinity) that should be
@@ -204,12 +217,20 @@ Set 2: Rate of change in salinity (left) and salinity (right)
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
+![](./doc/assets/r_process/8_flag_interpolate_4.png) Set 2 plots: Rate
+of change in salinity (left) and salinity (right)
+
+![](./doc/assets/r_process/8_flag_interpolate.png) Selecting and
+interpolating the shallowest density bin, showing before (top) and after
+(bottom).
+
 ## 9. Select profiles to include in data product (first round)
 
-During this step, the user selects profiles that should be included in
-the data product. The `review_profiles` function provides an interface
-for visually inspecting profiles for each deployment and selecting the
-profiles that should be included in the final data product.
+The `review_profiles` function provides an interface for visually
+inspecting profiles for each deployment and selecting the profiles to
+include in the final data product. The goal of this step is to select
+the profile(s) without dynamic errors (e.g., unreasonable salinity
+spikes or density inversions).
 
 ``` r
 # Review profiles
@@ -228,15 +249,13 @@ the right panel, it shows the buoyancy frequency threshold below which
 the water column is considered unstable.
 
 Follow instructions in the console to select profiles to use in the
-final data product: both casts (b), downcast (d), upcast (u), or none
+final data product: both casts (1), downcast (d), upcast (u), or none
 (0). If both casts are available from a deployment but none are
 selected, data from the cast will be reprocessed using a different
 approach to conductivity cell thermal mass correction and profiles will
 be reviewed again after processing.
 
-The goal of this step is to select the profile(s) without remaining
-dynamic errors (e.g., unreasonable salinity spikes or density
-inversions).
+![](./doc/assets/r_process/9_review_profiles.png)
 
 ## 10. Remedial corrections for conductivity cell thermal intertia errors
 
@@ -258,17 +277,19 @@ gapctd:::remedial_ctm(rds_path = here::here("output", processing_method),
                       haul_df = haul_df)
 ```
 
+![](./doc/assets/r_process/10_remedial_ctm.png)
+
 ## 11. Visually inspect, flag, and interpolate bad data (first round)
 
 Same as step \#8 but profiles are only reviewed if a profile from the
 deployment was not already selected for inclusion in the final data
 product.
 
-*Important:* In the next step, profiles will be reviewed one at a time.
-Therefore, during this step, it is useful to track (outside of the
-program) which cast (downcast or upcast) looks better if both casts were
-available from the deployment. Deployment IDs can be tracked through
-messages in the console.
+*Note: * Outside of the program, keep track of which cast (downcast or
+upcast) should be used in the data product. Keeping track of this is
+important because profiles will be reviewed one at a time during the
+next step. File IDs for deployments are displayed as messages in the
+console.
 
 ``` r
 ##---- Second round of review
@@ -301,6 +322,8 @@ Move all of the accepted profiles from /output/gapctd/ to the
 # Finalize
 finalize_data(rds_dir_path = here::here("output", processing_method))
 ```
+
+![](./doc/assets/r_process/13_finalize_data.png)
 
 ## 14. Prepare the data product
 
