@@ -1,8 +1,8 @@
 ## Introduction
 
-During processing, the gapctd package saves output to R data files
-(.rds) to preserve data formats. These are subsequently used to generate
-data products in netCDF files. Here, we show how the contents of the rds
+The gapctd package saves output to R data files (.rds) to preserve data
+formats during processing. These are subsequently used to generate data
+products in netCDF files. Here, we show how the contents of the rds
 files are structured.
 
 Load the gapctd package and read in data from a fully-processed
