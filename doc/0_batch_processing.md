@@ -59,7 +59,7 @@ gapctd:::setup_gapctd_directory(processing_method = processing_method,
                                 ctd_dir = ctd_dir)
 ```
 
-![](./doc/assets/r_process/1_setup_directory.png)
+![](./assets/r_process/1_setup_directory.png)
 <p align="center">
 <b>Left: SBE Data Processing converting raw data files after calling the
 setup_gapctd_directory(). Right: Contents of the working directory after
@@ -90,7 +90,7 @@ haul_df <- readRDS(file = here::here("output",
 The tzone = “America/Anchorage” argument specifies the timezone to use
 for haul event times in RACEBASE that are stored in UTC.
 
-![](./doc/assets/r_process/4_get_haul_data.png)
+![](./assets/r_process/4_get_haul_data.png)
 <p align="center">
 <b>Contents of the /output/ directory after running get_haul_data(),
 showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
@@ -123,7 +123,7 @@ not be included in the file (i.e., if the CTD shut-off during the
 deployment and there is no upcast data, there will not be an upcast file
 in the object).
 
-![](./doc/assets/r_process/5_run_gapctd.png)
+![](./assets/r_process/5_run_gapctd.png)
 <p align="center">
 <b>Top: Console messages while running wrapper_run_gapctd(). Bottom:
 Contents of the /output/gapctd/ directory after successfully running
@@ -147,7 +147,7 @@ gapctd:::make_metadata_file(rds_dir_path = here::here("output", "gapctd"),
                                                      paste0("CTD_HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
 ```
 
-![](./doc/assets/r_process/6_make_metadata_file.png)
+![](./assets/r_process/6_make_metadata_file.png)
 <p align="center">
 <b>Contents of the /metadata/ directory after running
 make_metadata_file(), showing the metadata file
@@ -168,7 +168,7 @@ fails data quality checks, the good profile is retained in the
 gapctd:::move_bad_rds(rds_dir_path = here::here("output", processing_method))
 ```
 
-![](./doc/assets/r_process/7_move_bad_rds.png)
+![](./assets/r_process/7_move_bad_rds.png)
 <p align="center">
 <b>Contents of the /bad_cnv/ directory after running move_bad_rds()</b>
 </p>
@@ -222,7 +222,7 @@ errors.
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![](./doc/assets/r_process/8_flag_interpolate_3.png)
+![](./assets/r_process/8_flag_interpolate_3.png)
 <p align="center">
 <b>Set 1 plots: Pressure versus temperature (left), salinity (center),
 and density (right).</b>
@@ -238,12 +238,12 @@ and density (right).</b>
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![](./doc/assets/r_process/8_flag_interpolate_4.png)
+![](./assets/r_process/8_flag_interpolate_4.png)
 <p align="center">
 <b>Set 2 plots: Rate of change in salinity (left) and salinity
 (right).</b>
 </p>
-<br> ![](./doc/assets/r_process/8_flag_interpolate.png)
+<br> ![](./assets/r_process/8_flag_interpolate.png)
 <p align="center">
 <b>Example of selecting and interpolating showing set 1 profiles before
 (top) and after (bottom) removing data from the shallowest depth
@@ -276,7 +276,7 @@ selected, data from the cast will be reprocessed using a different
 approach to conductivity cell thermal mass correction and profiles will
 be reviewed again after processing.
 
-![](./doc/assets/r_process/9_review_profiles.png)
+![](./assets/r_process/9_review_profiles.png)
 <p align="center">
 <b>Plots: Downcast (top row of profile plots) and upcast (bottom row of
 profile plots). Left-side panels show temperature (red) and salinity
@@ -307,7 +307,7 @@ gapctd:::remedial_ctm(rds_path = here::here("output", processing_method),
                       haul_df = haul_df)
 ```
 
-![](./doc/assets/r_process/10_remedial_ctm.png)
+![](./assets/r_process/10_remedial_ctm.png)
 <p align="center">
 <b>R console user interface for choosing casts for alternative
 conductivity cell thermal intertia correction.</b>
@@ -357,7 +357,7 @@ Move all of the accepted profiles from /output/gapctd/ to the
 finalize_data(rds_dir_path = here::here("output", processing_method))
 ```
 
-![](./doc/assets/r_process/13_finalize_data.png)
+![](./assets/r_process/13_finalize_data.png)
 <p align="center">
 <b>Final profile data in the /final_cnv/ directory.</b>
 </p>

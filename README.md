@@ -18,7 +18,7 @@ library(gapctd)
 
 # Documentation
 
-- [Batch processing CTD data in R using the gapctd package](0_batch_processing.md)
+- [Batch processing CTD data in R using the gapctd package](./doc/0_batch_processing.md)
 - [Processing CTD data with gapctd modules](./doc/data_processing_modules.md)
 - [gapctd data files](./doc/ctd_data_files.md)
 
