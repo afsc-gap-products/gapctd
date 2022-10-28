@@ -4,7 +4,7 @@
 \alias{qc_flag_interpolate}
 \title{Manually flag and interpolate bad data (R workflow)}
 \usage{
-qc_flag_interpolate(x, review = c("density"))
+qc_flag_interpolate(x, review = c("density"), bin_var = "depth")
 }
 \arguments{
 \item{x}{oce object}

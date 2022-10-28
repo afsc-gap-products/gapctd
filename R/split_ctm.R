@@ -14,13 +14,13 @@ split_ctm <- function(rds_path, haul_df) {
   if(grepl(pattern = "_dc_", x = rds_path)) {
     rds_downcast <- rds_path
   } else {
-    rds_downcast <- gsub(pattern = "_raw.rds", replacement = "_dc_raw.rds", x = rds_path)
+    rds_downcast <- gsub(pattern = "_full.rds", replacement = "_dc_full.rds", x = rds_path)
   }
   
   if(grepl(pattern = "_uc_", x = rds_path)) {
     rds_upcast <- rds_path
   } else {
-    rds_upcast <- gsub(pattern = "_raw.rds", replacement = "_uc_raw.rds", x = rds_path)
+    rds_upcast <- gsub(pattern = "_full.rds", replacement = "_uc_full.rds", x = rds_path)
   }
   
   if("downcast" %in% names(rds_dat)) {
@@ -40,7 +40,7 @@ split_ctm <- function(rds_path, haul_df) {
       
       processed_oce <- gapctd::run_gapctd(x = ctd_dat, 
                                           haul_df = haul_df, 
-                                          return_stages = "final",
+                                          return_stage = "full",
                                           ctd_tz = "America/Anchorage",
                                           ctm_pars = ctm_pars)
       processed_oce <- processed_oce[which(names(processed_oce) %in% c("downcast", "bottom"))]
@@ -65,7 +65,7 @@ split_ctm <- function(rds_path, haul_df) {
       
       processed_oce <- gapctd::run_gapctd(x = ctd_dat, 
                                           haul_df = haul_df, 
-                                          return_stages = "final",
+                                          return_stage = "full",
                                           ctd_tz = "America/Anchorage",
                                           ctm_pars = ctm_pars)
       processed_oce <- processed_oce[which(names(processed_oce) %in% c("upcast", "bottom"))]
@@ -88,21 +88,21 @@ split_ctm <- function(rds_path, haul_df) {
 #' @param rds_path Path to directory containing rds files.
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
 #' @param threshold Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses.
-#' @return Profiles (in "_raw.rds" files) processed using CTM parameters estimated for individual casts if cell thermal mass correction parameter estimation converged for the individual casts.
+#' @return Profiles (in "_full.rds" files) processed using CTM parameters estimated for individual casts if cell thermal mass correction parameter estimation converged for the individual casts.
 #' @export
 
 remedial_ctm <- function(rds_path = here::here("output", "gapctd"), haul_df, threshold = -1e-5) {
   
-  rds_files <- list.files(path = rds_path, full.names = TRUE, pattern = "_raw.rds")
+  rds_files <- list.files(path = rds_path, full.names = TRUE, pattern = "_full.rds")
   
-  # Find _raw.rds that do not have corresponding _final.rds, _dc_final.rds, _uc_final.rds, _dc_raw.rds, or _uc_raw.rds
-  check_final <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_final.rds")
-  check_dc <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_dc_final.rds")
+  # Find _full.rds that do not have corresponding _final.rds, _dc_final.rds, _uc_final.rds, _dc_full.rds, or _uc_full.rds
+  check_final <- gsub(x = rds_files, pattern = "_full.rds", replacement = "_final.rds")
+  check_dc <- gsub(x = rds_files, pattern = "_full.rds", replacement = "_dc_final.rds")
   check_dc2 <- gsub(x = check_dc, pattern = "_uc_", replacement = "_dc_")
-  check_uc <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_uc_final.rds")
+  check_uc <- gsub(x = rds_files, pattern = "_full.rds", replacement = "_uc_final.rds")
   check_uc2 <- gsub(x = check_uc, pattern = "_dc_", replacement = "_uc_")
-  check_dc_raw <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_dc_raw.rds")
-  check_uc_raw <- gsub(x = rds_files, pattern = "_raw.rds", replacement = "_uc_raw.rds")
+  check_dc_raw <- gsub(x = rds_files, pattern = "_full.rds", replacement = "_dc_full.rds")
+  check_uc_raw <- gsub(x = rds_files, pattern = "_full.rds", replacement = "_uc_full.rds")
   
   review_vec <- character(length = 0L)
   

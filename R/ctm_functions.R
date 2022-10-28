@@ -8,6 +8,7 @@
 #' @param optim_maxit Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.
 #' @param start_alpha_C Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).
 #' @param start_beta_C Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).
+#' @param area_method Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")
 #' @param default_parameters Named numeric vector of default parameters. Defaults is c(alpha_C = 0.04, beta_C = 0.125).
 #' @return A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
 #' @export
@@ -17,31 +18,37 @@ optim_ctm_pars <- function(dc = NULL,
                            optim_method = "L-BFGS-B",
                            start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
                            start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
-                           default_parameters = c(alpha_C = 0.04, beta_C = 0.125), 
+                           default_parameters = c(alpha_C = 0.04, beta_C = 0.125),
+                           area_method = "ts",
                            ...) {
   
   both_casts <- !any(is.null(dc), is.null(uc))
   
   start_pars <- expand_grid(start_alpha_C = start_alpha_C,
                             start_beta_C = start_beta_C,
-                            obj = 1e7)
+                            obj = 1e7,
+                            obj_down = 1e7,
+                            obj_up = 1e7)
   
   # Find good starting values
   for(kk in 1:nrow(start_pars)) {
     if(both_casts) {
       start_pars$obj_down[kk] <- ctm_obj(dc = dc,
                                          alpha_C = start_pars$start_alpha_C[kk],
-                                         beta_C = start_pars$start_beta_C[kk])
+                                         beta_C = start_pars$start_beta_C[kk],
+                                         area_method = area_method)
       
       start_pars$obj_up[kk] <- ctm_obj(uc = uc,
                                        alpha_C = start_pars$start_alpha_C[kk],
-                                       beta_C = start_pars$start_beta_C[kk])
+                                       beta_C = start_pars$start_beta_C[kk],
+                                       area_method = area_method)
     }
     
     start_pars$obj[kk] <- ctm_obj(dc = dc,
                                   uc = uc,
                                   alpha_C = start_pars$start_alpha_C[kk],
-                                  beta_C = start_pars$start_beta_C[kk])
+                                  beta_C = start_pars$start_beta_C[kk],
+                                  area_method = area_method)
   }
   
   start_index_both <- which.min(start_pars$obj)
@@ -55,7 +62,8 @@ optim_ctm_pars <- function(dc = NULL,
                               start = list(alpha_C = start_pars$start_alpha_C[start_index_both],
                                            beta_C = start_pars$start_beta_C[start_index_both]),
                               data = list(dc = dc,
-                                          uc = uc),
+                                          uc = uc,
+                                          area_method = area_method),
                               method = "L-BFGS-B",
                               lower = c(alpha_C = 0, beta_C = 1/45),
                               upper = c(alpha_C = 1, beta_C = 10),
@@ -69,7 +77,8 @@ optim_ctm_pars <- function(dc = NULL,
                                    start = list(alpha_C = start_pars$start_alpha_C[start_index_down],
                                                 beta_C = start_pars$start_beta_C[start_index_down]),
                                    data = list(dc = dc,
-                                               uc = NULL),
+                                               uc = NULL,
+                                               area_method = area_method),
                                    method = "L-BFGS-B",
                                    lower = c(alpha_C = 0, beta_C = 1/45),
                                    upper = c(alpha_C = 1, beta_C = 10),
@@ -83,7 +92,8 @@ optim_ctm_pars <- function(dc = NULL,
                                  start = list(alpha_C = start_pars$start_alpha_C[start_index_up],
                                               beta_C = start_pars$start_beta_C[start_index_up]),
                                  data = list(dc = NULL,
-                                             uc = uc),
+                                             uc = uc,
+                                             area_method = area_method),
                                  method = "L-BFGS-B",
                                  lower = c(alpha_C = 0, beta_C = 1/45),
                                  upper = c(alpha_C = 1, beta_C = 10),
@@ -144,10 +154,11 @@ optim_ctm_pars <- function(dc = NULL,
 #' @param uc Upcast oce object
 #' @param alpha_C Conductivity cell thermal inertia correction alpha parameter, passed to gapctd::conductivity_correction()
 #' @param beta_C Conductivity cell thermal inertia correction beta parameter, passed to gapctd::conductivity_correction()
-#' @return Area between T-S curves or path distance of salinity curve as a 1L numeric vector 
+#' @param area_method Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")
+#' @return Area between T-S curves, Z-S curves, or path distance of salinity curve as a 1L numeric vector 
 #' @export
 
-ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
+ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
   
   # Area when both dc and uc are provided
   if(!is.null(dc) & !is.null(uc)) {
@@ -155,18 +166,19 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
       gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
       gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+      gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
     uc_eval <- uc |>
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
       gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
       gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+      gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
     obj <- gapctd:::ts_area(dc = dc_eval, 
                             uc = uc_eval, 
                             by = "depth", 
-                            return_sf = FALSE)
+                            return_sf = FALSE,
+                            area_method = area_method)
   }
   
   # Path distance
@@ -175,7 +187,7 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
       gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
       gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+      gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
     obj <- sum(abs(diff(dc_eval@data$salinity[dc_eval@data$flag == 0])))
   }
@@ -185,7 +197,7 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C) {
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
       gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
       gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+      gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
     obj <- sum(abs(diff(uc_eval@data$salinity[uc_eval@data$flag == 0])))
   }
@@ -254,11 +266,12 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 #' 
 #' @param dc downcast oce object
 #' @param uc upcast oce object
+#' @param area_method Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")
 #' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
 #' @export
 
-ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
+ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts") {
   
   pd_switch <- ifelse(by == "pressure", "depth", "pressure")
   
@@ -287,38 +300,108 @@ ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE) {
                                                          yright = comb_df[, jj][max(which(!is.na(comb_df[, jj])))])$y
   }
   
-  ts_area_sf <- comb_df |>
-    data.frame(geometry = paste0("LINESTRING (", apply(X = 
-                                                         cbind(
-                                                           apply(
-                                                             X = cbind(
-                                                               comb_df$dc_salinity[1:(nrow(comb_df))],
-                                                               comb_df$dc_temperature[1:(nrow(comb_df))]),
-                                                             MARGIN = 1,
-                                                             FUN = paste, 
-                                                             collapse = " "),
-                                                           apply(
-                                                             cbind(c(comb_df$uc_salinity[1:(nrow(comb_df)-1)], comb_df$uc_salinity[(nrow(comb_df)-1)]),
-                                                                   c(comb_df$uc_temperature[1:(nrow(comb_df)-1)], comb_df$uc_temperature[(nrow(comb_df)-1)])),
-                                                             MARGIN = 1,
-                                                             FUN = paste, 
-                                                             collapse = " "),
-                                                           apply(
-                                                             X = cbind(c(comb_df$dc_salinity[2:(nrow(comb_df))],comb_df$uc_salinity[(nrow(comb_df))]),
-                                                                       c(comb_df$dc_temperature[2:(nrow(comb_df))],comb_df$uc_temperature[(nrow(comb_df))])),
-                                                             MARGIN = 1,
-                                                             FUN = paste, 
-                                                             collapse = " "),
-                                                           apply(
-                                                             X = cbind(
-                                                               c(comb_df$dc_salinity[1:(nrow(comb_df)-1)],comb_df$dc_salinity[(nrow(comb_df))]),
-                                                               c(comb_df$dc_temperature[1:(nrow(comb_df)-1)],comb_df$dc_temperature[(nrow(comb_df))])),
-                                                             MARGIN = 1,
-                                                             FUN = paste, 
-                                                             collapse = " ")),
-                                                       MARGIN = 1,
-                                                       FUN = paste,
-                                                       collapse = ", "), ")")) |>
+  if(area_method == "ts") {
+    ts_area_sf <- comb_df |>
+      data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                           cbind(
+                                                             apply(
+                                                               X = cbind(
+                                                                 comb_df$dc_salinity[1:(nrow(comb_df))],
+                                                                 comb_df$dc_temperature[1:(nrow(comb_df))]),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               cbind(c(comb_df$uc_salinity[1:(nrow(comb_df)-1)], comb_df$uc_salinity[(nrow(comb_df)-1)]),
+                                                                     c(comb_df$uc_temperature[1:(nrow(comb_df)-1)], comb_df$uc_temperature[(nrow(comb_df)-1)])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(c(comb_df$dc_salinity[2:(nrow(comb_df))],comb_df$uc_salinity[(nrow(comb_df))]),
+                                                                         c(comb_df$dc_temperature[2:(nrow(comb_df))],comb_df$uc_temperature[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(
+                                                                 c(comb_df$dc_salinity[1:(nrow(comb_df)-1)],comb_df$dc_salinity[(nrow(comb_df))]),
+                                                                 c(comb_df$dc_temperature[1:(nrow(comb_df)-1)],comb_df$dc_temperature[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " ")),
+                                                         MARGIN = 1,
+                                                         FUN = paste,
+                                                         collapse = ", "), ")"))
+  } else if(area_method == "zs") {
+    ts_area_sf <- comb_df |>
+      data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                           cbind(
+                                                             apply(
+                                                               X = cbind(
+                                                                 comb_df$dc_salinity[1:(nrow(comb_df))],
+                                                                 comb_df$dc_depth[1:(nrow(comb_df))]),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               cbind(c(comb_df$uc_salinity[1:(nrow(comb_df)-1)], comb_df$uc_salinity[(nrow(comb_df)-1)]),
+                                                                     c(comb_df$uc_depth[1:(nrow(comb_df)-1)], comb_df$uc_depth[(nrow(comb_df)-1)])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(c(comb_df$dc_salinity[2:(nrow(comb_df))],comb_df$uc_salinity[(nrow(comb_df))]),
+                                                                         c(comb_df$dc_depth[2:(nrow(comb_df))],comb_df$uc_depth[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(
+                                                                 c(comb_df$dc_salinity[1:(nrow(comb_df)-1)],comb_df$dc_salinity[(nrow(comb_df))]),
+                                                                 c(comb_df$dc_depth[1:(nrow(comb_df)-1)],comb_df$dc_depth[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " ")),
+                                                         MARGIN = 1,
+                                                         FUN = paste,
+                                                         collapse = ", "), ")"))
+  } else if(area_method == "ps") {
+    ts_area_sf <- comb_df |>
+      data.frame(geometry = paste0("LINESTRING (", apply(X = 
+                                                           cbind(
+                                                             apply(
+                                                               X = cbind(
+                                                                 comb_df$dc_salinity[1:(nrow(comb_df))],
+                                                                 comb_df$dc_pressure[1:(nrow(comb_df))]),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               cbind(c(comb_df$uc_salinity[1:(nrow(comb_df)-1)], comb_df$uc_salinity[(nrow(comb_df)-1)]),
+                                                                     c(comb_df$uc_pressure[1:(nrow(comb_df)-1)], comb_df$uc_pressure[(nrow(comb_df)-1)])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(c(comb_df$dc_salinity[2:(nrow(comb_df))],comb_df$uc_salinity[(nrow(comb_df))]),
+                                                                         c(comb_df$dc_pressure[2:(nrow(comb_df))],comb_df$uc_pressure[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " "),
+                                                             apply(
+                                                               X = cbind(
+                                                                 c(comb_df$dc_salinity[1:(nrow(comb_df)-1)],comb_df$dc_salinity[(nrow(comb_df))]),
+                                                                 c(comb_df$dc_pressure[1:(nrow(comb_df)-1)],comb_df$dc_pressure[(nrow(comb_df))])),
+                                                               MARGIN = 1,
+                                                               FUN = paste, 
+                                                               collapse = " ")),
+                                                         MARGIN = 1,
+                                                         FUN = paste,
+                                                         collapse = ", "), ")"))
+  }
+  
+  ts_area_sf <- ts_area_sf |>
     dplyr::mutate(ID = row_number()) |>
     st_as_sf(wkt = "geometry") |> 
     dplyr::group_by(ID) |>

@@ -18,7 +18,7 @@ remedial_ctm(
 \item{threshold}{Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses.}
 }
 \value{
-Profiles (in "_raw.rds" files) processed using CTM parameters estimated for individual casts if cell thermal mass correction parameter estimation converged for the individual casts.
+Profiles (in "_full.rds" files) processed using CTM parameters estimated for individual casts if cell thermal mass correction parameter estimation converged for the individual casts.
 }
 \description{
 Visually inspect plots and decide if raw files should be reprocessed using cell thermal mass correction parameters for individual profiles instead of the parameters estimated for both casts. Profiles selected for additional CTM are processed using split_ctm.

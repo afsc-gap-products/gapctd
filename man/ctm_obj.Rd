@@ -4,7 +4,7 @@
 \alias{ctm_obj}
 \title{Objective function for cell thermal mass calculations (R workflow)}
 \usage{
-ctm_obj(dc = NULL, uc = NULL, alpha_C, beta_C)
+ctm_obj(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts")
 }
 \arguments{
 \item{dc}{Downcast oce object}
@@ -14,9 +14,11 @@ ctm_obj(dc = NULL, uc = NULL, alpha_C, beta_C)
 \item{alpha_C}{Conductivity cell thermal inertia correction alpha parameter, passed to gapctd::conductivity_correction()}
 
 \item{beta_C}{Conductivity cell thermal inertia correction beta parameter, passed to gapctd::conductivity_correction()}
+
+\item{area_method}{Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")}
 }
 \value{
-Area between T-S curves or path distance of salinity curve as a 1L numeric vector
+Area between T-S curves, Z-S curves, or path distance of salinity curve as a 1L numeric vector
 }
 \description{
 Calculates area between temperature and salinity curves when upcast and downcast data are provided. Calculates path distance for salinity if only downcast or upcast is provided.

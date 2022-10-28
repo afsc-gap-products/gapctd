@@ -160,12 +160,14 @@ convert_ctd_hex <- function(hex_file_path,
 #' Remove deployment rds files that contain bottom, upcast, and/or bottom oce objects based on QA/QC flags.
 #' 
 #' @param rds_dir_path File path to directory containing rds files to be evaluated.
+#' @param in_pattern Character vector search pattern for input files.
 #' @return Bad files moved to /bad_cnv/
 #' @export
 
-move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
+move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd"),
+                         in_pattern = "_full.rds") {
   
-  rds_path <- list.files(rds_dir_path, pattern = ".rds", full.names = TRUE)
+  rds_path <- list.files(rds_dir_path, pattern = in_pattern, full.names = TRUE)
   
   n_moved <- 0
   
@@ -204,13 +206,13 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
       
       if(dc_flag & "downcast" %in% names(eval_deployment) & !uc_flag) {
         eval_deployment <- eval_deployment[-which(names(eval_deployment) == "downcast")]
-        out_path <- gsub(pattern = "_raw.rds", replacement = "_uc_raw.rds", x = rds_path[hh])
+        out_path <- gsub(pattern = in_pattern, replacement = paste0("_uc", in_pattern), x = rds_path[hh])
         cond <- TRUE
       }
       
       if(uc_flag & "upcast" %in% names(eval_deployment) & !dc_flag) {
         eval_deployment <- eval_deployment[-which(names(eval_deployment) == "upcast")]
-        out_path <- gsub(pattern = "_raw.rds", replacement = "_dc_raw.rds", x = rds_path[hh])
+        out_path <- gsub(pattern = in_pattern, replacement = paste0("_dc", in_pattern), x = rds_path[hh])
         cond <- TRUE
       }
       
@@ -236,8 +238,8 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd")) {
 finalize_data <- function(rds_dir_path = here::here("output", processing_method)) {
   
   
-  bad_files <- c(list.files(rds_dir_path, pattern = "_uc_uc_raw.rds", full.names = TRUE),
-                 list.files(rds_dir_path, pattern = "_dc_dc_raw.rds", full.names = TRUE))
+  bad_files <- c(list.files(rds_dir_path, pattern = "_uc_uc_full.rds", full.names = TRUE),
+                 list.files(rds_dir_path, pattern = "_dc_dc_full.rds", full.names = TRUE))
   
   if(length(bad_files) > 0) {
     bad_cnv_path <- gsub(pattern = rds_dir_path,

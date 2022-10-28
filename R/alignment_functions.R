@@ -52,19 +52,19 @@ optim_align_par <- function(x, cast_direction, variable = "temperature", offsets
 
   offset_corr <- numeric(length = length(offsets))
   
+  out <- list()
+  
   for(ii in 1:length(offsets)) {
     
     if(variable == "temperature") {
       offset_corr[ii] <- x |>
         gapctd:::align_var(variables = variable, offset = offsets[ii], interp_method = "linear") |>
-        gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
+        # gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
         gapctd:::channel_correlation(exclude_flag = TRUE, 
-                                     min_pressure = 4, 
+                                     min_pressure = 1.01, 
                                      cor_method = cor_method, 
                                      c1 = "temperature", 
                                      c2 = "conductivity")
-      
-      x@data["temperature"]
     }
     
     if(variable == "oxygen") {
@@ -73,8 +73,41 @@ optim_align_par <- function(x, cast_direction, variable = "temperature", offsets
 
   }
   
-  out <- c(best_offset = offsets[which.max(offset_corr)[1]],
-           best_corr = offset_corr[which.max(offset_corr)[1]])
+  out[[variable]] <- c(offset = offsets[which.max(offset_corr)[1]],
+           corr = offset_corr[which.max(offset_corr)[1]])
   return(out)
   
+}
+
+
+#' Calculate alignment correlation for fixed parameters
+#' 
+#' @param x oce object
+#' @param align_pars A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
+#' @param cor_var A vector of variable names that channels being aligned should be compared with (e.g., corr_var = "conductivity")
+#' @param cor_method Correlation method, passed to gapctd::channel_correlation().
+#' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::loop_edit()
+#' @export
+
+fixed_alignment <- function(x, align_pars, cor_var = "conductivity", cor_method = "pearson", cast_direction) {
+  align_list <- list()
+  for(jj in 1:length(align_pars)) {
+    
+    offset <- align_pars[[names(align_pars[jj])]]
+    
+    channel_corr <- x |>
+      gapctd:::align_var(variables = names(align_pars[jj]), 
+                         offset = offset, 
+                         interp_method = "linear") |>
+      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
+      gapctd:::channel_correlation(exclude_flag = TRUE, 
+                                   min_pressure = 4, 
+                                   cor_method = cor_method, 
+                                   c1 = names(align_pars[jj]), 
+                                   c2 = cor_var[jj])
+    
+    align_list[[names(align_pars[jj])]] <- c("offset" = offset, "corr" = channel_corr)
+  }
+  
+  return(align_list)
 }

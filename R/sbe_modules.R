@@ -9,9 +9,15 @@
 #' @return oce object with flags updated to denote scans for which speeds were below the threshold.
 #' @export
 
-loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
+loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, exclude_bottom = 2) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
+  
   half_window <- (window-1)/2
   pressure <- x@data$pressure
+  max_pressure <- max(pressure, na.rm = TRUE)
   timeS <- x@data$timeS
   n_pressure <- length(pressure)
   velocity <- numeric(length = length(pressure))
@@ -34,13 +40,14 @@ loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
   if(cast_direction == "upcast") {
     flag <- ifelse(-1 * velocity > min_speed, 0, -9)
   }
-
+  
+  flag[(max_pressure - pressure) < exclude_bottom] <- 0
   
   x@data$flag <- flag
   x@data$velocity <- velocity
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
 }
@@ -58,6 +65,10 @@ loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL) {
 #' @export
 
 median_filter <- function(x, variables = c("temperature", "conductivity"), window = c(5,5)) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   for(ii in 1:length(variables)) {
     
@@ -78,7 +89,7 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
   }
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
   
@@ -98,6 +109,10 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 #' @export
 
 temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   in_T <- x@data$temperature
   freq_n <- ifelse(is.numeric(freq_n), freq_n, mode(diff(x@data$timeS)))
@@ -127,7 +142,7 @@ temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
   x@data$temperature <- in_T + x@data$T_corr
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
 
@@ -149,6 +164,10 @@ temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
 
 conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = "seabird") {
   
+  if(is.null(x)) {
+    return(x)
+  }
+  
   freq_n <- ifelse(is.numeric(freq_n), freq_n, mode(diff(x@data$timeS)))
   in_C <- x@data$conductivity
   
@@ -163,7 +182,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
   }
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
 
@@ -184,6 +203,10 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @export
 
 align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear", na_rm = FALSE) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   in_timeS <- x@data$timeS
   
@@ -209,7 +232,7 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
   
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
 }
@@ -231,6 +254,10 @@ lowpass_filter <- function(x,
                            time_constant = c(0.5, 0.5, 1),
                            precision = c(4, 6, 3),
                            freq_n = 0.25) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   lp_filter <- function(var, tc, freq_n, prec) {
     
@@ -269,7 +296,7 @@ lowpass_filter <- function(x,
   }
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
   
@@ -286,6 +313,10 @@ lowpass_filter <- function(x,
 #' @export
 
 derive_eos <- function(x, precision = NULL) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   # Set precision
   prec <- c(depth = 3, 
@@ -338,6 +369,10 @@ derive_eos <- function(x, precision = NULL) {
 #' @export
 
 bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, exclude_bad_flag = TRUE, interpolate_missing = TRUE, missing_latitude = 55) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
   
   by <- tolower(by)
   stopifnot("bin_average: Argument 'by' must be \"pressure\" or \"depth\"" = by %in% c("pressure", "depth"))
@@ -414,7 +449,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
   x@data <- as.list(out_dat)
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
   
@@ -479,7 +514,7 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
   x@data <- as.list(out_dat)
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call(sys.parent(n=1))))
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   # Remove bad cast
   bad_profile <- FALSE

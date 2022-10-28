@@ -9,6 +9,10 @@
 
 check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "bv", correct_inversion = TRUE) {
   
+  if(is.null(x)) {
+    return(NULL)
+  }
+  
   threshold_method <- tolower(threshold_method)
   
   # Check that inputs are sensible

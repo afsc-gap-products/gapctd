@@ -4,7 +4,7 @@
 \alias{ts_area}
 \title{Calculate area between temperature-salinity curves (R workflow)}
 \usage{
-ts_area(dc, uc, by = "pressure", return_sf = FALSE)
+ts_area(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts")
 }
 \arguments{
 \item{dc}{downcast oce object}
@@ -12,6 +12,8 @@ ts_area(dc, uc, by = "pressure", return_sf = FALSE)
 \item{uc}{upcast oce object}
 
 \item{return_sf}{Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.}
+
+\item{area_method}{Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")}
 }
 \value{
 When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.

@@ -7,9 +7,11 @@
 run_gapctd(
   x,
   haul_df,
-  return_stages = c("final"),
+  return_stage = "full",
   ctd_tz = "America/Anchorage",
-  ctm_pars = list()
+  ctm_pars = list(),
+  align_pars = c(),
+  cor_var = "conductivity"
 )
 }
 \arguments{
@@ -17,14 +19,16 @@ run_gapctd(
 
 \item{haul_df}{data.frame containing haul data from RACEBASE that includes metadata for the cnv file.}
 
-\item{return_stages}{Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "final"). Can return multiple stages simultaneously. Default = "final"}
+\item{return_stage}{Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full"). Can return multiple stages simultaneously. Default = "full"}
 
 \item{ctd_tz}{timezone for CTD as a character vector or numeric that is valid for POSIXct.}
 
 \item{ctm_pars}{Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.}
+
+\item{align_pars}{A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)}
 }
 \value{
-A list of oce objects at stages of processing specified in return_stages.
+A list of oce objects at stages of processing specified in return_stage.
 }
 \description{
 Run all gapctd modules in order to process data from a cnv file.

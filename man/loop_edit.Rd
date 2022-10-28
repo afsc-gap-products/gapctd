@@ -4,7 +4,13 @@
 \alias{loop_edit}
 \title{Flag slowdowns and reversals (R workflow)}
 \usage{
-loop_edit(x, min_speed = 0.1, window = 5, cast_direction = NULL)
+loop_edit(
+  x,
+  min_speed = 0.1,
+  window = 5,
+  cast_direction = NULL,
+  exclude_bottom = 2
+)
 }
 \arguments{
 \item{x}{oce object}

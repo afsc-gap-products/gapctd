@@ -4,19 +4,27 @@
 #' 
 #' @param cnv_dir_path Path to directory containing cnv files to be processed.
 #' @param processing_method Name of processing method; for saving output.
-#' @param haul_df Optional. data.frame containing haul data from RACEBASE. Must provide arguments for vessel and cruise if not provided.
+#' @param return_stage Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full")
+#' @param gapctd_round Processing round (1 = typical settings, 2 = optimize CTM w/ T-S area or S path distance.
+#' @param haul_df Optional. data.frame containing  haul data from RACEBASE. Must provide arguments for vessel and cruise if not provided.
 #' @param vessel Optional. Vessel code as a 1L numeric vector.
 #' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
 #' @param channel Optional. RODBC channel; only used when haul_df = NULL.
+#' @param ctm_pars Optional. Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
+#' @param align_pars Optional. A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
 #' @return Writes rds files with cast data to /output/[processing_method]
 #' @export
 
 wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                processing_method,
+                               return_stage = "full",
+                               gapctd_round = 1,
                                haul_df = NULL,
                                vessel = NULL,
                                cruise = NULL,
-                               channel = NULL) {
+                               channel = NULL,
+                               ctm_pars = NULL,
+                               align_pars = NULL) {
   stopifnot("wrapper_run_gapctd: Output path does not exist. Make sure output/[processing_method] was created with gapctd::setup_gapctd_directory()." = dir.exists(here::here("output", processing_method)))
   stopifnot("wrapper_run_gapctd: cnv path does not exist. Make sure cnv_dir_path was created with gapctd::setup_gapctd_directory()." = dir.exists(cnv_dir_path))
   
@@ -34,43 +42,90 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
   # Input and output files
   cnv_files <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = TRUE)
   cnv_short <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = FALSE)
-  rds_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "raw.rds", x = cnv_short))
-  rds_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_raw.rds", x = cnv_short))
-  rds_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_raw.rds", x = cnv_short))
+  
+  
+  full_rds_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "full.rds", x = cnv_short))
+  full_rds_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_full.rds", x = cnv_short))
+  full_rds_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_full.rds", x = cnv_short))
+  full_rds_dc_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_dc_full.rds", x = cnv_short))
+  full_rds_uc_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_uc_full.rds", x = cnv_short))
+  
+  bad_rds_files <- here::here("bad_cnv", gsub(pattern = "raw.cnv", replacement = "full.rds", x = cnv_short))
+  
+  final_rds_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "final.rds", x = cnv_short))
+  final_rds_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_final.rds", x = cnv_short))
+  final_rds_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_final.rds", x = cnv_short))
+  final_rds_dc_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_dc_final.rds", x = cnv_short))
+  final_rds_uc_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_uc_final.rds", x = cnv_short))
+  
+  rds_split_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "split.rds", x = cnv_short))
   
   message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
   
   for(II in 1:length(cnv_files)) {
     
-    if(all(!file.exists(rds_files[II]), !file.exists(rds_dc[II]), !file.exists(rds_uc[II]))) {
-      message(paste0("wrapper_run_gapctd: Processing ", cnv_short[II]))
-      # Load CTD data
-      ctd_dat <- oce::read.oce(file = cnv_files[II])
-      
-      if(length(ctd_dat@data$timeS) < 1000) {
-        message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient data"))
+    if(gapctd_round == 1) {
+      if(any(file.exists(full_rds_files[II]), 
+             file.exists(full_rds_dc[II]), 
+             file.exists(full_rds_uc[II]), 
+             file.exists(full_rds_dc_dc[II]), 
+             file.exists(full_rds_uc_uc[II]))) {
+        message(paste0("skipping ", cnv_short[II]))
         next
       }
-      
-      if(abs(diff(range(ctd_dat@data$pressure))) < 5) {
-        message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient pressure range (", abs(diff(range(ctd_dat@data$pressure))), ")."))
+    }
+    
+    if(gapctd_round == 2) {
+      if(any(file.exists(bad_rds_files[II]),
+             file.exists(final_rds_files[II]), 
+             file.exists(final_rds_dc[II]), 
+             file.exists(final_rds_uc[II]), 
+             file.exists(final_rds_dc_dc[II]), 
+             file.exists(final_rds_uc_uc[II]))) {
+        message(paste0("skipping ", cnv_short[II]))
         next
       }
+    }
+    
+    message(paste0("wrapper_run_gapctd: Processing ", cnv_short[II]))
+    # Load CTD data
+    ctd_dat <- oce::read.oce(file = cnv_files[II])
+    
+    if(length(ctd_dat@data$timeS) < 1000) {
+      message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient data"))
+      next
+    }
+    
+    if(abs(diff(range(ctd_dat@data$pressure))) < 5) {
+      message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient pressure range (", abs(diff(range(ctd_dat@data$pressure))), ")."))
+      next
+    }
+    
+    if(gapctd_round == 1) {
+      # Write split data to file
+      split_oce <- gapctd:::run_gapctd(x = ctd_dat, 
+                                       haul_df = haul_df, 
+                                       return_stage = "split", 
+                                       ctd_tz = "America/Anchorage",
+                                       ctm_pars = ctm_pars,
+                                       align_pars = align_pars)
       
-      processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
-                                           haul_df = haul_df, 
-                                           return_stages = c("final"), 
-                                           ctd_tz = "America/Anchorage")
+      saveRDS(split_oce, file = rds_split_files[II])
+    }
+    
+    processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
+                                         haul_df = haul_df, 
+                                         return_stage = return_stage, 
+                                         ctd_tz = "America/Anchorage",
+                                         ctm_pars = ctm_pars,
+                                         align_pars = align_pars)
+    
+    if(is.null(processed_oce)) {
+      message("wrapper_run_gapctd: No data in ", cnv_files[II], ". Removing cast.")
+      file.remove(cnv_files[II])
       
-      if(is.null(processed_oce)) {
-        message("wrapper_run_gapctd: No data in ", cnv_files[II], ". Removing cast.")
-        file.remove(cnv_files[II])
-        
-      } else {
-        saveRDS(processed_oce, file = rds_files[II])
-      }
     } else {
-      message(paste0("skipping ", cnv_short[II]))
+      saveRDS(processed_oce, file = full_rds_files[II])
     }
   }
 }
@@ -83,13 +138,18 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 #' 
 #' @param x oce file
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
-#' @param return_stages Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "final"). Can return multiple stages simultaneously. Default = "final"
+#' @param return_stage Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full"). Can return multiple stages simultaneously. Default = "full"
 #' @param ctd_tz timezone for CTD as a character vector or numeric that is valid for POSIXct.
 #' @param ctm_pars Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
-#' @return A list of oce objects at stages of processing specified in return_stages.
+#' @param align_pars A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
+#' @return A list of oce objects at stages of processing specified in return_stage.
 #' @export
 
-run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America/Anchorage", ctm_pars = list()) {
+run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anchorage", ctm_pars = list(), align_pars = c(),
+                       cor_var = "conductivity") {
+  
+  stopifnot("run_gapctd: Invalid return_stage. Must be one of 'split', 'median_filter', 'lowpass_filter', 'align', 'ctmcorrect', 'loopedit', 'bin_average', or 'full'" = 
+              return_stage %in% c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "loopedit", "bin_average", "full"))
   
   output_list <- list()
   
@@ -98,46 +158,11 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
                                               tz = ctd_tz)
   
   
-  # Lowpass and median filters -----------------------------------------------------------------------
+  # Append haul data -------------------------------------------------------------------------------
   x <- x |> 
-    gapctd:::append_haul_data(haul_df = haul_df) |>
-    gapctd:::median_filter(variables = c("temperature", "conductivity"),
-                           window = c(5,5)) |>
-    gapctd:::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
-                            time_constant = c(0.5, 0.5, 1),
-                            precision = c(4, 6, 3),
-                            freq_n = 0.25)
+    gapctd:::append_haul_data(haul_df = haul_df)
   
-  # Return results based on typical settings
-  if("typical" %in% return_stages) {
-    
-    output_list[["typical_downcast"]] <- x |>
-      gapctd:::align_var(variables = "temperature", 
-                         offset = -0.5, 
-                         interp_method = "linear") |>
-    gapctd:::assign_metadata_fields(cast_direction = "downcast") |>
-      gapctd:::section_oce(by = "datetime",
-                           cast_direction = "downcast") |>
-      gapctd:::conductivity_correction(alpha_C = 0.04, beta_C = 1/8) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
-    
-    output_list[["typical_upcast"]] <- x |>
-      gapctd:::align_var(variables = "temperature", 
-                         offset = -0.5, 
-                         interp_method = "linear") |>
-    gapctd:::assign_metadata_fields(cast_direction = "upcast") |>
-      gapctd:::section_oce(by = "datetime",
-                           cast_direction = "upcast") |>
-      gapctd:::conductivity_correction(alpha_C = 0.04, beta_C = 1/8) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)  
-    
-  }
-  
-  # Split upcast, downcast, and bottom ---------------------------------------------------------------
+  # Split upcast, downcast, and bottom -------------------------------------------------------------
   downcast <- x |>
     gapctd:::assign_metadata_fields(cast_direction = "downcast") |>
     gapctd:::section_oce(by = "datetime",
@@ -148,44 +173,93 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
     gapctd:::section_oce(by = "datetime",
                          cast_direction = "upcast")
 
-  onbottom <- x|> 
+  bottom <- x|> 
     gapctd:::section_oce(by = "datetime",
                          cast_direction = "bottom")
   
   # Return NULL if no data are available
-  if(is.null(downcast) & is.null(upcast) & is.null(onbottom)) {
+  if(is.null(downcast) & is.null(upcast) & is.null(bottom)) {
     return(NULL)
   }
   
-  if(!is.null(onbottom)) {
-    onbottom <- gapctd:::derive_eos(x = onbottom)
-  }
+  # Return split cast ------------------------------------------------------------------------------
+  if(return_stage == "split") {
+    output_list[["downcast"]] <- downcast
+    output_list[["upcast"]] <- upcast
+    output_list[["bottom"]] <- bottom
     
-  
-  if("split" %in% return_stages) {
-    output_list[["split_downcast"]] <- downcast |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
-    output_list[["split_upcast"]] <- split_upcast = upcast |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
-    output_list[["split_bottom"]] <- split_bottom = bottom |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+    return(output_list)
   }
   
-  # Align upcast and downcast ------------------------------------------------------------------------
+  # Median filter, low pass filter, and derive bottom ----------------------------------------------
+  if(!is.null(bottom)) {
+    bottom <- bottom |>
+      gapctd:::median_filter(variables = c("temperature", "conductivity"),
+                             window = c(5,5)) |>
+      gapctd:::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
+                              time_constant = c(0.5, 0.5, 1),
+                              precision = c(4, 6, 3),
+                              freq_n = 0.25) |>
+      gapctd:::derive_eos()
+  }
+
+  # Median filter upcast and downncast -------------------------------------------------------------
+  downcast <- downcast |>
+    gapctd:::median_filter(variables = c("temperature", "conductivity"),
+                           window = c(5,5))
+  upcast <- upcast |>
+    gapctd:::median_filter(variables = c("temperature", "conductivity"),
+                           window = c(5,5))
+  
+  if(return_stage == "median_filter") {
+    output_list[["downcast"]] <- downcast
+    output_list[["upcast"]] <- upcast
+    output_list[["bottom"]] <- bottom
+    
+    return(output_list)
+  }
+  
+  # Low pass filter upcast and downncast -----------------------------------------------------------
+  downcast <- downcast |>
+    gapctd:::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
+                            time_constant = c(0.5, 0.5, 1),
+                            precision = c(4, 6, 3),
+                            freq_n = 0.25)
+  
+  upcast <- upcast |>
+    gapctd:::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
+                            time_constant = c(0.5, 0.5, 1),
+                            precision = c(4, 6, 3),
+                            freq_n = 0.25)
+  
+  if(return_stage == "lowpass_filter") {
+    output_list[["downcast"]] <- downcast
+    output_list[["upcast"]] <- upcast
+    output_list[["bottom"]] <- bottom
+    
+    return(output_list)
+  }
+  
+  # Align upcast and downcast ----------------------------------------------------------------------
   if(!is.null(downcast)) {
     
-  dc_align <- gapctd:::optim_align_par(x = downcast, 
-                                       variable = "temperature", 
-                                       offsets = seq(-1,1, 0.01), 
-                                       cor_method = "pearson",
-                                       cast_direction = "downcast")
-  
+    if(length(align_pars) == 0) {
+      dc_align <- gapctd:::optim_align_par(x = downcast, 
+                                           variable = "temperature", 
+                                           offsets = seq(-1,1, 0.01), 
+                                           cor_method = "pearson",
+                                           cast_direction = "downcast")
+    } else {
+      dc_align <- fixed_alignment(x = downcast, 
+                                  align_pars = align_pars, 
+                                  cor_var = cor_var, 
+                                  cast_direction = "downcast", 
+                                  cor_method = "pearson")
+    }
+
   downcast <- gapctd:::align_var(x = downcast, 
                                  variables = "temperature", 
-                                 offset = dc_align['best_offset'], 
+                                 offset = dc_align[["temperature"]]['offset'], 
                                  interp_method = "linear")
   
   downcast@metadata[['align']] <- dc_align
@@ -193,107 +267,158 @@ run_gapctd <- function(x, haul_df, return_stages = c("final"), ctd_tz = "America
   } 
   
   if(!is.null(upcast)) {
-    uc_align <- gapctd:::optim_align_par(x = upcast, 
-                                         variable = "temperature", 
-                                         offsets = seq(-1,1, 0.01), 
-                                         cor_method = "pearson",
-                                         cast_direction = "upcast")
     
-    upcast@metadata[['align']] <- uc_align
+    if(length(align_pars) == 0) {
+      uc_align <- gapctd:::optim_align_par(x = upcast, 
+                                           variable = "temperature", 
+                                           offsets = seq(-1,1, 0.01), 
+                                           cor_method = "pearson",
+                                           cast_direction = "upcast")
+    } else {
+      uc_align <- fixed_alignment(x = upcast, 
+                                  align_pars = align_pars, 
+                                  cor_var = cor_var, 
+                                  cast_direction = "upcast", 
+                                  cor_method = "pearson")
+    }
     
     upcast <- gapctd:::align_var(x = upcast, 
                                  variables = "temperature", 
-                                 offset = uc_align['best_offset'], 
+                                 offset = uc_align[["temperature"]]['offset'], 
                                  interp_method = "linear")
+    
+    upcast@metadata[['align']] <- uc_align
   }
 
-  
-  
-  if("align" %in% return_stages) {
-    output_list[["align_downcast"]] <- downcast |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
-    output_list[["align_upcast"]] <- split_upcast = upcast |>
-      gapctd:::derive_eos() |>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+  if(return_stage == "align") {
+    output_list[["downcast"]] <- downcast
+    output_list[["upcast"]] <- upcast
+    output_list[["bottom"]] <- bottom
+    
+    return(output_list)
   }
   
-  
-  # Estimate conductivity cell thermal mass correction parameters ------------------------------------
+  # Estimate conductivity cell thermal mass correction parameters ----------------------------------
   if(length(ctm_pars) == 0) {
     ctm_pars <- gapctd:::optim_ctm_pars(dc = downcast, 
                                         uc = upcast,
                                         optim_method = "L-BFGS-B",
                                         start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
                                         start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
-                                        default_parameters = c(alpha_C = 0.04, beta_C = 0.125))
+                                        default_parameters = c(alpha_C = 0.04, beta_C = 0.125),
+                                        area_method = "ts") # Area between pressure-salinity curves
     
     ctm_alpha_C <- ctm_pars[['both']]['alpha_C']
     ctm_beta_C <- ctm_pars[['both']]['beta_C']
   } else {
     message("run_gapctd: Using user-specified conductivity cell thermal inertia correction parameters.")
-    ctm_alpha_C <- ctm_pars['alpha_C']
-    ctm_beta_C <- ctm_pars['beta_C']
+    ctm_alpha_C <- ctm_pars[['alpha_C']]
+    ctm_beta_C <- ctm_pars[['beta_C']]
   }
-  downcast_binned <-NULL
-  upcast_binned <- NULL
-  
-  if(!is.null(downcast)) {
     
-    downcast_binned <- downcast |>
-      gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
-      gapctd:::derive_eos()|>
-      gapctd:::bin_average(by = "depth", bin_width = 1)
+  
+  # Apply conductivity cell thermal mass correction ------------------------------------------------
+    downcast <- downcast |>
+      gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C)
     
-    downcast_binned@metadata[['ctm']] <- ctm_pars
-    downcast_binned@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
-  }
-  
-  if(!is.null(upcast)) {
+    upcast <- upcast |>
+      gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C)
     
-  upcast_binned <- upcast |>
-    gapctd:::conductivity_correction(alpha_C = ctm_alpha_C, beta_C = ctm_beta_C) |>
-    gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
-    gapctd:::derive_eos() |>
-    gapctd:::bin_average(by = "depth", bin_width = 1)
-  
-  upcast_binned@metadata[['ctm']] <- ctm_pars
-  upcast_binned@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
-  
-  }
-  
-  if("tmcorrect" %in% return_stages) {
-    output_list[["tmcorrect_downcast"]] <- downcast_binned
-    output_list[["tmcorrect_upcast"]] <- upcast_binned
-  }
-  
+    if(!is.null(downcast)) {
+      downcast@metadata[['ctm']] <- ctm_pars
+    }
+
+    if(!is.null(upcast)) {
+      upcast@metadata[['ctm']] <- ctm_pars
+    }
+    
+    if(return_stage == "ctmcorrect") {
+      output_list[["downcast"]] <- downcast
+      output_list[["upcast"]] <- upcast
+      output_list[["bottom"]] <- bottom
+      
+      return(output_list)
+    }
+    
+    
+    # Loop edit ------------------------------------------------------------------------------------
+    
+    downcast <- downcast |>
+      gapctd:::loop_edit(min_speed = 0.1, 
+                         window = 5, 
+                         cast_direction = "downcast") 
+    
+    upcast <- upcast |> 
+      gapctd:::loop_edit(min_speed = 0.1, 
+                         window = 5, 
+                         cast_direction = "upcast")
+    
+    
+    if(return_stage == "loopedit") {
+      output_list[["downcast"]] <- downcast
+      output_list[["upcast"]] <- upcast
+      output_list[["bottom"]] <- bottom
+      
+      return(output_list)
+    }
+    
+    # Derive ---------------------------------------------------------------------------------------
+    
+    downcast <- gapctd::derive_eos(downcast)
+
+    upcast <- gapctd::derive_eos(upcast)
+    
+    if(return_stage == "derive") {
+      output_list[["downcast"]] <- downcast
+      output_list[["upcast"]] <- upcast
+      output_list[["bottom"]] <- bottom
+      
+      return(output_list)
+    }
+    
+    # Bin average
+    downcast <- gapctd:::bin_average(downcast, by = "depth", bin_width = 1)
+    upcast <- gapctd:::bin_average(upcast, by = "depth", bin_width = 1)
+    
+    if(!is.null(downcast)) {
+      downcast@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
+    }
+    
+    if(!is.null(upcast)) {
+      upcast@metadata[['bin_average']] <- c(by = "depth", bin_width = 1)
+    }
+
+    if(return_stage == "bin_average") {
+      output_list[["downcast"]] <- downcast
+      output_list[["upcast"]] <- upcast
+      output_list[["bottom"]] <- bottom
+      
+      return(output_list)
+    }
   
   # Check/correct density inversion; check if data are complete  -----------------------------------
   
-  if(!is.null(downcast_binned)) {
-    downcast_binned <- downcast_binned |>
+    downcast <- downcast |>
       gapctd:::check_density_inversion(threshold  = -1e-4, 
                                        threshold_method = "bv", 
                                        correct_inversion = TRUE) |>
       gapctd:::qc_check(prop_max_flag = 0.1,
                         prop_min_bin = 0.9)
-  }
-
-  if(!is.null(upcast_binned)) {
-    upcast_binned <- upcast_binned |>
+    
+    upcast <- upcast |>
       gapctd:::check_density_inversion(threshold  = -1e-4, 
                                        threshold_method = "bv", 
                                        correct_inversion = TRUE) |>
       gapctd:::qc_check(prop_max_flag = 0.1,
                         prop_min_bin = 0.9)
-  }  
-
-  if("final" %in% return_stages) {
-    output_list[["downcast"]] <- downcast_binned
-    output_list[["upcast"]] <- upcast_binned
-    output_list[["bottom"]] <- onbottom
-  }
+    
+    if(return_stage == "full") {
+      output_list[["downcast"]] <- downcast
+      output_list[["upcast"]] <- upcast
+      output_list[["bottom"]] <- bottom
+      
+      return(output_list)
+    }
   
   return(output_list)
   

@@ -4,10 +4,15 @@
 \alias{move_bad_rds}
 \title{Remove rds files based on QA/QC flags (R workflow)}
 \usage{
-move_bad_rds(rds_dir_path = here::here("output", "gapctd"))
+move_bad_rds(
+  rds_dir_path = here::here("output", "gapctd"),
+  in_pattern = "_full.rds"
+)
 }
 \arguments{
 \item{rds_dir_path}{File path to directory containing rds files to be evaluated.}
+
+\item{in_pattern}{Character vector search pattern for input files.}
 }
 \value{
 Bad files moved to /bad_cnv/

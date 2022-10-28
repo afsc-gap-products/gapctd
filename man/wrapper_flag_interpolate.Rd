@@ -8,7 +8,8 @@ wrapper_flag_interpolate(
   rds_dir_path = here::here("output", "gapctd"),
   output_dir_path = NULL,
   append_char = "_qc",
-  review = "density"
+  review = "density",
+  bin_var = "depth"
 )
 }
 \arguments{

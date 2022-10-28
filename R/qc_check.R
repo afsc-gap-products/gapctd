@@ -11,6 +11,10 @@
 
 qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max = 45) {
   
+  if(is.null(x)) {
+    return(NULL)
+  }
+  
   prop_bins <- length(x@data$depth)/(x@metadata$gearDepth/as.numeric(x@metadata$bin_average['bin_width']))
   
   x@metadata$flags[['bin_flag']] <- ifelse(prop_bins < prop_min_bin, TRUE, FALSE)
@@ -38,11 +42,18 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
 #' @return An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.
 #' @export
 
-qc_flag_interpolate <- function(x, review = c("density")) {
+qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
   
-  interp_flags <- function(x_oce) {
+  interp_flags <- function(x_oce, bin_var) {
     
     if(sum(x_oce@data$flag < 0) > 0) {
+      
+      if(bin_var == "depth") {
+        x_input <- x_oce@data$depth
+      } else if(bin_var == "pressure") {
+        x_input <- x_oce@data$pressure
+      }
+      
       flag_index <- which(x_oce@data$flag < 0)
       x_oce@data$temperature[flag_index] <- oce::oce.approx(x = x_oce@data$depth[-flag_index], 
                                                             y = x_oce@data$temperature[-flag_index], 
@@ -54,8 +65,17 @@ qc_flag_interpolate <- function(x, review = c("density")) {
                                                              method = "unesco")
       x_oce <- x_oce |> gapctd:::derive_eos()
       
+      if(bin_var == "depth") {
+        x_oce@data$depth <- x_input
+      } else if(bin_var == "pressure") {
+        x_oce@data$pressure <- x_input
+      }
+      
       x_oce@data$flag[flag_index] <- 7
     }
+    
+
+    
     return(x_oce)
   }
   
@@ -104,7 +124,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
       
       x@data$flag[new_flags] <- -7
       
-      x <- interp_flags(x_oce = x)
+      x <- interp_flags(x_oce = x, bin_var = bin_var)
     }
   }
   
@@ -139,7 +159,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
       }
       
       x@data$flag[new_flags] <- -7
-      x <- interp_flags(x_oce = x)
+      x <- interp_flags(x_oce = x, bin_var = bin_var)
     }
   }
   
@@ -173,7 +193,7 @@ qc_flag_interpolate <- function(x, review = c("density")) {
       
       x@data$flag[new_flags] <- -7
       
-      x <- interp_flags(x_oce = x)
+      x <- interp_flags(x_oce = x, bin_var = bin_var)
     }
   }
   
@@ -200,22 +220,23 @@ qc_flag_interpolate <- function(x, review = c("density")) {
 wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd"),
                                      output_dir_path = NULL,
                                      append_char = "_qc",
-                                     review = "density") {
+                                     review = "density",
+                                     bin_var = "depth") {
   
   output_dir_path <- ifelse(is.null(output_dir_path), rds_dir_path, output_dir_path)
   
-  rds_files <- list.files(rds_dir_path, pattern = "_raw.rds", full.names = TRUE)
-  rds_short <- list.files(rds_dir_path, pattern = "_raw.rds", full.names = FALSE)
-  output_files <- here::here(output_dir_path,  gsub(pattern = "_raw.rds", 
+  rds_files <- list.files(rds_dir_path, pattern = "_full.rds", full.names = TRUE)
+  rds_short <- list.files(rds_dir_path, pattern = "_full.rds", full.names = FALSE)
+  output_files <- here::here(output_dir_path,  gsub(pattern = "_full.rds", 
                                                 replacement = paste0(append_char, ".rds"), 
                                                 x = rds_short))
   
   dc_files <- here::here(output_dir_path,  
-                         gsub(pattern = "_raw.rds", 
+                         gsub(pattern = "_full.rds", 
                               replacement = "_dc_final.rds", 
                               x = rds_short))
   uc_files <- here::here(output_dir_path,  
-                         gsub(pattern = "_raw.rds", 
+                         gsub(pattern = "_full.rds", 
                               replacement = "_uc_final.rds", 
                               x = rds_short))
 
@@ -243,11 +264,11 @@ wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd
       message(paste0("Processing ", rds_short[JJ]))
       
       if("downcast" %in% names(ctd_dat)) {
-          ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review)
+          ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review, bin_var = bin_var)
       }
       
       if("upcast" %in% names(ctd_dat)) {
-        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast, review = review)
+        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast, review = review, bin_var = bin_var)
       }
       
       saveRDS(ctd_dat, file = output_files[JJ])
