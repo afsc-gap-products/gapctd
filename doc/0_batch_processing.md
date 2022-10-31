@@ -98,9 +98,9 @@ showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
 
 ## 5. Run gapctd processing methods on CTD files
 
-The `wrapper_run_gapctd` function implements the `run_gapctd` function
-on each CTD file in the working directory. The `run_gapctd` function
-processes data for a single CTD data file (.cnv) using the [processing
+The `wrapper_run_gapctd` function runs the `run_gapctd` function on each
+CTD file in the working directory. The `run_gapctd` function processes
+data from a single CTD data file (.cnv) using the [processing
 steps](/doc/batch_processing_steps.md) we have found works best for our
 deployments across bottom trawl survey regions.
 
@@ -111,8 +111,15 @@ vessel/cruise.*
 # Run data processing algorithm on files. Write .rds
 gapctd:::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"), # Path to decoded CTD data (.cnv) files
                             processing_method = processing_method, # Processing method
-                            haul_df = haul_df) # Haul data from step 4
+                            haul_df = haul_df,  # Haul data from step 4
+                            ctm_pars = list(alpha_C = 0.04, beta_C = 1/8)) # Default CTM parameters
 ```
+
+In the code above, user-specified conductivity cell thermal mass
+correction parameters are provided to the function as:
+`ctm_pars = list(alpha_C = 0.04, beta_C = 1/8)`. If profile data from
+the deployment do not pass QA/QC checks, these parameters are optimized
+in subsequent steps.
 
 Outputs from `wrapper_run_gapctd` are stored in oce objects that are
 saved in R data (.rds) files in /output/gapctd/
