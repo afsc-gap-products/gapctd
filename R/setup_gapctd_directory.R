@@ -99,18 +99,6 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
     dir.create("output")
   }
   
-  # if(!dir.exists(here::here("output", "density_corrected"))) {
-  #   dir.create(here::here("output",  "density_corrected"))
-  # }
-  # 
-  # if(!dir.exists(here::here("output", "manual_flag"))) {
-  #   dir.create(here::here("output", "manual_flag"))
-  # }
-  # 
-  # if(!dir.exists(here::here("output", "accepted_profiles"))) {
-  #   dir.create(here::here("output", "accepted_profiles"))
-  # }
-  
   if(!dir.exists("plots")) {
     dir.create("plots")
   }

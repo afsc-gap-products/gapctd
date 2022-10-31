@@ -4,7 +4,7 @@
 #'  
 #'  @param ctd_directory_path Path to CTD directory
 #'  @param xmlcon_path Path to xmlcon file
-#'  @noRd
+#'  @export
 
 convert_ctd_hex <- function(ctd_directory_path, 
                             xmlcon_path, 
