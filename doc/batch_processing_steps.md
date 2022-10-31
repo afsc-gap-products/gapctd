@@ -1,6 +1,6 @@
 # Batch Processing Steps
 
-![](/doc/assets/gapctd_workflow.tif)
+![](/doc/assets/gapctd_workflow.png)
 
 This document lists data processing steps that are used to produce GAP
 CTD data. Steps 2-13 are performed inside of the `run_gapctd()`
