@@ -2,7 +2,7 @@
 % Please edit documentation in R/convert_ctd_hex.R, R/utils.R
 \name{convert_ctd_hex}
 \alias{convert_ctd_hex}
-\title{Check at-sea CTD data}
+\title{Convert hex files using SBE Data Processing software}
 \usage{
 convert_ctd_hex(
   hex_file_path,
@@ -31,11 +31,11 @@ convert_ctd_hex(
 Writes decoded CTD data to a cnv file and returns the path to the file as a 1L character vector.
 }
 \description{
-In development
+Converts .hex files to .cnv files using SBE Data Processing. Must have SBE Data Processing software installed for this function to work.
  
  @param ctd_directory_path Path to CTD directory
  @param xmlcon_path Path to xmlcon file
- @noRd
+ @export
 
 Converts SBE19plus V2 CTD hex file to cnv using Sea-Bird Data Processing software. cnv files generated with this function will be properly formatted for conversion to BTD using CTDtoBTD().
 }
