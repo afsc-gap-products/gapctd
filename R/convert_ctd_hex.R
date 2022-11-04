@@ -104,8 +104,7 @@ hex_to_cnv <- function(hex_path,
     dplyr::summarise(gapctd:::hex_extract_raw_uint_tbl(lines_raw, cols = cols))
   
   
-  # Temperature calibration coefficients from header
-  
+  # Retrieve calibration coefficients from header
   cal_par_names <- c("TA0", "TA1", "TA2", "TA3", "TOFFSET", "G", "H", "I", "J", "CPCOR", "CTCOR", "CSLOPE", "PA0", "PA1", "PA2", "PTEMPA0", "PTEMPA1", "PTEMPA2", "PTCA0", "PTCA1", "PTCA2", "PTCB0", "PTCB1", "PTCB2", "POFFSET")
   
   cal_par_list <- list()
@@ -113,8 +112,6 @@ hex_to_cnv <- function(hex_path,
   for(ii in 1:length(cal_par_names)) {
     cal_par_list[[cal_par_names[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header, cal_par = cal_par_names[ii])
   }
-  
-  # Test conversion ----
   
   temperature  <- gapctd:::integer_to_temperature(
     temperature_integer = values_int$temperature_int,
