@@ -157,7 +157,7 @@ convert_ctd_hex <- function(hex_file_path,
 
 #' Remove rds files based on QA/QC flags (R workflow)
 #' 
-#' Remove deployment rds files that contain bottom, upcast, and/or bottom oce objects based on QA/QC flags.
+#' Remove deployment rds files that contain bottom, upcast, and/or bottom ctd objects based on QA/QC flags.
 #' 
 #' @param rds_dir_path File path to directory containing rds files to be evaluated.
 #' @param in_pattern Character vector search pattern for input files.
@@ -165,66 +165,59 @@ convert_ctd_hex <- function(hex_file_path,
 #' @export
 
 move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd"),
-                         in_pattern = "_full.rds") {
+                         in_pattern = "_typical.rds") {
   
-  rds_path <- list.files(rds_dir_path, pattern = in_pattern, full.names = TRUE)
-  
-  n_moved <- 0
-  
-  for(hh in 1:length(rds_path)) {
+  for(gg in 1:length(in_pattern)) {
     
-    message("move_bad_rds: Checking ", rds_path[hh])
-    eval_deployment <- readRDS(rds_path[hh])
+    rds_path <- list.files(rds_dir_path, pattern = in_pattern[gg], full.names = TRUE)
     
-    dc_flag <- TRUE
-    if("downcast" %in% names(eval_deployment)) {
-      dc_flag <- any(as.logical(eval_deployment$downcast@metadata$flags), na.rm = TRUE)
-    }
+    n_moved <- 0
     
-    uc_flag <- TRUE
-    if("upcast" %in% names(eval_deployment)) {
-      uc_flag <- any(as.logical(eval_deployment$upcast@metadata$flags), na.rm = TRUE)
-    }
-    
-    # Move bad rds file
-    if(any(dc_flag, uc_flag)) {
-      message(paste0("move_bad_rds: Moving ", rds_path[hh]))
+    for(hh in 1:length(rds_path)) {
       
-      new_loc <- gsub(pattern = paste0("/output/", processing_method, "/"), 
-                      replacement = "/bad_cnv/",
-                      x = rds_path[hh])
+      message("move_bad_rds: Checking ", rds_path[hh])
+      eval_deployment <- readRDS(rds_path[hh])
       
-      file.rename(from =  rds_path[hh], to = new_loc)
+      flag <- FALSE
       
-      n_moved <- n_moved + 1
-    }
-    
-    # Remove only the bad profile
-    if(dc_flag != uc_flag) {
-      
-      cond <- FALSE
-      
-      if(dc_flag & "downcast" %in% names(eval_deployment) & !uc_flag) {
-        eval_deployment <- eval_deployment[-which(names(eval_deployment) == "downcast")]
-        out_path <- gsub(pattern = in_pattern, replacement = paste0("_uc", in_pattern), x = rds_path[hh])
-        cond <- TRUE
+      # Check metadata for flags created by qc_check()
+      if("downcast" %in% names(eval_deployment)) {
+        if(any(as.logical(eval_deployment$downcast@metadata$flags), na.rm = TRUE)) {
+          flag <- TRUE
+          eval_deployment <- eval_deployment[-which(names(eval_deployment) == "downcast")]
+        }
+        
       }
       
-      if(uc_flag & "upcast" %in% names(eval_deployment) & !dc_flag) {
-        eval_deployment <- eval_deployment[-which(names(eval_deployment) == "upcast")]
-        out_path <- gsub(pattern = in_pattern, replacement = paste0("_dc", in_pattern), x = rds_path[hh])
-        cond <- TRUE
+      if("upcast" %in% names(eval_deployment)) {
+        if(any(as.logical(eval_deployment$upcast@metadata$flags), na.rm = TRUE)) {
+          flag <- TRUE
+          eval_deployment <- eval_deployment[-which(names(eval_deployment) == "upcast")]
+        }
       }
       
-      if(cond) {
-        saveRDS(object = eval_deployment, file = out_path)
+      # Move file containing flagged profile to a the /bad_cnv/ directory
+      if(flag) {
+        message(paste0("move_bad_rds: Moving ", rds_path[hh]))
+        
+        new_loc <- gsub(pattern = paste0("/output/", processing_method, "/"), 
+                        replacement = "/bad_cnv/",
+                        x = rds_path[hh])
+        
+        file.rename(from =  rds_path[hh], to = new_loc)
+        
+        # Save deployment list with only one downcast or upcast to output
+        if(any(c("downcast", "upcast") %in% names(eval_deployment))) {
+          saveRDS(object = eval_deployment, file = rds_path[hh])
+        }
+        
+        n_moved <- n_moved + 1
       }
-      
       
     }
+    
+    message(paste0("move_bad_rds: Moved ", n_moved, " files to /bad_cnv/"))  
   }
-  
-  message(paste0("move_bad_rds: Moved ", n_moved, " files to /bad_cnv/"))
   
 }
 

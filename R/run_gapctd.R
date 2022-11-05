@@ -4,27 +4,48 @@
 #' 
 #' @param cnv_dir_path Path to directory containing cnv files to be processed.
 #' @param processing_method Name of processing method; for saving output.
-#' @param return_stage Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full")
-#' @param gapctd_round Processing round (1 = typical settings, 2 = optimize CTM w/ T-S area or S path distance.
 #' @param haul_df Optional. data.frame containing  haul data from RACEBASE. Must provide arguments for vessel and cruise if not provided.
 #' @param vessel Optional. Vessel code as a 1L numeric vector.
 #' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
 #' @param channel Optional. RODBC channel; only used when haul_df = NULL.
-#' @param ctm_pars Optional. Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
-#' @param align_pars Optional. A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
+#' @param tzone Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()
 #' @return Writes rds files with cast data to /output/[processing_method]
 #' @export
 
 wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                processing_method,
-                               return_stage = "full",
-                               gapctd_round = 1,
                                haul_df = NULL,
                                vessel = NULL,
                                cruise = NULL,
                                channel = NULL,
-                               ctm_pars = NULL,
-                               align_pars = NULL) {
+                               racebase_tzone = "America/Anchorage") {
+  
+  # Function to write CTD data to output files if the outputs contain data
+  gapctd_write_rds <- function(x, out_path, in_path, gapctd_method) {
+    if(is.null(x)) {
+      message("wrapper_run_gapctd: No data in ", in_path, ". Removing cast.")
+      file.remove(in_path)
+    } else {
+      
+      null_vec <- c()
+      for(ii in 1:length(x)) {
+        if(is.null(x[[ii]])) {
+          null_vec <- -1*ii
+        }
+      }
+      
+      if(length(null_vec) > 0) {
+        x <- x[null_vec]
+      }
+      
+      for(HH in 1:length(x)) {
+        x[[HH]]@metadata$gapctd_method <- gapctd_method
+      }
+      saveRDS(x, file = out_path)
+    }
+  }
+  
+  
   stopifnot("wrapper_run_gapctd: Output path does not exist. Make sure output/[processing_method] was created with gapctd::setup_gapctd_directory()." = dir.exists(here::here("output", processing_method)))
   stopifnot("wrapper_run_gapctd: cnv path does not exist. Make sure cnv_dir_path was created with gapctd::setup_gapctd_directory()." = dir.exists(cnv_dir_path))
   
@@ -36,61 +57,65 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     haul_df <- gapctd:::get_haul_data(channel = channel,
                                       vessel = vessel,
                                       cruise = cruise,
-                                      tzone = "America/Anchorage")
+                                      tzone = racebase_tzone)
   }
   
-  # Input and output files
+  # Get paths to input files to be processed
   cnv_files <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = TRUE)
   cnv_short <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = FALSE)
   
+  # Create vectors of paths to output files
+  rds_filenames_split <- here::here("data",
+                                    "split",
+                                    gsub(pattern = "raw.cnv", 
+                                         replacement = "split.rds",
+                                         x = cnv_short))
+  rds_filenames_tsa <- here::here("output", 
+                                  processing_method, 
+                                  gsub(pattern = "raw.cnv", 
+                                       replacement = "tsa.rds", 
+                                       x = cnv_short))
+  rds_filenames_typical_ctm <- here::here("output", 
+                                          processing_method, 
+                                          gsub(pattern = "raw.cnv", 
+                                               replacement = "typical_ctm.rds", 
+                                               x = cnv_short))
+  rds_filenames_spd <- here::here("output", 
+                                  processing_method, 
+                                  gsub(pattern = "raw.cnv", 
+                                       replacement = "spd.rds", 
+                                       x = cnv_short))
+  rds_filenames_typical <- here::here("output", 
+                                      processing_method, 
+                                      gsub(pattern = "raw.cnv", 
+                                           replacement = "typical.rds", 
+                                           x = cnv_short))
+  rds_filenames_best <- here::here("output", 
+                                    processing_method, 
+                                    gsub(pattern = "raw.cnv", 
+                                         replacement = "best.rds", 
+                                         x = cnv_short))
   
-  full_rds_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "full.rds", x = cnv_short))
-  full_rds_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_full.rds", x = cnv_short))
-  full_rds_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_full.rds", x = cnv_short))
-  full_rds_dc_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_dc_full.rds", x = cnv_short))
-  full_rds_uc_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_uc_full.rds", x = cnv_short))
+  rds_filenames_final <- here::here("output", 
+                                    processing_method, 
+                                    gsub(pattern = "raw.cnv", 
+                                         replacement = "final.rds", 
+                                         x = cnv_short))
   
-  bad_rds_files <- here::here("bad_cnv", gsub(pattern = "raw.cnv", replacement = "full.rds", x = cnv_short))
-  
-  final_rds_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "final.rds", x = cnv_short))
-  final_rds_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_final.rds", x = cnv_short))
-  final_rds_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_final.rds", x = cnv_short))
-  final_rds_dc_dc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "dc_dc_final.rds", x = cnv_short))
-  final_rds_uc_uc <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "uc_uc_final.rds", x = cnv_short))
-  
-  rds_split_files <- here::here("output", processing_method, gsub(pattern = "raw.cnv", replacement = "split.rds", x = cnv_short))
-  
-  message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
   
   for(II in 1:length(cnv_files)) {
     
-    if(gapctd_round == 1) {
-      if(any(file.exists(full_rds_files[II]), 
-             file.exists(full_rds_dc[II]), 
-             file.exists(full_rds_uc[II]), 
-             file.exists(full_rds_dc_dc[II]), 
-             file.exists(full_rds_uc_uc[II]))) {
-        message(paste0("skipping ", cnv_short[II]))
-        next
-      }
+    # Skip processing if typical output, best output, or final file already exists
+    if(any(file.exists(rds_filenames_final[II],
+                       rds_filenames_best[II],
+                       rds_filenames_typical[II]))) {
+      next
     }
     
-    if(gapctd_round == 2) {
-      if(any(file.exists(bad_rds_files[II]),
-             file.exists(final_rds_files[II]), 
-             file.exists(final_rds_dc[II]), 
-             file.exists(final_rds_uc[II]), 
-             file.exists(final_rds_dc_dc[II]), 
-             file.exists(final_rds_uc_uc[II]))) {
-        message(paste0("skipping ", cnv_short[II]))
-        next
-      }
-    }
-    
-    message(paste0("wrapper_run_gapctd: Processing ", cnv_short[II]))
     # Load CTD data
     ctd_dat <- oce::read.oce(file = cnv_files[II])
     
+    # Skip files without useable data, such as files collected during between-leg maintenan
     if(length(ctd_dat@data$timeS) < 1000) {
       message(paste0("wrapper_run_gapctd: Skipping ", cnv_short[II], ". Insufficient data"))
       next
@@ -101,33 +126,137 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       next
     }
     
-    if(gapctd_round == 1) {
-      # Write split data to file
-      split_oce <- gapctd:::run_gapctd(x = ctd_dat, 
-                                       haul_df = haul_df, 
-                                       return_stage = "split", 
-                                       ctd_tz = "America/Anchorage",
-                                       ctm_pars = ctm_pars,
-                                       align_pars = align_pars)
+    message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
+    
+    
+    # Create files with just upcasts or downcast
+    ctd_split <- run_gapctd(x = ctd_dat, 
+                            haul_df = haul_df, 
+                            ctd_tz = "America/Anchorage",
+                            return_stage = "split")
+    
+    gapctd_write_rds(x = ctd_split,
+                     in_path = cnv_files[II],
+                     out_path = rds_filenames_split[II],
+                     gapctd_method = NA)
+    
+    # TSA: Estimate temperature alignment and CTM parameters (optimization using area betwween T-S curves)
+    if(all(c("downcast", "upcast") %in% names(ctd_split))) {
+      ctd_tsa <- run_gapctd(x = ctd_dat, 
+                            haul_df = haul_df, 
+                            ctd_tz = "America/Anchorage",
+                            return_stage = "full", # w/ Density inversion check and completeness check
+                            align_pars = list(),
+                            ctm_pars = list())
       
-      saveRDS(split_oce, file = rds_split_files[II])
+      gapctd_write_rds(x = ctd_tsa,
+                       in_path = cnv_files[II],
+                       out_path = rds_filenames_tsa[II],
+                       gapctd_method = "TSA")
     }
     
-    processed_oce <- gapctd:::run_gapctd(x = ctd_dat, 
-                                         haul_df = haul_df, 
-                                         return_stage = return_stage, 
-                                         ctd_tz = "America/Anchorage",
-                                         ctm_pars = ctm_pars,
-                                         align_pars = align_pars)
+    # SPD: Estimate temperature alignment and CTM parameters (optimization using S path distance)
+    ctd_downcast_spd <- NULL
+    ctd_upcast_spd <- NULL
     
-    if(is.null(processed_oce)) {
-      message("wrapper_run_gapctd: No data in ", cnv_files[II], ". Removing cast.")
-      file.remove(cnv_files[II])
+    if("downcast" %in% names(ctd_split)) {
+      sel_downcast <- oce::ctdTrim(x = ctd_dat,
+                                   method = "range", 
+                                   parameters = list(item = "timeS",
+                                                     from = 0,
+                                                     to = max(ctd_split$downcast@data$timeS + 0.25, na.rm = TRUE)))
       
-    } else {
-      saveRDS(processed_oce, file = full_rds_files[II])
+      ctd_downcast_spd <- run_gapctd(x = sel_downcast, 
+                                     haul_df = haul_df, 
+                                     ctd_tz = "America/Anchorage",
+                                     return_stage = "full",
+                                     align_pars = list(),
+                                     ctm_pars = list())
     }
+    
+    if("upcast" %in% names(ctd_split)) {
+      sel_upcast <- oce::ctdTrim(x = ctd_dat,
+                                 method = "range", 
+                                 parameters = list(item = "timeS",
+                                                   from = min(ctd_split$upcast@data$timeS - 0.25, na.rm = TRUE),
+                                                   to = 5e6))
+      
+      ctd_upcast_spd <- run_gapctd(x = sel_upcast, 
+                                   haul_df = haul_df, 
+                                   ctd_tz = "America/Anchorage",
+                                   return_stage = "full", 
+                                   align_pars = list(),
+                                   ctm_pars = list())
+    }
+    
+    if(all("downcast" %in% names(ctd_downcast_spd), "upcast" %in% names(ctd_upcast_spd))) {
+      ctd_spd <- list(downcast = ctd_downcast_spd[['downcast']],
+                      upcast = ctd_downcast_spd[['upcast']])
+    } 
+    
+    if(("downcast" %in% names(ctd_downcast_spd)) & !("upcast" %in% names(ctd_upcast_spd))) {
+      ctd_spd <- ctd_downcast_spd
+      
+    }
+    
+    if(!("downcast" %in% names(ctd_downcast_spd)) & ("upcast" %in% names(ctd_upcast_spd))) {
+      ctd_spd <- ctd_upcast_spd
+    }
+    
+    gapctd_write_rds(x = ctd_spd,
+                     in_path = cnv_files[II],
+                     out_path = rds_filenames_spd[II],
+                     gapctd_method = "SPD")
+    
+    
+    if(any(c("downcast", "upcast") %in% names(ctd_split))) {
+      # Typical CTM: Estimate temperature alignment, use manufacturer-recommended CTM parameters
+      ctd_typical_ctm <- run_gapctd(x = ctd_dat, 
+                                    haul_df = haul_df, 
+                                    ctd_tz = "America/Anchorage",
+                                    return_stage = "full", # w/ Density inversion check and completeness check
+                                    align_pars = list(),
+                                    ctm_pars = list(alpha_C = 0.04, beta_C = 1/8))
+      
+      gapctd_write_rds(x = ctd_typical_ctm,
+                       in_path = cnv_files[II],
+                       out_path = rds_filenames_typical_ctm[II],
+                       gapctd_method = "Typical CTM")
+      
+      # Typical: Manufacturer-recommended alignment and CTM parameters
+      ctd_typical <- run_gapctd(x = ctd_dat, 
+                                haul_df = haul_df, 
+                                ctd_tz = "America/Anchorage",
+                                return_stage = "full", # w/ Density inversion check and completeness check
+                                align_pars = list(temperature = -0.5),
+                                ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
+                                cor_var = "conductivity")
+      
+      gapctd_write_rds(x = ctd_typical,
+                       in_path = cnv_files[II],
+                       out_path = rds_filenames_typical[II],
+                       gapctd_method = "Typical")
+    }
+    
   }
+  
+  # Make metadata file
+  gapctd:::make_metadata_file(rds_dir_path = here::here("output", processing_method),
+                              in_pattern = "_typical.rds",
+                              output_path = here::here("metadata", 
+                                                       paste0("CTD_HAUL_DATA_", 
+                                                              unique(haul_df$vessel), "_", 
+                                                              paste(unique(haul_df$cruise), 
+                                                                    collapse = "_"), ".rds")))
+  
+  # Move 'bad' files to bad_cnv
+  move_bad_rds(rds_dir_path = here::here("data", "split"),
+               in_pattern = "split.rds")
+  
+  # Move 'bad' files to bad_cnv
+  move_bad_rds(rds_dir_path = here::here("output", processing_method),
+               in_pattern = c("typical.rds", "typical_ctm.rds", "tsa.rds", "spd.rds"))
+  
 }
 
 
@@ -434,7 +563,7 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
 #' @param vessel Vessel code as a 1L numeric vector.
 #' @param cruise Cruise code as a numeric vector (can include more than one).
 #' @param out_path Optional. Filepath for the output R data file (.rds).
-#' @param tzone Time zone for events and star_time.
+#' @param tzone Time zone for events and start_time in racebase/race_data tables.
 #' @return Returns a data.frame containing haul data. Also saves haul data to an rds file.
 
 get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "America/Anchorage") {

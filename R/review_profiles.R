@@ -1,3 +1,106 @@
+#' Select best processing method (R workflow)
+#' 
+#' Simultaneously review multiple temperature, salinity, and density profiles from downcasts and upcasts that were contained in .rds files that were processed using different methods (e.g., Typical, Typical CTM, TSA, SPD) then select the best profile. Renames the rds file with the best profile by replacing the method with the suffix ("_best.rds"). Run after wrapper_run_gapctd().
+#' 
+#' @param rds_dir_path Filepath to directory containing .rds files.
+#' @export
+
+select_best_method <- function(rds_dir_path) {
+  
+  rds_path <- list.files(rds_dir_path, full.names = TRUE)
+  
+  rds_filename <- list.files(rds_dir_path, 
+                             pattern = "_typical.rds")
+  
+  deployment_id <- unique(
+    gsub(x = rds_filename,
+         pattern = "_typical.rds",
+         replacement = ""))
+  
+  for(II in 1:length(deployment_id)) {
+    
+    deployment_files <- rds_path[grep(x = rds_path, pattern = deployment_id[II])]
+    
+    if(any(grepl(pattern = "_best.rds", x = deployment_files))) {
+      message("select_best_method: Skpping deployment ", 
+              deployment_id[II], 
+              " because best method file (ending in _best.rds) already exists.")
+      next
+    }
+    
+    message("select_best_method: Retrieving data from deployment ", deployment_id[II], ".")
+    
+    deployment_df <- data.frame()
+    
+    for(JJ in 1:length(deployment_files)) {
+      sel_dat <- readRDS(file = deployment_files[JJ])
+      
+      if("downcast" %in% names(sel_dat)) {
+        deployment_df <- deployment_df |>
+          dplyr::bind_rows(
+            as.data.frame(sel_dat$downcast@data) |>
+              dplyr::mutate(cast_direction = sel_dat$downcast@metadata$cast_direction,
+                            gapctd_method = sel_dat$downcast@metadata$gapctd_method)
+          )
+      }
+      
+      if("upcast" %in% names(sel_dat)) {
+        deployment_df <- deployment_df |>
+          dplyr::bind_rows(
+            as.data.frame(sel_dat$upcast@data) |>
+              dplyr::mutate(cast_direction = sel_dat$upcast@metadata$cast_direction,
+                            gapctd_method = sel_dat$upcast@metadata$gapctd_method)
+          )
+      }
+    }
+    
+    # Make an interactive plot of variables to review
+    print(
+      plotly::ggplotly(
+        ggplot() +
+          geom_path(data =
+                      tidyr::pivot_longer(data = deployment_df,
+                                          cols = c("salinity", "temperature", "density")),
+                    aes(x = value,
+                        y = depth,
+                        linetype = cast_direction,
+                        color = factor(gapctd_method, 
+                                       levels = c("Typical", "Typical CTM", "TSA", "SPD"),
+                                       labels = c("(1) Typical", "(2) Typical CTM", "(3) T-S Area", "(4) S Path Dist")))) +
+          scale_color_manual(name = "",
+                             values = c("(1) Typical" = "#E69F00", 
+                                        "(2) Typical CTM" = "#56B4E9", 
+                                        "(3) T-S Area" = "#009E73", 
+                                        "(4) S Path Dist" = "#0072B2")) +
+          scale_linetype_manual(name = "",
+                                values = c("downcast" = 1, "upcast" = 2)) +
+          scale_y_reverse(name = "Depth (m)") +
+          scale_x_continuous(name = "Value") +
+          facet_grid(~factor(name, levels = c("temperature", "salinity", "density")), 
+                     scales = "free_x") +
+          theme_bw() +
+          theme(legend.title = element_blank())
+      )
+    )
+    
+    # Prompt user to select the best method
+    response <- gapctd:::accept_response(valid_responses = c(1,2,3,4),
+                                         prompt = "Select the best processing method (1 = Typical, 2 = Typical CTM, 3 = T-S Area, 4 = S Path Dist): ")
+    
+    # Clear last plot
+    dev.off()
+    
+    best_suffix <- c("_typical.rds", "_typical_ctm.rds", "_tsa.rds", "_spd.rds")[as.numeric(response)]
+    
+    #  Rename best file
+    best_file <- deployment_files[grepl(pattern = best_suffix, x = deployment_files)]
+    file.rename(from = best_file, to = gsub(pattern = best_suffix, replacement = "_best.rds", x = best_file))
+    
+  }
+}
+
+
+
 #' Visually inspect profiles (R workflow)
 #' 
 #' Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
@@ -17,39 +120,11 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
                                replacement = "_final.rds", 
                                x = rds_short))
   
-  dc_files <- here::here(rds_dir_path, 
-                         gsub(pattern = in_pattern, 
-                              replacement = "_dc_final.rds", 
-                              x = rds_short))
-  
-  uc_files <- here::here(rds_dir_path, 
-                         gsub(pattern = in_pattern, 
-                              replacement = "_uc_final.rds", 
-                              x = rds_short))
-  
-  dc_files2 <- gsub(pattern = "_uc", replacement = "_dc", x = uc_files)
-  uc_files2 <- gsub(pattern = "_dc", replacement = "_uc", x = dc_files)
-  
   for(ii in 1:length(rds_files)) {
-    
-    output_exists <- any(file.exists(out_files[ii], dc_files[ii], uc_files[ii], dc_files2[ii], uc_files2[ii]))
-    
-    if(!output_exists) {
       
+    if(!file.exists(out_files[ii])) {
       message("review_profiles: Reviewing ", rds_files[ii])
       ctd_dat <- readRDS(file = rds_files[ii])
-      
-      if(file.exists(dc_files[ii])) {
-        message("reviewing_profiles: Downcast file exists. Only reviewing upcast.")
-        dc_index <- which(names(ctd_dat) == c("downcast"))
-        ctd_dat <- ifelse(length(dc_index) == 1, ctd_dat[-dc_index], ctd_dat)
-      }
-      
-      if(file.exists(uc_files[ii])) {
-        message("reviewing_profiles: Upcast file exists. Only reviewing downcast.")
-        uc_index <- which(names(ctd_dat) == c("upcast"))
-        ctd_dat <- ifelse(length(uc_index) == 1, ctd_dat[-uc_index], ctd_dat)
-      }
       
       n_casts <- sum(names(ctd_dat) %in% c("downcast", "upcast"))
       
@@ -100,7 +175,6 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
                                              prompt = "Accept none (0) or downcast (d)?: ")
         keep_dc <- response == "d"
         remove_rds <- !keep_dc
-        
       }
       
       if("upcast" %in% names(ctd_dat)  & !("downcast" %in% names(ctd_dat))) {
@@ -124,24 +198,21 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       # Keep only an upcast or a downcast
       if(!(keep_dc == keep_uc)) {
         if(keep_dc & !keep_uc) {
-          saveRDS(ctd_dat[which(names(ctd_dat) %in% c("downcast", "bottom"))], 
-                  gsub(pattern = "_final.rds", replacement = "_dc_final.rds",  x = out_files[ii]))
-        } 
-        
+          saveRDS(object = ctd_dat[which(names(ctd_dat) %in% c("downcast", "bottom"))],
+                  file = out_files[ii])
+        }
+
         if(!keep_dc & keep_uc) {
-          saveRDS(ctd_dat[which(names(ctd_dat) %in% c("upcast", "bottom"))], 
-                  gsub(pattern = "_final.rds", replacement = "_uc_final.rds",  x = out_files[ii]))
-          
-        } 
+          saveRDS(object = ctd_dat[which(names(ctd_dat) %in% c("upcast", "bottom"))],
+                  file = out_files[ii])
+        }
       }
       
     } else {
       
-      file_vec <- c(out_files[ii], dc_files[ii], uc_files[ii], dc_files2[ii], uc_files2[ii])
-      
       message("review_profiles: Skipping ", 
               rds_files[ii], 
-              " because a final profile already exists for the deployment (", file_vec[which(file.exists(file_vec))],
+              " because a final profile already exists for the deployment (", out_files[ii],
               ").")
     }
   } 

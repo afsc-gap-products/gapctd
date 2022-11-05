@@ -21,7 +21,7 @@ get_haul_data(
 
 \item{out_path}{Optional. Filepath for the output R data file (.rds).}
 
-\item{tzone}{Time zone for events and star_time.}
+\item{tzone}{Time zone for events and start_time in racebase/race_data tables.}
 }
 \value{
 Returns a data.frame containing haul data. Also saves haul data to an rds file.

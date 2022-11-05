@@ -6,7 +6,7 @@
 \usage{
 move_bad_rds(
   rds_dir_path = here::here("output", "gapctd"),
-  in_pattern = "_full.rds"
+  in_pattern = "_typical.rds"
 )
 }
 \arguments{
@@ -18,5 +18,5 @@ move_bad_rds(
 Bad files moved to /bad_cnv/
 }
 \description{
-Remove deployment rds files that contain bottom, upcast, and/or bottom oce objects based on QA/QC flags.
+Remove deployment rds files that contain bottom, upcast, and/or bottom ctd objects based on QA/QC flags.
 }

@@ -211,50 +211,38 @@ qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
 #' Visually inspect and interpolate errors. See documentation for gapctd:::qc_flag_interpolate()
 #' 
 #' @param rds_dir_path Filepath to directory containing rds files to be reviewed.
-#' @param output_path Optional. Filepath to output directory. If not provided, files are written to the rds_dir_path directory.
-#' @param append_char Characters to append to output file name.
+#' @param in_pattern Character vector search pattern for input files.
+#' @param append_pattern Characters to append to output file name.
 #' @param review Passed to qc_flag_interpolate(). Variable to review ("density", "temperature" or "salinity"). Default = "density"
+#' @param bin_var Name of variable that was used to bin data ("depth" or "pressure").
 #' @return rds files with flagged conductivity and temperature removed and interpolated; derived quantities recalculated.
 #' @export
 
-wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd"),
-                                     output_dir_path = NULL,
-                                     append_char = "_qc",
-                                     review = "density",
+wrapper_flag_interpolate <- function(rds_dir_path,
+                                     in_pattern = NULL,
+                                     append_pattern = NULL,
+                                     review = c("density", "salinity"),
                                      bin_var = "depth") {
   
-  output_dir_path <- ifelse(is.null(output_dir_path), rds_dir_path, output_dir_path)
+  if(is.null(in_pattern)) {
+    in_pattern <- "_best.rds"
+  }
   
-  rds_files <- list.files(rds_dir_path, pattern = "_full.rds", full.names = TRUE)
-  rds_short <- list.files(rds_dir_path, pattern = "_full.rds", full.names = FALSE)
-  output_files <- here::here(output_dir_path,  gsub(pattern = "_full.rds", 
-                                                replacement = paste0(append_char, ".rds"), 
-                                                x = rds_short))
+  if(is.null(append_pattern)) {
+    append_pattern <- "_qc.rds"
+  }
   
-  dc_files <- here::here(output_dir_path,  
-                         gsub(pattern = "_full.rds", 
-                              replacement = "_dc_final.rds", 
-                              x = rds_short))
-  uc_files <- here::here(output_dir_path,  
-                         gsub(pattern = "_full.rds", 
-                              replacement = "_uc_final.rds", 
-                              x = rds_short))
-
+  rds_files <- list.files(rds_dir_path, pattern = in_pattern, full.names = TRUE)
+  rds_short <- list.files(rds_dir_path, pattern = in_pattern, full.names = FALSE)
+  output_files <- here::here(rds_dir_path,  gsub(pattern = in_pattern, 
+                                                 replacement = append_pattern, 
+                                                 x = rds_short))
+  
   for(JJ in 1:length(rds_files)) {
     if(!file.exists(output_files[JJ])) {
       
       # Load CTD data
       ctd_dat <- readRDS(file = rds_files[JJ])
-      
-      if(file.exists(dc_files[JJ])) {
-        message("Skipping downcast from", rds_short[JJ])
-        ctd_dat <- ctd_dat[-which(names(ctd_dat) == c("downcast"))]
-      }
-      
-      if(file.exists(uc_files[JJ])) {
-        message("Skipping downcast from", rds_short[JJ])
-        ctd_dat <- ctd_dat[-which(names(ctd_dat) == "upcast")]
-      }
       
       if(!any(c("upcast", "downcast") %in% names(ctd_dat))) {
         message(paste0("skipping ", rds_short[JJ]))
@@ -264,7 +252,7 @@ wrapper_flag_interpolate <- function(rds_dir_path = here::here("output", "gapctd
       message(paste0("Processing ", rds_short[JJ]))
       
       if("downcast" %in% names(ctd_dat)) {
-          ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review, bin_var = bin_var)
+        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review, bin_var = bin_var)
       }
       
       if("upcast" %in% names(ctd_dat)) {

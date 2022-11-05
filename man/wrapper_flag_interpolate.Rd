@@ -5,21 +5,23 @@
 \title{Wrapper for qc_flag_interpolate (R workflow)}
 \usage{
 wrapper_flag_interpolate(
-  rds_dir_path = here::here("output", "gapctd"),
-  output_dir_path = NULL,
-  append_char = "_qc",
-  review = "density",
+  rds_dir_path,
+  in_pattern = NULL,
+  append_pattern = NULL,
+  review = c("density", "salinity"),
   bin_var = "depth"
 )
 }
 \arguments{
 \item{rds_dir_path}{Filepath to directory containing rds files to be reviewed.}
 
-\item{append_char}{Characters to append to output file name.}
+\item{in_pattern}{Character vector search pattern for input files.}
+
+\item{append_pattern}{Characters to append to output file name.}
 
 \item{review}{Passed to qc_flag_interpolate(). Variable to review ("density", "temperature" or "salinity"). Default = "density"}
 
-\item{output_path}{Optional. Filepath to output directory. If not provided, files are written to the rds_dir_path directory.}
+\item{bin_var}{Name of variable that was used to bin data ("depth" or "pressure").}
 }
 \value{
 rds files with flagged conductivity and temperature removed and interpolated; derived quantities recalculated.

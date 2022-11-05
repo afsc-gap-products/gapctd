@@ -7,24 +7,17 @@
 wrapper_run_gapctd(
   cnv_dir_path = here::here("cnv"),
   processing_method,
-  return_stage = "full",
-  gapctd_round = 1,
   haul_df = NULL,
   vessel = NULL,
   cruise = NULL,
   channel = NULL,
-  ctm_pars = NULL,
-  align_pars = NULL
+  racebase_tzone = "America/Anchorage"
 )
 }
 \arguments{
 \item{cnv_dir_path}{Path to directory containing cnv files to be processed.}
 
 \item{processing_method}{Name of processing method; for saving output.}
-
-\item{return_stage}{Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full")}
-
-\item{gapctd_round}{Processing round (1 = typical settings, 2 = optimize CTM w/ T-S area or S path distance.}
 
 \item{haul_df}{Optional. data.frame containing  haul data from RACEBASE. Must provide arguments for vessel and cruise if not provided.}
 
@@ -34,9 +27,7 @@ wrapper_run_gapctd(
 
 \item{channel}{Optional. RODBC channel; only used when haul_df = NULL.}
 
-\item{ctm_pars}{Optional. Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.}
-
-\item{align_pars}{Optional. A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)}
+\item{tzone}{Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()}
 }
 \value{
 Writes rds files with cast data to /output/[processing_method]
