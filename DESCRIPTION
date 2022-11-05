@@ -23,7 +23,8 @@ Depends: R(>= 4.1),
          bbmle, 
          sf,
          purrr,
-         tibble
+         tibble,
+         plotly
 Imports: RODBC,
          getPass,
          RNetCDF,
