@@ -97,10 +97,10 @@ hex_to_cnv <- function(hex_path,
   )
   
   # Split list based on hex index
-  values_int <- lines_tbl %>%
-    dplyr::select(scan, lines_raw) %>% 
-    tidyr::unnest(lines_raw) %>% 
-    dplyr::group_by(scan) %>% 
+  values_int <- lines_tbl |>
+    dplyr::select(scan, lines_raw) |> 
+    tidyr::unnest(lines_raw) |> 
+    dplyr::group_by(scan) |> 
     dplyr::summarise(gapctd:::hex_extract_raw_uint_tbl(lines_raw, cols = cols))
   
   

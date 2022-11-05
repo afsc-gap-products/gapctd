@@ -4,11 +4,12 @@
 #' 
 #' @param processing_method "gapctd"
 #' @param ctd_dir Filepath to directory with .hex and .xmlcon files
+#' @param use_sbedp_to_convert Logical. Should hex files be converted using SBE Data Processing software (TRUE) or gapctd's hexadecimal conversion functions (FALSE). Conversion with SBEDP is faster but requires that the software is installed.
 #' @param bat_file Optional. Filepath to a batch (.bat) file for batch processign using SBE data processing.
 #' @return Files to working directory.
 #' @noRd
 
-setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_file = NULL) {
+setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sbedp_to_convert = TRUE, bat_file = NULL) {
   
   storage_directory <- here::here("output", processing_method)
   
@@ -79,6 +80,10 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
     dir.create("data")
   }
   
+  if(!dir.exists(here::here("data", "split"))) {
+    dir.create(here::here("data", "split"))
+  }
+  
   if(!dir.exists("psa_xmlcon")) {
     dir.create("psa_xmlcon")
   }
@@ -141,9 +146,34 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, bat_fi
     }
   }
   
-  xmlcon_local <- list.files(path = "./psa_xmlcon", pattern = "xmlcon")
-  
-  message("setup_gapctd_directory: Starting sbebatch")
-  system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_local))
+  if(use_sbedp_to_convert) {
+    xmlcon_local <- list.files(path = "./psa_xmlcon", pattern = "xmlcon")
+    
+    message("setup_gapctd_directory: Starting sbebatch")
+    system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_local))
+  } else {
+    
+    hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
+    cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
+    cnv_output <- gsub(x = cnv_output, pattern = "/data/", replacement = "/cnv/")
+    
+    for(II in 1:length(hex_files)) {
+      message("setup_gapctd_directory: Converting ", hex_files[II])
+      hex_to_cnv(hex_path = hex_files[II], 
+                 output_path = cnv_output[II], 
+                 sample_interval = 0.25,
+                 output_channels = c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
+                                     "temperature" = "tv290C: Temperature [ITS-90, deg C]",
+                                     "pressure" = "prdM: Pressure, Strain Gauge [db]",
+                                     "conductivity" = "c0S/m: Conductivity [S/m]", 
+                                     "flag" = "flag:  0.000e+00"),
+                 output_sig_digits = c("time_elapsed" = 3,
+                                       "temperature" = 4,
+                                       "pressure" = 3,
+                                       "conductivity" = 6, 
+                                       "flag" = 1))
+    }
+    
+  }
   
 }
