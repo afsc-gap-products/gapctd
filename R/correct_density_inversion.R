@@ -9,6 +9,39 @@
 
 check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "bv", correct_inversion = TRUE) {
   
+  interp_flags <- function(x_oce, bin_var) {
+    
+    if(sum(x_oce@data$flag < 0) > 0) {
+      
+      if(bin_var == "depth") {
+        x_input <- x_oce@data$depth
+      } else if(bin_var == "pressure") {
+        x_input <- x_oce@data$pressure
+      }
+      
+      flag_index <- which(x_oce@data$flag < 0)
+      x_oce@data$temperature[flag_index] <- oce::oce.approx(x = x_oce@data$depth[-flag_index], 
+                                                            y = x_oce@data$temperature[-flag_index], 
+                                                            xout = x_oce@data$depth[flag_index], 
+                                                            method = "unesco")
+      x_oce@data$conductivity[flag_index] <- oce::oce.approx(x = x_oce@data$depth[-flag_index], 
+                                                             y = x_oce@data$conductivity[-flag_index], 
+                                                             xout = x_oce@data$depth[flag_index], 
+                                                             method = "unesco")
+      x_oce <- x_oce |> gapctd:::derive_eos()
+      
+      if(bin_var == "depth") {
+        x_oce@data$depth <- x_input
+      } else if(bin_var == "pressure") {
+        x_oce@data$pressure <- x_input
+      }
+      
+      x_oce@data$flag[flag_index] <- 6
+    }
+    
+    return(x_oce)
+  }
+  
   if(is.null(x)) {
     return(NULL)
   }
@@ -52,17 +85,19 @@ check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "b
     
     if(correct_inversion & length(flags) > 0) {
       
-      x@data$temperature[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
-                                                   y = x@data$temperature[-flags], 
-                                                   xout = x@data$depth[flags], 
-                                                   method = "unesco")
-      x@data$conductivity[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
-                                                    y = x@data$conductivity[-flags], 
-                                                    xout = x@data$depth[flags], 
-                                                    method = "unesco")
+      interp_flags(x_oce = x, bin_var = "depth")
+      
+      # x@data$temperature[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
+      #                                              y = x@data$temperature[-flags], 
+      #                                              xout = x@data$depth[flags], 
+      #                                              method = "unesco")
+      # x@data$conductivity[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
+      #                                               y = x@data$conductivity[-flags], 
+      #                                               xout = x@data$depth[flags], 
+      #                                               method = "unesco")
       
       # Re-calculate N2
-      x <- gapctd:::derive_eos(x = x)
+      # x <- gapctd:::derive_eos(x = x)
       
       # Re-flag
       flag_density <- switch(threshold_method,
