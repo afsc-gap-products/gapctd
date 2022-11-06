@@ -24,11 +24,11 @@ optim_ctm_pars <- function(dc = NULL,
   
   both_casts <- !any(is.null(dc), is.null(uc))
   
-  start_pars <- expand_grid(start_alpha_C = start_alpha_C,
-                            start_beta_C = start_beta_C,
-                            obj = 1e7,
-                            obj_down = 1e7,
-                            obj_up = 1e7)
+  start_pars <- tidyr::expand_grid(start_alpha_C = start_alpha_C,
+                                   start_beta_C = start_beta_C,
+                                   obj = 1e7,
+                                   obj_down = 1e7,
+                                   obj_up = 1e7)
   
   # Find good starting values
   for(kk in 1:nrow(start_pars)) {

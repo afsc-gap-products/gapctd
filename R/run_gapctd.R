@@ -20,7 +20,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                channel = NULL,
                                racebase_tzone = "America/Anchorage") {
   
-  # Function to write CTD data to output files if the outputs contain data
+  # Internal function to write CTD data to output files if the outputs contain data
   gapctd_write_rds <- function(x, out_path, in_path, gapctd_method) {
     if(is.null(x)) {
       message("wrapper_run_gapctd: No data in ", in_path, ". Removing cast.")
@@ -91,10 +91,10 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                            replacement = "typical.rds", 
                                            x = cnv_short))
   rds_filenames_best <- here::here("output", 
-                                    processing_method, 
-                                    gsub(pattern = "raw.cnv", 
-                                         replacement = "best.rds", 
-                                         x = cnv_short))
+                                   processing_method, 
+                                   gsub(pattern = "raw.cnv", 
+                                        replacement = "best.rds", 
+                                        x = cnv_short))
   
   rds_filenames_final <- here::here("output", 
                                     processing_method, 
@@ -130,10 +130,10 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     
     
     # Create files with just upcasts or downcast
-    ctd_split <- run_gapctd(x = ctd_dat, 
-                            haul_df = haul_df, 
-                            ctd_tz = "America/Anchorage",
-                            return_stage = "split")
+    ctd_split <- gapctd::run_gapctd(x = ctd_dat, 
+                                    haul_df = haul_df, 
+                                    ctd_tz = "America/Anchorage",
+                                    return_stage = "split")
     
     gapctd_write_rds(x = ctd_split,
                      in_path = cnv_files[II],
@@ -142,12 +142,12 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     
     # TSA: Estimate temperature alignment and CTM parameters (optimization using area betwween T-S curves)
     if(all(c("downcast", "upcast") %in% names(ctd_split))) {
-      ctd_tsa <- run_gapctd(x = ctd_dat, 
-                            haul_df = haul_df, 
-                            ctd_tz = "America/Anchorage",
-                            return_stage = "full", # w/ Density inversion check and completeness check
-                            align_pars = list(),
-                            ctm_pars = list())
+      ctd_tsa <- gapctd::run_gapctd(x = ctd_dat, 
+                                    haul_df = haul_df, 
+                                    ctd_tz = "America/Anchorage",
+                                    return_stage = "full", # w/ Density inversion check and completeness check
+                                    align_pars = list(),
+                                    ctm_pars = list())
       
       gapctd_write_rds(x = ctd_tsa,
                        in_path = cnv_files[II],
@@ -166,12 +166,12 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                                      from = 0,
                                                      to = max(ctd_split$downcast@data$timeS + 0.25, na.rm = TRUE)))
       
-      ctd_downcast_spd <- run_gapctd(x = sel_downcast, 
-                                     haul_df = haul_df, 
-                                     ctd_tz = "America/Anchorage",
-                                     return_stage = "full",
-                                     align_pars = list(),
-                                     ctm_pars = list())
+      ctd_downcast_spd <- gapctd::run_gapctd(x = sel_downcast, 
+                                             haul_df = haul_df, 
+                                             ctd_tz = "America/Anchorage",
+                                             return_stage = "full",
+                                             align_pars = list(),
+                                             ctm_pars = list())
     }
     
     if("upcast" %in% names(ctd_split)) {
@@ -181,12 +181,12 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                                    from = min(ctd_split$upcast@data$timeS - 0.25, na.rm = TRUE),
                                                    to = 5e6))
       
-      ctd_upcast_spd <- run_gapctd(x = sel_upcast, 
-                                   haul_df = haul_df, 
-                                   ctd_tz = "America/Anchorage",
-                                   return_stage = "full", 
-                                   align_pars = list(),
-                                   ctm_pars = list())
+      ctd_upcast_spd <- gapctd::run_gapctd(x = sel_upcast, 
+                                           haul_df = haul_df, 
+                                           ctd_tz = "America/Anchorage",
+                                           return_stage = "full", 
+                                           align_pars = list(),
+                                           ctm_pars = list())
     }
     
     if(all("downcast" %in% names(ctd_downcast_spd), "upcast" %in% names(ctd_upcast_spd))) {
@@ -211,12 +211,12 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     
     if(any(c("downcast", "upcast") %in% names(ctd_split))) {
       # Typical CTM: Estimate temperature alignment, use manufacturer-recommended CTM parameters
-      ctd_typical_ctm <- run_gapctd(x = ctd_dat, 
-                                    haul_df = haul_df, 
-                                    ctd_tz = "America/Anchorage",
-                                    return_stage = "full", # w/ Density inversion check and completeness check
-                                    align_pars = list(),
-                                    ctm_pars = list(alpha_C = 0.04, beta_C = 1/8))
+      ctd_typical_ctm <- gapctd::run_gapctd(x = ctd_dat, 
+                                            haul_df = haul_df, 
+                                            ctd_tz = "America/Anchorage",
+                                            return_stage = "full", # w/ Density inversion check and completeness check
+                                            align_pars = list(),
+                                            ctm_pars = list(alpha_C = 0.04, beta_C = 1/8))
       
       gapctd_write_rds(x = ctd_typical_ctm,
                        in_path = cnv_files[II],
@@ -224,13 +224,13 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                        gapctd_method = "Typical CTM")
       
       # Typical: Manufacturer-recommended alignment and CTM parameters
-      ctd_typical <- run_gapctd(x = ctd_dat, 
-                                haul_df = haul_df, 
-                                ctd_tz = "America/Anchorage",
-                                return_stage = "full", # w/ Density inversion check and completeness check
-                                align_pars = list(temperature = -0.5),
-                                ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
-                                cor_var = "conductivity")
+      ctd_typical <- gapctd::run_gapctd(x = ctd_dat, 
+                                        haul_df = haul_df, 
+                                        ctd_tz = "America/Anchorage",
+                                        return_stage = "full", # w/ Density inversion check and completeness check
+                                        align_pars = list(temperature = -0.5),
+                                        ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
+                                        cor_var = "conductivity")
       
       gapctd_write_rds(x = ctd_typical,
                        in_path = cnv_files[II],
