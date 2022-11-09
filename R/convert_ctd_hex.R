@@ -134,11 +134,11 @@ hex_to_cnv <- function(hex_path,
       cal_par_list[[cal_par_names[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header, cal_par = cal_par_names[ii])
   }
   
+  # Check that necessary calibration parameters were in the hex file header if no .xmlcon file was provided
   if(is.null(xmlcon_path)) {
     if(any(is.na(cal_par_list))) {
-      
+      stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], sep = ", "), "not found in ", hex_path)) 
     }
-    stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], sep = ", "), "not found in ", hex_path)) 
   }
   
   temperature  <- gapctd:::integer_to_temperature(
