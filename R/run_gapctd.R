@@ -21,7 +21,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                racebase_tzone = "America/Anchorage") {
   
   # Internal function to write CTD data to output files if the outputs contain data
-  gapctd_write_rds <- function(x, out_path, in_path, gapctd_method) {
+  gapctd_write_rds <- function(x, out_path, in_path, gapctd_method, exclude_bottom = FALSE) {
     if(is.null(x)) {
       message("wrapper_run_gapctd: No data in ", in_path, ". Removing cast.")
       file.remove(in_path)
@@ -36,6 +36,10 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       
       if(length(null_vec) > 0) {
         x <- x[null_vec]
+      }
+      
+      if(exclude_bottom & ("bottom" %in% names(x))) {
+        x <- x[-which(names(x) == "bottom")]
       }
       
       for(HH in 1:length(x)) {
@@ -138,9 +142,11 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     gapctd_write_rds(x = ctd_split,
                      in_path = cnv_files[II],
                      out_path = rds_filenames_split[II],
-                     gapctd_method = NA)
+                     gapctd_method = NA,
+                     exclude_bottom = FALSE)
     
-    # TSA: Estimate temperature alignment and CTM parameters (optimization using area betwween T-S curves)
+    
+    # TSA: Estimate temperature alignment and CTM parameters (optimization using area between T-S curves)
     if(all(c("downcast", "upcast") %in% names(ctd_split))) {
       ctd_tsa <- gapctd::run_gapctd(x = ctd_dat, 
                                     haul_df = haul_df, 
@@ -152,7 +158,15 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       gapctd_write_rds(x = ctd_tsa,
                        in_path = cnv_files[II],
                        out_path = rds_filenames_tsa[II],
-                       gapctd_method = "TSA")
+                       gapctd_method = "TSA",
+                       exclude_bottom = TRUE)
+      
+      spd_pars_dc <- ctd_tsa$downcast@metadata$ctm$downcast
+      spd_pars_uc <- ctd_tsa$upcast@metadata$ctm$upcast
+      
+    } else {
+      spd_pars_dc <- list()
+      spd_pars_uc <- list()
     }
     
     # SPD: Estimate temperature alignment and CTM parameters (optimization using S path distance)
@@ -171,7 +185,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                              ctd_tz = "America/Anchorage",
                                              return_stage = "full",
                                              align_pars = list(),
-                                             ctm_pars = list())
+                                             ctm_pars = spd_pars_dc)
     }
     
     if("upcast" %in% names(ctd_split)) {
@@ -186,7 +200,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                            ctd_tz = "America/Anchorage",
                                            return_stage = "full", 
                                            align_pars = list(),
-                                           ctm_pars = list())
+                                           ctm_pars = spd_pars_uc)
     }
     
     if(all("downcast" %in% names(ctd_downcast_spd), "upcast" %in% names(ctd_upcast_spd))) {
@@ -206,7 +220,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     gapctd_write_rds(x = ctd_spd,
                      in_path = cnv_files[II],
                      out_path = rds_filenames_spd[II],
-                     gapctd_method = "SPD")
+                     gapctd_method = "SPD",
+                     exclude_bottom = TRUE)
     
     
     if(any(c("downcast", "upcast") %in% names(ctd_split))) {
@@ -221,7 +236,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       gapctd_write_rds(x = ctd_typical_ctm,
                        in_path = cnv_files[II],
                        out_path = rds_filenames_typical_ctm[II],
-                       gapctd_method = "Typical CTM")
+                       gapctd_method = "Typical CTM",
+                       exclude_bottom = TRUE)
       
       # Typical: Manufacturer-recommended alignment and CTM parameters
       ctd_typical <- gapctd::run_gapctd(x = ctd_dat, 
@@ -235,7 +251,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       gapctd_write_rds(x = ctd_typical,
                        in_path = cnv_files[II],
                        out_path = rds_filenames_typical[II],
-                       gapctd_method = "Typical")
+                       gapctd_method = "Typical",
+                       exclude_bottom = FALSE)
     }
     
   }
