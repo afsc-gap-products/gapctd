@@ -69,7 +69,7 @@ optim_ctm_pars <- function(dc = NULL,
                               upper = c(alpha_C = 1, beta_C = 10),
                               control = list(reltol = 1e-4, 
                                              trace = 1,
-                                             parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_down]), # Estimate parameter scaling for optimization
+                                             parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_both]), # Estimate parameter scaling for optimization
                                                           beta_C = 0.1))),
                   silent = TRUE)
   
@@ -99,7 +99,7 @@ optim_ctm_pars <- function(dc = NULL,
                                  upper = c(alpha_C = 1, beta_C = 10),
                                  control = list(reltol = 1e-4, 
                                                 trace = 1,
-                                                parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_down]),  # Estimate parameter scaling for optimization
+                                                parscale = c(alpha_C = 10^log10(start_pars$start_alpha_C[start_index_up]),  # Estimate parameter scaling for optimization
                                                              beta_C = 0.1))),
                      silent = TRUE)
   
