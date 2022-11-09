@@ -191,7 +191,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     
     if(all("downcast" %in% names(ctd_downcast_spd), "upcast" %in% names(ctd_upcast_spd))) {
       ctd_spd <- list(downcast = ctd_downcast_spd[['downcast']],
-                      upcast = ctd_downcast_spd[['upcast']])
+                      upcast = ctd_upcast_spd[['upcast']])
     } 
     
     if(("downcast" %in% names(ctd_downcast_spd)) & !("upcast" %in% names(ctd_upcast_spd))) {

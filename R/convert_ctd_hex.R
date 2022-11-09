@@ -53,13 +53,15 @@ convert_ctd_hex <- function(ctd_directory_path,
 #' 
 #' @param hex_path Path to a .hex file
 #' @param output_path Path to the output file location for a .cnv file
+#' @param xmlcon_file Optional. Path to config file. Must be provided if .hex file does not contain configuration file parameters.
 #' @param sample_interval Sampling interval for scans; 0.25 for a typical SBE19plus V2 deployment.
 #' @param output_channels Named vector of output channels and their names. Do not change from default unless additional channels of data are added.
 #' @param output_sig_digits Significant digits after the decimal place for output channels. Do not change from default unless additional channels of data are added or sensor precision changes.
 #' @export
 
 hex_to_cnv <- function(hex_path, 
-                       output_path, 
+                       output_path,
+                       xmlcon_path = NULL,
                        sample_interval = 0.25, 
                        output_channels = c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
                                            "temperature" = "tv290C: Temperature [ITS-90, deg C]",
@@ -71,13 +73,31 @@ hex_to_cnv <- function(hex_path,
                                              "pressure" = 3,
                                              "conductivity" = 6, 
                                              "flag" = 1)) {
-  
+
   # Split-up hex file into header and hex data
-  lines_hex <- readr::read_lines(hex_path)
+  lines_hex <- readLines(hex_path)
   end_header <- grep(pattern = "*END*", x = lines_hex)
   last_line <- length(lines_hex)
   lines_header <- lines_hex[1:(end_header-1)]
+  
+  # xmlcon variable names do not match hex file names and must be substituted
+  if(!is.null(xmlcon_path)) {
+    xmlcon_header <- readLines(xmlcon_path)
+    
+    init_var <- c("<A0>", "<A1>", "<A2>", "<A3>", "</A0>", "</A1>", "</A2>", "</A3>", "CPcor", "CTcor")
+    repl_var <- c("<TA0>", "<TA1>", "<TA2>", "<TA3>", "</TA0>", "</TA1>", "</TA2>", "</TA3>", "CPCOR", "CTCOR")
+    
+    for(hh in 1:length(init_var)) {
+      xmlcon_header <- gsub(x = xmlcon_header, pattern = init_var[hh], replacement = repl_var[hh])
+    }
+    
+    lines_header <- c(lines_header, paste("#", xmlcon_header))
+  
+  }
+  
   lines_data <- lines_hex[(end_header+1):(last_line-1)]
+  
+  # Remove invalid lines at the end
   lines_raw <- purrr::map(lines_data, .f = gapctd:::hex_line_to_raw)
   
   # Index of hex values for different channels
@@ -105,12 +125,20 @@ hex_to_cnv <- function(hex_path,
   
   
   # Retrieve calibration coefficients from header
+
   cal_par_names <- c("TA0", "TA1", "TA2", "TA3", "TOFFSET", "G", "H", "I", "J", "CPCOR", "CTCOR", "CSLOPE", "PA0", "PA1", "PA2", "PTEMPA0", "PTEMPA1", "PTEMPA2", "PTCA0", "PTCA1", "PTCA2", "PTCB0", "PTCB1", "PTCB2", "POFFSET")
   
   cal_par_list <- list()
   
   for(ii in 1:length(cal_par_names)) {
-    cal_par_list[[cal_par_names[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header, cal_par = cal_par_names[ii])
+      cal_par_list[[cal_par_names[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header, cal_par = cal_par_names[ii])
+  }
+  
+  if(is.null(xmlcon_path)) {
+    if(any(is.na(cal_par_list))) {
+      
+    }
+    stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], sep = ", "), "not found in ", hex_path)) 
   }
   
   temperature  <- gapctd:::integer_to_temperature(
