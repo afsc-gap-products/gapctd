@@ -63,13 +63,11 @@ gapctd:::setup_gapctd_directory(processing_method = processing_method,
                                 use_sbedp_to_convert = FALSE)
 ```
 
-![](/doc/assets/r_process/1_setup_directory.png) \_\_Left: SBE Data
-Processing converting raw data files after calling the
-setup_gapctd_directory(). Right: Contents of the working directory after
-successfully running setup_gapctd_directory().\_</b>
-</p>
+![](/doc/assets/r_process/1_setup_directory.png)
 
-\_\_
+**Left: SBE Data Processing converting raw data files after calling the
+setup_gapctd_directory(). Right: Contents of the working directory after
+successfully running setup_gapctd_directory().**
 
 ## 4. Run gapctd processing methods on CTD files
 
@@ -106,9 +104,10 @@ deployment and there is no upcast data, there will not be an upcast file
 in the object). The end of the filename denotes which of the four
 processing methods was used for the data.
 
-![](/doc/assets/r_process/5_run_gapctd.png) **Top: Console messages
-while running wrapper_run_gapctd(). Bottom: Contents of the
-/output/gapctd/ directory after successfully running
+![](/doc/assets/r_process/5_run_gapctd.png)
+
+**Top: Console messages while running wrapper_run_gapctd(). Bottom:
+Contents of the /output/gapctd/ directory after successfully running
 wrapper_run_gapctd().**
 
 ## 5. Select best method
@@ -178,9 +177,10 @@ errors.
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![](/doc/assets/r_process/8_flag_interpolate_3.png) **Set 1 plots:
-Pressure versus temperature (left), salinity (center), and density
-(right).**
+![](/doc/assets/r_process/8_flag_interpolate_3.png)
+
+**Set 1 plots: Pressure versus temperature (left), salinity (center),
+and density (right).**
 
 #### Set 2
 
@@ -192,12 +192,14 @@ Pressure versus temperature (left), salinity (center), and density
     pressure will be recalculated.
 4.  Repeat 1-3 until there are no more errors to remove.
 
-![](/doc/assets/r_process/8_flag_interpolate_4.png) **Set 2 plots: Rate
-of change in salinity (left) and salinity (right).**
+![](/doc/assets/r_process/8_flag_interpolate_4.png)
 
-![](/doc/assets/r_process/8_flag_interpolate.png) **Example of selecting
-and interpolating showing set 1 profiles before (top) and after (bottom)
-removing data from the shallowest depth bin.**
+**Set 2 plots: Rate of change in salinity (left) and salinity (right).**
+
+![](/doc/assets/r_process/8_flag_interpolate.png)
+
+**Example of selecting and interpolating showing set 1 profiles before
+(top) and after (bottom) removing data from the shallowest depth bin.**
 
 ## 7. Select profiles to include in data product (first round)
 
@@ -225,14 +227,15 @@ selected, data from the cast will be reprocessed using a different
 approach to conductivity cell thermal mass correction and profiles will
 be reviewed again after processing.
 
-![](/doc/assets/r_process/9_review_profiles.png) **Plots: Downcast (top
-row of profile plots) and upcast (bottom row of profile plots).
-Left-side panels show temperature (red) and salinity (green) versus
-depth. Right-side panel show density anomaly (blue) and buoyancy
-frequency (brown) versus depth. A vertical line on the right panels
-shows the buoyancy frequency threshold below which the density structure
-of the water column could be considered unstable. R Console output: User
-interface for selecting casts.**
+![](/doc/assets/r_process/9_review_profiles.png)
+
+**Plots: Downcast (top row of profile plots) and upcast (bottom row of
+profile plots). Left-side panels show temperature (red) and salinity
+(green) versus depth. Right-side panel show density anomaly (blue) and
+buoyancy frequency (brown) versus depth. A vertical line on the right
+panels shows the buoyancy frequency threshold below which the density
+structure of the water column could be considered unstable. R Console
+output: User interface for selecting casts.**
 
 ## 8. Finalize data
 
@@ -244,8 +247,9 @@ Move all of the accepted profiles from /output/gapctd/ to the
 finalize_data(rds_dir_path = here::here("output", processing_method))
 ```
 
-![](/doc/assets/r_process/13_finalize_data.png) **Final profile data in
-the /final_cnv/ directory.**
+![](/doc/assets/r_process/13_finalize_data.png)
+
+**Final profile data in the /final_cnv/ directory.**
 
 ## 9. Prepare the data product
 

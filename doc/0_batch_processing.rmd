@@ -48,7 +48,8 @@ gapctd:::setup_gapctd_directory(processing_method = processing_method,
 ```
 
 ![](/doc/assets/r_process/1_setup_directory.png)
-__Left: SBE Data Processing converting raw data files after calling the setup_gapctd_directory(). Right: Contents of the working directory after successfully running setup_gapctd_directory()._</b></p>__
+
+__Left: SBE Data Processing converting raw data files after calling the setup_gapctd_directory(). Right: Contents of the working directory after successfully running setup_gapctd_directory().__
 
 
 ## 4. Run gapctd processing methods on CTD files
@@ -71,6 +72,7 @@ In the code above, user-specified conductivity cell thermal mass correction para
 Outputs from `wrapper_run_gapctd` are stored in oce objects that are saved in R data (.rds) files in /output/gapctd/ [(example)](/doc/ctd_data_files.md). The files include three segments for each deployment (downcast, bottom, upcast). Haul metadata are included with each of the segments. If any segment is missing, it will not be included in the file (i.e., if the CTD shut-off during the deployment and there is no upcast data, there will not be an upcast file in the object). The end of the filename denotes which of the four processing methods was used for the data.
 
 ![](/doc/assets/r_process/5_run_gapctd.png)
+
 __Top: Console messages while running wrapper_run_gapctd(). Bottom: Contents of the &#47;output&#47;gapctd&#47; directory after successfully running wrapper_run_gapctd().__
 
 
@@ -116,6 +118,7 @@ _The goal of this step is to flag large transient errors. Pay careful attention 
 4.  Repeat 1-3 until there are no more errors to remove.
 
 ![](/doc/assets/r_process/8_flag_interpolate_3.png)
+
 __Set 1 plots: Pressure versus temperature (left), salinity (center), and density (right).__
 
 #### Set 2
@@ -126,10 +129,12 @@ __Set 1 plots: Pressure versus temperature (left), salinity (center), and densit
 4.  Repeat 1-3 until there are no more errors to remove.
 
 ![](/doc/assets/r_process/8_flag_interpolate_4.png)
+
 __Set 2 plots: Rate of change in salinity (left) and salinity (right).__
 
 
 ![](/doc/assets/r_process/8_flag_interpolate.png)
+
 __Example of selecting and interpolating showing set 1 profiles before (top) and after (bottom) removing data from the shallowest depth bin.__
 
 
@@ -151,6 +156,7 @@ Follow instructions in the console to select profiles to use in the final data p
 
 
 ![](/doc/assets/r_process/9_review_profiles.png)
+
 __Plots: Downcast (top row of profile plots) and upcast (bottom row of profile plots). Left-side panels show temperature (red) and salinity (green) versus depth. Right-side panel show density anomaly (blue) and buoyancy frequency (brown) versus depth. A vertical line on the right panels shows the buoyancy frequency threshold below which the density structure of the water column could be considered unstable. R Console output: User interface for selecting casts.__
 
 
@@ -164,6 +170,7 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 ```
 
 ![](/doc/assets/r_process/13_finalize_data.png)
+
 __Final profile data in the &#47;final_cnv&#47; directory.__
 
 ## 9. Prepare the data product
