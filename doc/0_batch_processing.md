@@ -126,12 +126,10 @@ gapctd::select_best_method(
   rds_dir_path = here::here("output", processing_method))
 ```
 
-![](/doc/assets/r_process/6_select_best_1.png)
-<p align="center">
-<b>Plotly interface for select_best_method() showing data processed
-using four methods (Typical, Typical CTM, Temperature-Salinity Area,
-salinity path distance).</b>
-</p>
+![](/doc/assets/r_process/6_select_best_1.png) *Plotly interface for
+select_best_method() showing data processed using four methods (Typical,
+Typical CTM, Temperature-Salinity Area, salinity path distance).*
+
 ![](/doc/assets/r_process/6_select_best_2.png)
 <p align="center">
 <b>Console prompt for select_best_method() input, where inputs
