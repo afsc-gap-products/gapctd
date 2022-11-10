@@ -71,7 +71,7 @@ In the code above, user-specified conductivity cell thermal mass correction para
 Outputs from `wrapper_run_gapctd` are stored in oce objects that are saved in R data (.rds) files in /output/gapctd/ [(example)](/doc/ctd_data_files.md). The files include three segments for each deployment (downcast, bottom, upcast). Haul metadata are included with each of the segments. If any segment is missing, it will not be included in the file (i.e., if the CTD shut-off during the deployment and there is no upcast data, there will not be an upcast file in the object). The end of the filename denotes which of the four processing methods was used for the data.
 
 ![](/doc/assets/r_process/5_run_gapctd.png)
-<p align = "center"><b>Top: Console messages while running wrapper_run_gapctd(). Bottom: Contents of the &#47;output&#47;gapctd&#47; directory after successfully running wrapper_run_gapctd().</b></p>
+<p align = center><b>Top: Console messages while running wrapper_run_gapctd(). Bottom: Contents of the &#47;output&#47;gapctd&#47; directory after successfully running wrapper_run_gapctd().</b></p>
 
 
 ## 5. Select best method
@@ -84,10 +84,11 @@ gapctd::select_best_method(
 ```
 
 ![](/doc/assets/r_process/6_select_best_1.png)
-<p align = "center"><b>Plotly interface for select_best_method() showing data processed using four methods (Typical, Typical CTM, Temperature-Salinity Area, salinity path distance)</b></p>
+<p align = center><b>Plotly interface for select_best_method() showing data processed using four methods (Typical, Typical CTM, Temperature-Salinity Area, salinity path distance).</b></p>
+  
 
 ![](/doc/assets/r_process/6_select_best_2.png)
-<p align = "center"><b>Console prompt for select_best_method() input, where inputs correspond with method numbers identified on the plot.</b></p>
+<p align = center><b>Console prompt for select_best_method() input, where inputs correspond with method numbers identified on the plot.</b></p>
 
 ## 6. Visually inspect, flag, and interpolate bad data
 
@@ -146,6 +147,7 @@ gapctd:::review_profiles(rds_dir_path = here::here("output", processing_method),
 Data from each deployment are displayed one at a time. If a downcast and upcast are both available, both will be shown simultaneously. If only one cast is available, only the downcast or upcast will be shown. 
 
 Follow instructions in the console to select profiles to use in the final data product: both casts (1), downcast (d), upcast (u), or none (0). If both casts are available from a deployment but none are selected, data from the cast will be reprocessed using a different approach to conductivity cell thermal mass correction and profiles will be reviewed again after processing.
+
 
 ![](/doc/assets/r_process/9_review_profiles.png)
 <p align = "center"><b>Plots: Downcast (top row of profile plots) and upcast (bottom row of profile plots). Left-side panels show temperature (red) and salinity (green) versus depth. Right-side panel show density anomaly (blue) and buoyancy frequency (brown) versus depth. A vertical line on the right panels shows the buoyancy frequency threshold below which the density structure of the water column could be considered unstable. R Console output: User interface for selecting casts.</b></p>
