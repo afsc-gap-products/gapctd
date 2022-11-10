@@ -130,9 +130,9 @@ gapctd::select_best_method(
 four methods (Typical, Typical CTM, Temperature-Salinity Area, salinity
 path distance).**
 
-![](/doc/assets/r_process/6_select_best_2.png) Console prompt for
+![](/doc/assets/r_process/6_select_best_2.png) **Console prompt for
 select_best_method() input, where inputs correspond with method numbers
-identified on the plot.
+identified on the plot.**
 
 ## 6. Visually inspect, flag, and interpolate bad data
 

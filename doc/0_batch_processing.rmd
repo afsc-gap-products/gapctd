@@ -91,7 +91,7 @@ __Plotly interface for select_best_method() showing data processed using four me
   
 
 ![](/doc/assets/r_process/6_select_best_2.png)
-Console prompt for select_best_method() input, where inputs correspond with method numbers identified on the plot.
+__Console prompt for select_best_method() input, where inputs correspond with method numbers identified on the plot.__
 
 ## 6. Visually inspect, flag, and interpolate bad data
 
