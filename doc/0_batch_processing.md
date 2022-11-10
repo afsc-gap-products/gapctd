@@ -47,16 +47,20 @@ The `setup_gapctd_directory` function sets up the working directory for
 processing data from a single CTD, vessel, and cruise. Raw CTD data
 files (.hex) and configuration files (.xmlcon) are copied from the
 source directory, ctd_dir, to the /data/ and /psa_xmlcon/ directories.
-Then, the SBE Data Processing DatCnv module is run using system commands
-to convert .hex files to human-readable decoded CTD data files (.cnv)
-that get saved in the /cnv/ directory.
+If `use_sbedp_to_convert = TRUE`, system commands are executed to run
+SBE Data Processing convert .hex files to human-readable decoded CTD
+data files (.cnv) that get saved in the /cnv/ directory. If
+`use_sbedp_to_convert = FALSE`, files are decoded using
+`gapctd::hex_to_cnv()`. SBEDP is slightly faster than the gapctd method
+but the gapctd method avoids the need to install SBEDP software.
 
 *Note: A new directory/project will need to setup for each
 cruise/vessel/CTD combination.*
 
 ``` r
 gapctd:::setup_gapctd_directory(processing_method = processing_method, 
-                                ctd_dir = ctd_dir)
+                                ctd_dir = ctd_dir,
+                                use_sbedp_to_convert = FALSE)
 ```
 
 ![](/doc/assets/r_process/1_setup_directory.png)
@@ -66,53 +70,23 @@ setup_gapctd_directory(). Right: Contents of the working directory after
 successfully running setup_gapctd_directory().</b>
 </p>
 
-## 4. Retrieve haul data from RACEBASE
-
-The `get_haul_data` function retrieves haul data for a vessel/cruise
-from RACEBASE and writes the haul data to an R data file
-(/output/HAUL_DATA\_\[vessel\]\_\[cruise\].rds).
-
-``` r
-# Establish Oracle connection connection
-channel <- gapctd::get_connected(schema = "AFSC")
-
-# Get haul data from RACEBASE and write to an .rds file in /output/
-haul_df <- gapctd:::get_haul_data(channel = channel,
-                                  vessel = vessel,
-                                  cruise = cruise,
-                                  tzone = "America/Anchorage")
-
-# Load haul data
-haul_df <- readRDS(file = here::here("output", 
-                                     paste0("HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
-```
-
-The tzone = “America/Anchorage” argument specifies the timezone to use
-for haul event times in RACEBASE that are stored in UTC.
-
-![](/doc/assets/r_process/4_get_haul_data.png)
-<p align="center">
-<b>Contents of the /output/ directory after running get_haul_data(),
-showing the haul data file (HAUL_DATA_94_202101_202102.rds).</b>
-</p>
-
-## 5. Run gapctd processing methods on CTD files
+## 4. Run gapctd processing methods on CTD files
 
 The `wrapper_run_gapctd` function runs the `run_gapctd` function on each
 CTD file in the working directory. The `run_gapctd` function processes
 data from a single CTD data file (.cnv) using the [processing
-steps](/doc/batch_processing_steps.md) we have found works best for our
-deployments across bottom trawl survey regions.
+steps](/doc/batch_processing_steps.md).
 
-*Note: wrapper_run_gapctd takes 8+ hours to run for a full
-vessel/cruise.*
+*Note: wrapper_run_gapctd takes 8+ hours to run for a full vessel/cruise
+on a typical NOAA laptop.*
 
 ``` r
 # Run data processing algorithm on files. Write .rds
 gapctd:::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"), # Path to decoded CTD data (.cnv) files
                             processing_method = processing_method, # Processing method
-                            haul_df = haul_df,  # Haul data from step 4
-                            ctm_pars = list(alpha_C = 0.04, beta_C = 1/8)) # Default CTM parameters
+                            vessel = vessel,
+                            cruise = cruise,
+                            channel = NULL)
 ```
 
 In the code above, user-specified conductivity cell thermal mass
@@ -128,7 +102,8 @@ for each deployment (downcast, bottom, upcast). Haul metadata are
 included with each of the segments. If any segment is missing, it will
 not be included in the file (i.e., if the CTD shut-off during the
 deployment and there is no upcast data, there will not be an upcast file
-in the object).
+in the object). The end of the filename denotes which of the four
+processing methods was used for the data.
 
 ![](/doc/assets/r_process/5_run_gapctd.png)
 <p align="center">
@@ -137,50 +112,33 @@ Contents of the /output/gapctd/ directory after successfully running
 wrapper_run_gapctd().</b>
 </p>
 
-## 6. Make metadata file
+## 5. Select best method
 
-The `make_metadata_file` function reads in R data (.rds) files from each
-casts, calculates haul-level averages from bottom samples (i.e., mean
-bottom salinity, mean bottom temperature), and retrieves other metadata
-that are included in the data product. The data are then written to the
-file path specified using the output_path argument. This is the last
-time bottom data will be used in processing.
-
-``` r
-# Make metadata and bottom averages file
-gapctd:::make_metadata_file(rds_dir_path = here::here("output", "gapctd"),
-                            in_pattern = "_raw.rds",
-                            output_path = here::here("metadata", 
-                                                     paste0("CTD_HAUL_DATA_", vessel, "_", paste(cruise, collapse = "_"), ".rds")))
-```
-
-![](/doc/assets/r_process/6_make_metadata_file.png)
-<p align="center">
-<b>Contents of the /metadata/ directory after running
-make_metadata_file(), showing the metadata file
-(CTD_HAUL_DATA_94_202101_202202.rds)</b>
-</p>
-
-## 7. Run basic data quality checks
-
-The `move_bad_rds` function checks data files from each deployment for
-common errors in downcast and upcast profiles. Files with bad upcasts or
-downcasts are moved to /bad_cnv/ while good casts are retained in the
-/output/gapctd/ directory. If only one of the casts from a deployment
-fails data quality checks, the good profile is retained in the
-/output/gapctd directory.
+Different data processing methods are used for different casts due to
+variation in operating conditions among profiles. Visually review
+results of casts that were processed using each of the four methods and
+select the best method by typing the corresponding number into the
+console. Plots are displayed using interactive plotly graphs that allow
+zooming in/out, hiding layers, etc.
 
 ``` r
-# Move 'bad' files to bad_cnv
-gapctd:::move_bad_rds(rds_dir_path = here::here("output", processing_method))
+gapctd::select_best_method(
+  rds_dir_path = here::here("output", processing_method))
 ```
 
-![](/doc/assets/r_process/7_move_bad_rds.png)
+![](/doc/assets/r_process/6_select_best_1.png)
 <p align="center">
-<b>Contents of the /bad_cnv/ directory after running move_bad_rds()</b>
+<b>Plotly interface for select_best_method() showing data processed
+using four methods (Typical, Typical CTM, Temperature-Salinity Area,
+salinity path distance)</b>
+</p>
+![](/doc/assets/r_process/6_select_best_2.png)
+<p align="center">
+<b>Console prompt for select_best_method() input, where inputs
+correspond with method numbers identified on the plot.</b>
 </p>
 
-## 8. Visually inspect, flag, and interpolate bad data (first round)
+## 6. Visually inspect, flag, and interpolate bad data
 
 *IMPORTANT: For this step, your display/GUI must be set to Actual Size
 in R Studio! Use the drop down menu (View \> Actual Size) to set your R
@@ -193,12 +151,6 @@ allows users to inspect plots of profile data for selected data and
 select erroneous data that should be removed and interpolated. The
 `wrapper_flag_interpolate` function is a wrapper for
 `qc_flag_interpolate`.
-
-Please note that interpolation can sometimes behave in unintuitive ways
-when interpolating salinity and density because the function
-interpolates conductivity and temperature, not salinity and density.
-Salinity and density are recalculated after interpolating conductivity
-and temperature.
 
 ``` r
 # Visually inspect, flag, and interpolate
@@ -257,7 +209,7 @@ and density (right).</b>
 bin.</b>
 </p>
 
-## 9. Select profiles to include in data product (first round)
+## 7. Select profiles to include in data product (first round)
 
 The `review_profiles` function provides an interface for visually
 inspecting profiles for each deployment and selecting the profiles to
@@ -294,67 +246,7 @@ structure of the water column could be considered unstable. R Console
 output: User interface for selecting casts.</b>
 </p>
 
-## 10. Remedial corrections for conductivity cell thermal intertia errors
-
-During this step, use the `remedial_ctm` to select deployments that
-should be reprocessed using the alternative method for conductivity cell
-thermal inertia error correction. Casts for each deployment are
-displayed sequentially. Use the console to select deployments that
-should be reprocessed (usually all casts).
-
-In the alternative methods, conductivity cell thermal inertia parameters
-are estimated for individual casts by minimizing the path distance of
-the salinity curve instead of the primary method of estimating
-parameters for both casts by minimizing the area between upcast and
-downcast temperature-salinity curves.
-
-``` r
-# Examine rejected profiles and run cell thermal mass corrections with alternate values using split_ctm()
-gapctd:::remedial_ctm(rds_path = here::here("output", processing_method),
-                      haul_df = haul_df)
-```
-
-![](/doc/assets/r_process/10_remedial_ctm.png)
-<p align="center">
-<b>R console user interface for choosing casts for alternative
-conductivity cell thermal intertia correction.</b>
-</p>
-
-## 11. Visually inspect, flag, and interpolate bad data (first round)
-
-Same as step \#8 but profiles are only reviewed if a profile from the
-deployment was not already selected for inclusion in the final data
-product.
-
-*Note: * Outside of the program, keep track of which cast (downcast or
-upcast) should be used in the data product. Keeping track of this is
-important because profiles will be reviewed one at a time during the
-next step. File IDs for deployments are displayed as messages in the
-console.
-
-``` r
-##---- Second round of review
-# Visually inspect, flag, and interpolate
-gapctd:::wrapper_flag_interpolate(rds_dir_path = here::here("output", processing_method),
-                                  review = c("density", "salinity"))
-```
-
-## 12. Select profiles to include in data product (first round)
-
-Same as step \#9 except downcast and upcast data are displayed one at a
-time even if both casts are available from a deployment. If the downcast
-is selected, the upcast will not be reviewed. If no casts from a
-deployment are accepted, data from the deployment will not be included
-in the final data product.
-
-``` r
-# Review profiles
-gapctd:::review_profiles(rds_dir_path = here::here("output", processing_method),
-                         threshold = -1e-5, 
-                         in_pattern = "_qc.rds")
-```
-
-## 13. Finalize data
+## 8. Finalize data
 
 Move all of the accepted profiles from /output/gapctd/ to the
 /final_cnv/ directory.
@@ -369,7 +261,7 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 <b>Final profile data in the /final_cnv/ directory.</b>
 </p>
 
-## 14. Prepare the data product
+## 9. Prepare the data product
 
 [Prepare the data product](/doc/prepare_data_product.md) if all data
 from the survey have been processed and are in different directories.
