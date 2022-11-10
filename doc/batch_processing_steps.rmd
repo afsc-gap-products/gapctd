@@ -40,7 +40,7 @@ This document lists data processing steps for the four methods used to process G
 | Method | Channel | Offset (s) | Description |
 |--------------------------------|--------------------------------|--------------------------------|--------------------------------|
 | Typical | Temperature | -0.5 | Typical setting recommended by the manufacturer. |
-| Typical CTM | Temperature | Estimated | Use grid search to find the offset parameter that maximizes the coefficient of determination (r<sup2</sup>) between first derivatives of temperature and conductivity with respect to time for individual upcasts and downcasts, to the nearest 0.01 s (Ullman and Hebert, 2014). | 
+| Typical CTM | Temperature | Estimated | Use grid search to find the offset parameter that maximizes the coefficient of determination (r<sup>2</sup>) between first derivatives of temperature and conductivity with respect to time for individual upcasts and downcasts, to the nearest 0.01 s (Ullman and Hebert, 2014). | 
 | TSA | Temperature | Estimated | Same as Typical CTM |
 | SPD | Temperature | Estimated | Same as Typical CTM |
 <br><br><br>
@@ -51,7 +51,7 @@ This document lists data processing steps for the four methods used to process G
 |--------------------------------|--------------------------------|--------------------------------|--------------------------------|
 | Typical | 0.04 | 1/8 | Typical setting recommended by the manufacturer. |
 | Typical CTM | 0.04 | 1/8 | Typical setting recommended by the manufacturer. |
-| TSA | Estimated | Estimated | Estimate optimal conductivity cell thermal mass correction parameters (alpha and beta) by using numerical optimization (Broyden-Fletcher-Goldfarb-Shanno with box constraints) to find parameter values that minimize the area between temperature-salinity curves from upcasts and downcasts (Garau et al., 2011). Starting parameters based on initial grid search parameters &alpha; (0.001, 0.01, 0.02, 0.04, 0.08, 0.12),  &beta; (1, 1/2, 1/4, 1/8, 1/12, 1/24). Uses typical values (alpha = 0.04, beta = 0.125) if optimization does not converge. |
+| TSA | Estimated | Estimated | Estimate optimal conductivity cell thermal mass correction parameters (alpha and beta) by using numerical optimization (Broyden-Fletcher-Goldfarb-Shanno with box constraints) to find parameter values that minimize the area between temperature-salinity curves from upcasts and downcasts (Garau et al., 2011). Starting parameters based on initial grid search across values of &alpha; (0.001, 0.01, 0.02, 0.04, 0.08, 0.12),  &beta; (1, 1/2, 1/4, 1/8, 1/12, 1/24). Box constraints: 0 &leq; &alpha; &leq; 1, 0.1 &leq; &beta;<sup>-1</sup> &leq; 45. Typical values (alpha = 0.04, beta = 0.125) are used if optimization does not converge.  |
 | SPD |  Estimated | Estimated | Same as TSA but optimization minimizes the path distance of the salinity curve for individual casts instead of the area between downcast and upcast T-S curves. |
 
 <br><br><br>
