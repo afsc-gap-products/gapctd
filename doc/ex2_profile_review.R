@@ -11,8 +11,22 @@ ex_dest_path <- gsub(pattern = system.file(package = "gapctd", "extdata/example/
                      x = ex_zip_path)
 file.copy(from = ex_zip_path, to = ex_dest_path)
 
+# Unzip files
 unzip(zipfile = ex_dest_path,
       exdir = here::here("output"))
+
+# Let's examine some of these files
+rds_paths <- list.files(here::here("output", "ex_review_files"), full.names = TRUE)
+
+# Load data and examine the contents of the downcast
+profile_data <- readRDS(file = rds_paths[3])
+
+str(profile_data$downcast@data)
+str(profile_data$downcast@metadata)
+
+# Plot the downcast and upcast data using oce
+plot(profile_data$downcast)
+plot(profile_data$upcast)
 
 # Select best method -----------------------------------------------------------------------------
 
