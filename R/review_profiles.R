@@ -94,7 +94,7 @@ select_best_method <- function(rds_dir_path) {
     
     #  Rename best file
     best_file <- deployment_files[grepl(pattern = best_suffix, x = deployment_files)]
-    file.rename(from = best_file, to = gsub(pattern = best_suffix, replacement = "_best.rds", x = best_file))
+    file.copy(from = best_file, to = gsub(pattern = best_suffix, replacement = "_best.rds", x = best_file))
     
   }
 }
@@ -114,6 +114,7 @@ select_best_method <- function(rds_dir_path) {
 review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.rds") {
   
   rds_files <- list.files(rds_dir_path, full.names = TRUE, pattern = in_pattern)
+  rds_rm <- gsub(pattern = in_pattern, replacement = "", x = rds_files)
   rds_short <- list.files(rds_dir_path, full.names = FALSE, pattern = in_pattern)
   out_files <- here::here(rds_dir_path, 
                           gsub(pattern = in_pattern, 
@@ -192,7 +193,13 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       
       if(remove_rds) {
         message(paste0("manual_review: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
-        file.remove(rds_files[ii])
+        
+        rm_paths <- list.files(path = rds_dir_path, full.names = TRUE)
+        rm_paths <- rm_paths[grepl(pattern = rds_rm[ii], x = rm_paths)]
+        
+        if(length(rm_paths) > 0) {
+          file.remove(rm_paths)
+        }
       }
       
       # Keep only an upcast or a downcast
