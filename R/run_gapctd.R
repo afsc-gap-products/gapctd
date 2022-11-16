@@ -68,6 +68,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
   cnv_files <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = TRUE)
   cnv_short <- list.files(cnv_dir_path, pattern = "raw.cnv", full.names = FALSE)
   
+  message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
+  
   # Create vectors of paths to output files
   rds_filenames_split <- here::here("data",
                                     "split",
@@ -130,8 +132,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       next
     }
     
-    message(paste0("wrapper_run_gapctd: ", length(cnv_files), " files found in ", cnv_dir_path))
-    
+    message(paste0("wrapper_run_gapctd: Processing ", cnv_files[II], "."))
     
     # Create files with just upcasts or downcast
     ctd_split <- gapctd::run_gapctd(x = ctd_dat, 
@@ -262,8 +263,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                               in_pattern = "_typical.rds",
                               output_path = here::here("metadata", 
                                                        paste0("CTD_HAUL_DATA_", 
-                                                              unique(haul_df$vessel), "_", 
-                                                              paste(unique(haul_df$cruise), 
+                                                              unique(vessel), "_", 
+                                                              paste(unique(cruise), 
                                                                     collapse = "_"), ".rds")))
   
   # Move 'bad' files to bad_cnv
