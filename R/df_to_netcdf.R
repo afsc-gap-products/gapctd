@@ -798,6 +798,20 @@ make_oce_table <- function(cast_files,
     
     if("downcast" %in% names(dat)) {
       sel_cast <- dat$downcast
+      
+      if(sel_cast@metadata$gapctd_method == "TSA") {
+        alpha_C <- sel_cast@metadata$ctm$both['alpha_C']
+        beta_C <- sel_cast@metadata$ctm$both['beta_C']
+      } else {
+        if("both" %in% names(sel_cast@metadata$ctm)) {
+          alpha_C <- sel_cast@metadata$ctm$both['alpha_C']
+          beta_C <- sel_cast@metadata$ctm$both['beta_C']
+        } else {
+          alpha_C <- unlist(sel_cast@metadata$ctm['alpha_C'])
+          beta_C <- unlist(sel_cast@metadata$ctm['beta_C'])
+        }
+      }
+      
       sel_cast_data <- as.data.frame(sel_cast@data) |>
         dplyr::mutate(vessel = sel_cast@metadata$race_metadata$VESSEL,
                       cruise = sel_cast@metadata$race_metadata$CRUISE,
@@ -811,6 +825,10 @@ make_oce_table <- function(cast_files,
                       latitude = sel_cast@metadata$latitude,
                       longitude = sel_cast@metadata$longitude,
                       timeS = sel_cast@metadata$startTime + timeS,
+                      processing_method = sel_cast@metadata$gapctd_method,
+                      alpha_C = alpha_C,
+                      beta_C = beta_C,
+                      temperature_offset = sel_cast@metadata$align$temperature['offset'],
                       serial_number = sel_cast@metadata$serialNumberTemperature,
                       sample_interval = sel_cast@metadata$sampleInterval,
                       cast_direction = "downcast")
@@ -819,6 +837,20 @@ make_oce_table <- function(cast_files,
     
     if("upcast" %in% names(dat)) {
       sel_cast <- dat$upcast
+      
+      if(sel_cast@metadata$gapctd_method == "TSA") {
+        alpha_C <- sel_cast@metadata$ctm$both['alpha_C']
+        beta_C <- sel_cast@metadata$ctm$both['beta_C']
+      } else {
+        if("both" %in% names(sel_cast@metadata$ctm)) {
+          alpha_C <- sel_cast@metadata$ctm$both['alpha_C']
+          beta_C <- sel_cast@metadata$ctm$both['beta_C']
+        } else {
+          alpha_C <- unlist(sel_cast@metadata$ctm['alpha_C'])
+          beta_C <- unlist(sel_cast@metadata$ctm['beta_C'])
+        }
+      }
+      
       sel_cast_data <- as.data.frame(sel_cast@data) |>
         dplyr::mutate(vessel = sel_cast@metadata$race_metadata$VESSEL,
                       cruise = sel_cast@metadata$race_metadata$CRUISE,
@@ -832,6 +864,10 @@ make_oce_table <- function(cast_files,
                       latitude = sel_cast@metadata$latitude,
                       longitude = sel_cast@metadata$longitude,
                       timeS = sel_cast@metadata$startTime + timeS,
+                      processing_method = sel_cast@metadata$gapctd_method,
+                      alpha_C = alpha_C,
+                      beta_C = beta_C,
+                      temperature_offset = sel_cast@metadata$align$temperature['offset'],
                       serial_number = sel_cast@metadata$serialNumberTemperature,
                       sample_interval = sel_cast@metadata$sampleInterval,
                       cast_direction = "upcast")

@@ -63,7 +63,7 @@ accept_response <- function(valid_responses, prompt) {
     if((entry %in% valid_responses) & length(entry) == 1) {
       accept <- TRUE
     } else {
-      message("Invalid entry, please try again. Must be one of ", paste(valid_responses, sep = ", "))
+      message("Invalid entry, please try again. Must be one of ", paste(valid_responses, collapse = ", "))
     }
   }
   return(entry)
