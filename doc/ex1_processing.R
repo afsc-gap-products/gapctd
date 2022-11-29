@@ -8,7 +8,7 @@ vessel <- 94
 cruise <- c(202101, 202102)
 region <- "BS"
 processing_method <- "gapctd"
-ctd_dir <- "G:/RACE_CTD/data/2021/ebs/v94_8091"
+ctd_dir <- "G:/RACE_CTD/data/2021/ebs/v94_ctd1"
 
 # 1. Setup -----------------------------------------------------------------------------------------
 
