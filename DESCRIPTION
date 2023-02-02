@@ -13,7 +13,7 @@ Description: Package to process SBE19 CTD data for AFSC RACE/Groundfish Assessme
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Depends: R(>= 4.1), 
          ggplot2, 
          dplyr, 

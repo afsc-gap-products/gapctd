@@ -10,6 +10,21 @@ trawl_height_df <- readRDS(file = here::here("paper", "data", "trawl_height_df.r
 net_number_df <- readRDS(file = here::here("paper", "data", "net_number_df.rds"))
 trawl_height_summary <- readRDS(file = here::here("paper", "data", "trawl_height_summary.rds"))
 
+pings_model <- glm(n~ctd, 
+                   offset = log(n_sec), 
+                   family = poisson(link = "log"), 
+                   data = trawl_height_summary |>
+                     dplyr::mutate(n_sec = as.numeric(duration)))
+
+summary(pings_model)
+
+ggplot() +
+  geom_density(data = trawl_height_summary,
+               aes(x = n/duration_sec,
+                   color = ctd)) +
+  scale_x_continuous(name = "Pings per second") +
+  scale_y_continuous(name = "Density")
+
 # Cumulative trawls on the haul
 n_trawls_df <- trawl_height_df |>
   dplyr::select(haul, net_number, eq) |>
@@ -127,6 +142,7 @@ ctd_vs_no_ctd_df <- trawl_height_summary |>
                    grand_sd_net_height = sd(mean_net_height),
                    grand_median_net_height = mean(median_net_height))
 
+
 ggplot() +
   geom_density(data = trawl_height_summary,
                aes(x = mean_net_height,
@@ -134,12 +150,6 @@ ggplot() +
   scale_x_continuous(name = "Mean net height") +
   scale_y_continuous(name = "Density")
 
-ggplot() +
-  geom_density(data = trawl_height_summary,
-               aes(x = n/duration_sec,
-                   color = ctd)) +
-  scale_x_continuous(name = "Pings per second") +
-  scale_y_continuous(name = "Density")
 
 png(file = here::here("plots", "cumulative_hauls_by_net.png"), width = 6, height = 6, units = "in", res = 120)
     print(
