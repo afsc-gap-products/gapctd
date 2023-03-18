@@ -23,9 +23,6 @@ ex_area_poly_init <- as.data.frame(sf::st_coordinates(ex_area_init$sf)) |>
                       dplyr::select(-geometry)) |>
   dplyr::mutate(L2 = factor(L2))
 
-# ex_area_poly_init <- as.data.frame(sf::st_coordinates(ex_area_init$sf)) |>
-#   dplyr::mutate(L2 = factor(L2))
-
 ex_tsa_final <- run_gapctd(x = ex_oce, 
            haul_df = haul_df, 
            ctd_tz = "America/Anchorage",
@@ -70,12 +67,18 @@ plot_tsa_init <- ggplot() +
             mapping = aes(x = salinity, 
                           y = temperature, 
                           color = cast)) +
+  geom_text(data = data.frame(x = 32.545, 
+                              y = 2.5, 
+                              label = paste0("Total area: ", round(ex_area_init$area, 2))), 
+            mapping = aes(x = x, y = y, label = label), 
+            color = "black", 
+            hjust = 0) +
   scale_color_manual(values = c("grey50", "black"), name = NULL) +
   scale_shape(name = NULL) +
   scale_fill_distiller(palette = "Purples", limits = a_lim, direction = 1) +
   scale_x_continuous(name = "Salinity (PSS-78)", limits = s_lim) +
   scale_y_continuous(name = expression('Temperature'~(degree*C)), limits = t_lim) +
-  ggtitle(label = paste0("Align T (Total area: ", round(ex_area_init$area, 2), ")")) +
+  ggtitle(label = "Align T") +
   theme_bw() +
   theme(legend.position = "none",
         plot.title = element_text(hjust = 0.5))
@@ -91,12 +94,18 @@ plot_tsa_final <- ggplot() +
             mapping = aes(x = salinity, 
                           y = temperature, 
                           color = cast)) +
+  geom_text(data = data.frame(x = 32.545, 
+                              y = 2.5, 
+                              label = paste0("Total area: ", round(ex_area_final$area, 2))), 
+            mapping = aes(x = x, y = y, label = label), 
+                          color = "black", 
+                          hjust = 0) +
   scale_color_manual(name = "Cast", values = c("grey50", "black")) +
   scale_shape(name = "Cast") +
   scale_fill_distiller(name = "TS Area", palette = "Purples", limits = a_lim, direction = 1) +
   scale_x_continuous(name = "Salinity (PSS-78)", limits = s_lim) +
   scale_y_continuous(name = expression('Temperature'~(degree*C)), limits = t_lim) +
-  ggtitle(label = paste0("CTM Corr. (Total area: ", round(ex_area_final$area, 2), ")")) +
+  ggtitle(label = "CTM Corr.") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -167,8 +176,8 @@ ex_spd_final <- dplyr::bind_rows(
 
 spd_srange <- range(ex_spd_init$salinity, ex_spd_final$salinity)
 
-dc_dist_init <- sprintf("%.4f", round(sum(diff(ex_spd_init$salinity[ex_spd_init$cast == "downcast"])), 4))
-uc_dist_init <- sprintf("%.4f", round(sum(diff(ex_spd_init$salinity[ex_spd_init$cast == "upcast"])), 4))
+dc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_spd_init$salinity[ex_spd_init$cast == "downcast"]))), 4))
+uc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_spd_init$salinity[ex_spd_init$cast == "upcast"]))), 4))
 
 plot_spd_init <- ggplot() +
   geom_path(data = ex_spd_init,
@@ -190,8 +199,8 @@ plot_spd_init <- ggplot() +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5))
 
-dc_dist_final <- sprintf("%.4f", round(sum(diff(ex_spd_final$salinity[ex_spd_final$cast == "downcast"])), 4))
-uc_dist_final <- sprintf("%.4f", round(sum(diff(ex_spd_final$salinity[ex_spd_final$cast == "upcast"])), 4))
+dc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_spd_final$salinity[ex_spd_final$cast == "downcast"]))), 4))
+uc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_spd_final$salinity[ex_spd_final$cast == "upcast"]))), 4))
 
 plot_spd_final <- ggplot() +
   geom_path(data = ex_spd_final,
@@ -236,5 +245,3 @@ print(
   labels = LETTERS[1:2])
 )
 dev.off()
-
-
