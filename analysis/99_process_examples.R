@@ -472,6 +472,8 @@ process_df <- readRDS(here::here("paper", "data", "ex_process_df.rds"))
 param_df <- readRDS(here::here("paper", "data", "param_df.rds"))
 # profile_df <- readRDS(here::here("paper", "data", "ex_profiles.rds"))
 
+representative_station_df <- read.csv(here::here("paper", "plots", "representative_station_table.csv"))
+
 unique_deployments <- process_df |>
   dplyr::select(VESSEL, CRUISE, HAUL) |>
   unique()
@@ -489,8 +491,15 @@ for(jj in 1:nrow(unique_deployments)) {
                   HAUL == unique_deployments$HAUL[jj],
                   !(stage %in% c("loopedit", "bin_average")))
   
+  sel_dat$sigmat <- oce::swSigmaT(salinity = sel_dat$salinity, 
+                                  temperature = sel_dat$temperature,
+                                  pressure = sel_dat$pressure,
+                                  longitude = representative_station_df$LONGITUDE[jj],
+                                  latitude = representative_station_df$LATITUDE[jj])
+  
   sel_dat$range_temperature <- diff(range(sel_dat$temperature, na.rm = TRUE))
   sel_dat$range_salinity <- diff(range(sel_dat$salinity, na.rm = TRUE))
+  sel_dat$range_sigmat <- diff(range(sel_dat$sigmat, na.rm = TRUE))
   
   sel_dat <- dplyr::inner_join(sel_dat, 
                                offset_curves,
@@ -498,72 +507,128 @@ for(jj in 1:nrow(unique_deployments)) {
   
   names(sel_dat) <- tolower(names(sel_dat))
   
+  plot_T <- ggplot() +
+    geom_path(data = sel_dat,
+              mapping = aes(y = depth,
+                            x = temperature + range_temperature*shift_var,
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            linetype = cast_direction),
+              size = rel(0.3)) +
+    scale_x_continuous(name = expression("Temperature,"~degree*C), 
+                       guide = guide_axis(check.overlap = TRUE)) +
+    scale_y_reverse(name = "Depth (m)") +
+    scale_color_manual(guide = "none", values = ggthemes::colorblind_pal()(6)[c(1:4,6)]) +
+    facet_wrap(~factor(stage,
+                       levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
+                       labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
+    theme_bw() +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          strip.background = element_blank(),
+          axis.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          legend.text = element_text(size = 8),
+          legend.margin=margin())
+  
+  plot_S <- ggplot() +
+    geom_path(data = sel_dat,
+              mapping = aes(y = depth,
+                            x = salinity + range_salinity*shift_var,
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            linetype = cast_direction),
+              size = rel(0.3)) +
+    scale_x_continuous(name = "Salnity, PSS-78", 
+                       guide = guide_axis(check.overlap = TRUE)) +
+    scale_linetype(guide = "none") +
+    scale_y_reverse(name = "Depth (m)") +
+    scale_color_manual(values = ggthemes::colorblind_pal()(6)[c(1:4,6)]) +
+    facet_wrap(~factor(stage,
+                       levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
+                       labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
+    theme_bw() +
+    guides(color=guide_legend(nrow=2)) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          strip.background = element_blank(),
+          axis.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          legend.text = element_text(size = 8),
+          legend.margin=margin(),
+          legend.box = "vertical")
+  
+  plot_sigmat <- ggplot() +
+    geom_path(data = sel_dat |>
+                dplyr::filter(stage == "slowdown"),
+              mapping = aes(y = depth,
+                            x = sigmat + range_sigmat*shift_var,
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            linetype = cast_direction),
+              size = rel(0.3)) +
+    scale_x_continuous(name = expression(sigma[t]*', '*rho['S,T,0']-1000~kg~m^-3), 
+                       guide = guide_axis(check.overlap = TRUE)) +
+    scale_y_reverse(name = "Depth (m)") +
+    scale_linetype(name = "Cast") +
+    scale_color_manual(name = "Method", values = ggthemes::colorblind_pal()(6)[c(1:4,6)], drop = FALSE) +
+    facet_wrap(~factor(stage,
+                       levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
+                       labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
+    theme_bw() +
+    theme(legend.position = "none",
+          legend.title = element_blank(),
+          strip.background = element_blank(),
+          axis.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          legend.text = element_text(size = 8),
+          legend.margin=margin())
+  
+  plot_direction_legend <- cowplot::get_legend(plot_T)
+  plot_method_legend <- cowplot::get_legend(plot_S)
   
   ragg::agg_png(file = here::here("paper", "plots", 
-                        paste0("process_", 
+                        paste0("process_", jj, "_", 
                                unique_deployments$VESSEL[jj], "_", 
                                unique_deployments$CRUISE[jj], "_", 
                                unique_deployments$HAUL[jj], ".png")), 
-      width = 170, 
-      height = 150, 
+      width = 220, 
+      height = 110, 
       res = 600, 
       units = "mm")
   
+  # print(
+  #   cowplot::plot_grid(
+  #     cowplot::plot_grid(
+  #       cowplot::plot_grid(
+  #         plot_T + theme(legend.position = "none"),
+  #         plot_S + theme(legend.position = "none"),
+  #         align = "hv"),
+  #       plot_sigmat,
+  #       rel_widths = c(2,2/3)
+  #     ),
+  #   cowplot::plot_grid(
+  #     NULL,
+  #     plot_direction_legend,
+  #     NULL,
+  #     plot_method_legend,
+  #     NULL,
+  #     nrow = 1
+  #   ), 
+  #   nrow = 2,
+  #   rel_heights = c(0.9,0.1))
+  # )
   print(
-    cowplot::plot_grid(
-      ggplot() +
-        geom_path(data = sel_dat,
-                  mapping = aes(y = depth,
-                                x = temperature + range_temperature*shift_var,
-                                color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
-                                linetype = cast_direction),
-                  size = rel(0.3)) +
-        scale_x_continuous(name = expression("Temperature,"~degree*C), 
-                           guide = guide_axis(check.overlap = TRUE)) +
-        scale_y_reverse(name = "Depth (m)") +
-        scale_color_manual(guide = "none", values = ggthemes::colorblind_pal()(6)[c(1:4,6)]) +
-        facet_wrap(~factor(stage,
-                           levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
-                           labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
-        theme_bw() +
-        theme(legend.position = "bottom",
-              legend.title = element_blank(),
-              strip.background = element_blank(),
-              axis.text = element_text(size = 8, color = "black"),
-              axis.title = element_text(size = 9, color = "black"),
-              legend.text = element_text(size = 8),
-              legend.margin=margin()),
-      ggplot() +
-        geom_path(data = sel_dat,
-                  mapping = aes(y = depth,
-                                x = salinity + range_salinity*shift_var,
-                                color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
-                                linetype = cast_direction),
-                  size = rel(0.3)) +
-        scale_x_continuous(name = "Salnity, PSS-78", 
-                           guide = guide_axis(check.overlap = TRUE)) +
-        scale_linetype(guide = "none") +
-        scale_y_reverse(name = "Depth (m)") +
-        scale_color_manual(values = ggthemes::colorblind_pal()(6)[c(1:4,6)]) +
-        facet_wrap(~factor(stage,
-                           levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
-                           labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
-        theme_bw() +
-        guides(color=guide_legend(nrow=2)) +
-        theme(legend.position = "bottom",
-              legend.title = element_blank(),
-              strip.background = element_blank(),
-              axis.text = element_text(size = 8, color = "black"),
-              axis.title = element_text(size = 9, color = "black"),
-              legend.text = element_text(size = 8),
-              legend.margin=margin(),
-              legend.box = "vertical"),
-      align = "hv"
-    )
+      cowplot::plot_grid(
+        cowplot::plot_grid(
+          plot_T + theme(legend.position = "none"),
+          plot_S + theme(legend.position = "none"),
+          align = "hv", labels = c("A", "B")),
+        plot_sigmat + theme(legend.position = "right",
+                            legend.title = element_text(size = 8, hjust = 0)),
+        rel_widths = c(2,0.8),
+        labels = c(NA, "C")
+      )
   )
   dev.off()
 }
-
 
 # Inspect plots ------------------------------------------------------------------------------------
 

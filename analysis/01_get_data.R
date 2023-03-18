@@ -10,7 +10,7 @@ if(!dir.exists(here::here("plots"))) {
   dir.create(here::here("plots"))
 }
 
-nc_path <- here::here("data", "GOA", "GAPCTD_2021_GOA.nc")  # Change to your path if you run
+nc_path <- here::here("data", "GAPCTD_2021_GOA.nc")  # Change to your path if you run
 
 # Connect to oracle
 channel <- gapctd::get_connected(schema = "AFSC")
@@ -40,6 +40,13 @@ trawl_height_df <- RODBC::sqlQuery(channel = channel, query =
 			and e.use_in_analysis = 'Y'")
 
 names(trawl_height_df) <- tolower(names(trawl_height_df))
+
+trawl_height_rb <- RODBC::sqlQuery(channel = channel, query = "select vessel, cruise, haul, net_height from racebase.haul
+                                   where vessel = 176 and cruise = 202101") |>
+  dplyr::rename(racebase_net_height = NET_HEIGHT)
+
+names(trawl_height_rb) <- tolower(names(trawl_height_rb))
+
 
 # Convert time zone
 trawl_height_df$date_time <- lubridate::force_tz(trawl_height_df$date_time, tz = "UTC")
@@ -112,6 +119,21 @@ trawl_height_summary <- dplyr::bind_rows(
   dplyr::anti_join(trawl_height_summary, 
                    goa_haul_df) |>
     dplyr::mutate(ctd = "no"))
+
+height_diff <- dplyr::inner_join(trawl_height_summary, trawl_height_rb) |>
+  dplyr::mutate(height_diff = mean_net_height - racebase_net_height)
+
+height_diff |>
+  dplyr::arrange(-abs(height_diff))
+
+ggplot() +
+  geom_density(data = height_diff, 
+               mapping = aes(x = height_diff, 
+                             color = ctd))
+
+dplyr::group_by(height_diff, ctd) |>
+  dplyr::summarise(median_diff = median(height_diff),
+                   mean_diff = mean(height_diff))
 
 saveRDS(trawl_height_df, file = here::here("paper", "data", "trawl_height_df.rds"))
 saveRDS(net_number_df, file = here::here("paper", "data", "net_number_df.rds"))

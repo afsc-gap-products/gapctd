@@ -33,7 +33,7 @@ ctd_unit <- "SBE19plus V2"
 gapctd::make_oce_ncdf(
   cast_files = cast_files,
   metadata_files = metadata_files,
-  output_file = paste0("GAPCTD_", year, "_", region, ".nc"),
+  output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".nc")),
   global_attributes = list(title = data_set_name, 
                            references = "CTD TEAM...",
                            id = dataset_doi,
@@ -60,7 +60,7 @@ gapctd::make_oce_ncdf(
 
 # Create an rds file with cast data in the working directory
 make_oce_table(cast_files = cast_files,
-               output_file = paste0("GAPCTD_", year, "_", region, ".rds"),
+               output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".rds")),
                precision = c(temperature = 4,
                            conductivity = 6,
                            salinity = 4,

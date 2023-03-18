@@ -52,14 +52,14 @@ ts_gradient_df |>
 saveRDS(ts_gradient_df, 
         file = here::here("paper", "output", "TS_gradient_by_cast.rds"))
 
-png(file = here::here("paper", "plots", "method_versus_TSrate.png"), width = 120, height = 120, units = "mm", res = 600)
+ragg::agg_png(file = here::here("paper", "plots", "method_versus_TSrate.png"), width = 120, height = 120, units = "mm", res = 600)
 print(
   cowplot::plot_grid(
     ggplot() +
       geom_boxplot(data = ts_gradient_df,
                    mapping = aes(x = region, 
                                  y = temperature_max_gradient_s)) +
-      scale_y_continuous(name = expression("Max. T rate "~(degree*C/s)),
+      scale_y_continuous(name = expression("Max. T rate "~(degree*C~s^-1)),
                          limits = c(0, 2.5)
       ) +
       scale_x_discrete(name = "Region") +
@@ -71,7 +71,7 @@ print(
       geom_boxplot(data = ts_gradient_df,
                    mapping = aes(x = region, 
                                  y = temperature_max_gradient_z)) +
-      scale_y_continuous(name = expression("Max. T rate "~(degree*C/s)),
+      scale_y_continuous(name = expression("Max. T rate "~(degree*C~m^-1)),
                          limits = c(0, 2.5)
       ) +
       scale_x_discrete(name = "Region") +
@@ -88,7 +88,7 @@ print(
                                  color = factor(processing_method, 
                                                 levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
                                                 labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")))) +
-      scale_y_continuous(name = expression("Max. T rate "~(degree*C/s)),
+      scale_y_continuous(name = expression("Max. T rate "~(degree*C~s^-1)),
                          limits = c(0, 2.5)
       ) +
       scale_x_discrete(name = "Processing method") +
@@ -106,7 +106,7 @@ print(
                                  color = factor(processing_method, 
                                                 levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
                                                 labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")))) +
-      scale_y_continuous(name = expression("Max. T rate "~(degree*C/m)),
+      scale_y_continuous(name = expression("Max. T rate "~(degree*C~m^-1)),
                          limits = c(0, 2.5)
       ) +
       scale_x_discrete(name = "Processing method") +

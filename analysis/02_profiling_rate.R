@@ -1,6 +1,7 @@
 # Retrieve sample locations from netCDF file
 library(gapctd)
 library(RNetCDF)
+library(ggthemes)
 
 # Load CTD data
 ctd_dat <- dplyr::bind_rows(
@@ -11,7 +12,8 @@ ctd_dat <- dplyr::bind_rows(
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_AI.rds")) |>
     dplyr::mutate(region = "AI"),
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_EBS.rds")) |>
-    dplyr::mutate(region = "EBS+NBS"))
+    dplyr::mutate(region = "EBS+NBS")) |>
+  dplyr::filter(!(vessel == 94 & cruise == 202101 & haul == 74))
 
 haul_files <- list.files(here::here("paper", "data", "haul_data"), full.names = TRUE)
 
@@ -76,7 +78,7 @@ print(
                group = depth)) +
       geom_boxplot(size = rel(0.2),
                    outlier.size = rel(0.2)) +
-      scale_y_continuous(name = "Profiling speed (m/s)", expand = c(0,0)) +
+      scale_y_continuous(name = expression("Profiling speed ("~m~s^-1~')'), expand = c(0,0)) +
       scale_x_continuous(name = "Depth (m)",
                          limits = c(-1, 41)) +
       scale_color_colorblind(name = "Vessel") +
@@ -95,7 +97,7 @@ print(
                group = diff_depth)) +
       geom_boxplot(size = rel(0.2),
                    outlier.size = rel(0.2)) +
-      scale_y_continuous(name = "Profiling speed (m/s)", expand = c(0,0)) +
+      scale_y_continuous(name = expression("Profiling speed ("~m~s^-1~')'), expand = c(0,0)) +
       scale_x_continuous(name = "Distance from bottom (m)",
                          limits = c(-1, 21)) +
       scale_color_colorblind(name = "Vessel") +
