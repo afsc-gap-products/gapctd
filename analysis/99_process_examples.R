@@ -491,15 +491,23 @@ for(jj in 1:nrow(unique_deployments)) {
                   HAUL == unique_deployments$HAUL[jj],
                   !(stage %in% c("loopedit", "bin_average")))
   
-  sel_dat$sigmat <- oce::swSigmaT(salinity = sel_dat$salinity, 
+  sel_dat$sigmat <- oce::swSigmaT(salinity = sel_dat$salinity,
                                   temperature = sel_dat$temperature,
                                   pressure = sel_dat$pressure,
                                   longitude = representative_station_df$LONGITUDE[jj],
                                   latitude = representative_station_df$LATITUDE[jj])
   
+  sel_dat$sigmatheta <- oce::swSigmaTheta(salinity = sel_dat$salinity,
+                                          temperature = sel_dat$temperature,
+                                          pressure = sel_dat$pressure,
+                                          longitude = representative_station_df$LONGITUDE[jj],
+                                          latitude = representative_station_df$LATITUDE[jj])
+  
   sel_dat$range_temperature <- diff(range(sel_dat$temperature, na.rm = TRUE))
   sel_dat$range_salinity <- diff(range(sel_dat$salinity, na.rm = TRUE))
   sel_dat$range_sigmat <- diff(range(sel_dat$sigmat, na.rm = TRUE))
+  sel_dat$range_sigmatheta <- diff(range(sel_dat$sigmat, na.rm = TRUE))
+  sel_dat$range_density <- diff(range(sel_dat$density-1000, na.rm = TRUE))
   
   sel_dat <- dplyr::inner_join(sel_dat, 
                                offset_curves,
@@ -514,7 +522,7 @@ for(jj in 1:nrow(unique_deployments)) {
                             color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
                             linetype = cast_direction),
               size = rel(0.3)) +
-    scale_x_continuous(name = expression("Temperature,"~degree*C), 
+    scale_x_continuous(name = expression("Temperature ("*degree*C*')'), 
                        guide = guide_axis(check.overlap = TRUE)) +
     scale_y_reverse(name = "Depth (m)") +
     scale_color_manual(guide = "none", values = ggthemes::colorblind_pal()(6)[c(1:4,6)]) +
@@ -537,7 +545,7 @@ for(jj in 1:nrow(unique_deployments)) {
                             color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
                             linetype = cast_direction),
               size = rel(0.3)) +
-    scale_x_continuous(name = "Salnity, PSS-78", 
+    scale_x_continuous(name = "Salnity (PSS-78)", 
                        guide = guide_axis(check.overlap = TRUE)) +
     scale_linetype(guide = "none") +
     scale_y_reverse(name = "Depth (m)") +
@@ -556,15 +564,15 @@ for(jj in 1:nrow(unique_deployments)) {
           legend.margin=margin(),
           legend.box = "vertical")
   
-  plot_sigmat <- ggplot() +
+  plot_density <- ggplot() +
     geom_path(data = sel_dat |>
                 dplyr::filter(stage == "slowdown"),
               mapping = aes(y = depth,
-                            x = sigmat + range_sigmat*shift_var,
+                            x = density-1000 + range_density*shift_var,
                             color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
                             linetype = cast_direction),
               size = rel(0.3)) +
-    scale_x_continuous(name = expression(sigma[t]*', '*rho['S,T,0']-1000~kg~m^-3), 
+    scale_x_continuous(name = expression(sigma~'('*kg~m^-3*')'), 
                        guide = guide_axis(check.overlap = TRUE)) +
     scale_y_reverse(name = "Depth (m)") +
     scale_linetype(name = "Cast") +
@@ -584,37 +592,99 @@ for(jj in 1:nrow(unique_deployments)) {
   plot_direction_legend <- cowplot::get_legend(plot_T)
   plot_method_legend <- cowplot::get_legend(plot_S)
   
-  ragg::agg_png(file = here::here("paper", "plots", 
-                        paste0("process_", jj, "_", 
-                               unique_deployments$VESSEL[jj], "_", 
-                               unique_deployments$CRUISE[jj], "_", 
-                               unique_deployments$HAUL[jj], ".png")), 
-      width = 220, 
-      height = 110, 
-      res = 600, 
-      units = "mm")
+  plot_sigmat <- ggplot() +
+    geom_path(data = sel_dat |>
+                dplyr::filter(stage == "slowdown"),
+              mapping = aes(y = depth,
+                            x = sigmat + range_sigmat*shift_var,
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            linetype = cast_direction),
+              size = rel(0.3)) +
+    scale_x_continuous(name = expression(sigma[t]~'('*kg~m^-3*')'), 
+                       guide = guide_axis(check.overlap = TRUE)) +
+    scale_y_reverse(name = "Depth (m)") +
+    scale_linetype(name = "Cast") +
+    scale_color_manual(name = "Method", values = ggthemes::colorblind_pal()(6)[c(1:4,6)], drop = FALSE) +
+    facet_wrap(~factor(stage,
+                       levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
+                       labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
+    theme_bw() +
+    theme(legend.position = "none",
+          legend.title = element_blank(),
+          strip.background = element_blank(),
+          axis.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          legend.text = element_text(size = 8),
+          legend.margin=margin())
   
-  # print(
-  #   cowplot::plot_grid(
-  #     cowplot::plot_grid(
-  #       cowplot::plot_grid(
-  #         plot_T + theme(legend.position = "none"),
-  #         plot_S + theme(legend.position = "none"),
-  #         align = "hv"),
-  #       plot_sigmat,
-  #       rel_widths = c(2,2/3)
-  #     ),
-  #   cowplot::plot_grid(
-  #     NULL,
-  #     plot_direction_legend,
-  #     NULL,
-  #     plot_method_legend,
-  #     NULL,
-  #     nrow = 1
-  #   ), 
-  #   nrow = 2,
-  #   rel_heights = c(0.9,0.1))
-  # )
+  plot_direction_legend <- cowplot::get_legend(plot_T)
+  plot_method_legend <- cowplot::get_legend(plot_S)
+  
+  plot_sigmatheta <- ggplot() +
+    geom_path(data = sel_dat |>
+                dplyr::filter(stage == "slowdown"),
+              mapping = aes(y = depth,
+                            x = sigmatheta + range_sigmatheta*shift_var,
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            linetype = cast_direction),
+              size = rel(0.3)) +
+    scale_x_continuous(name = expression(sigma[theta]~'('*kg~m^-3*')'), 
+                       guide = guide_axis(check.overlap = TRUE)) +
+    scale_y_reverse(name = "Depth (m)") +
+    scale_linetype(name = "Cast") +
+    scale_color_manual(name = "Method", values = ggthemes::colorblind_pal()(6)[c(1:4,6)], drop = FALSE) +
+    facet_wrap(~factor(stage,
+                       levels = c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown"),
+                       labels = c("Split", "Median Filter", "Low Pass Filter", "Align T", "CTM Corr.", "Slowdown"))) +
+    theme_bw() +
+    theme(legend.position = "none",
+          legend.title = element_blank(),
+          strip.background = element_blank(),
+          axis.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          legend.text = element_text(size = 8),
+          legend.margin=margin())
+  
+  plot_direction_legend <- cowplot::get_legend(plot_T)
+  plot_method_legend <- cowplot::get_legend(plot_S)
+  
+  # Sigma-theta
+  ragg::agg_png(file = here::here("paper", "plots", 
+                                  paste0("process_sigmatheta_", 
+                                         unique_deployments$VESSEL[jj], "_", 
+                                         unique_deployments$CRUISE[jj], "_", 
+                                         unique_deployments$HAUL[jj], ".png")), 
+                width = 220, 
+                height = 110, 
+                res = 600, 
+                units = "mm")
+  
+  print(
+    cowplot::plot_grid(
+      cowplot::plot_grid(
+        plot_T + theme(legend.position = "none"),
+        plot_S + theme(legend.position = "none"),
+        align = "hv", labels = c("A", "B")),
+      plot_sigmatheta + theme(legend.position = "right",
+                          legend.title = element_text(size = 8, hjust = 0)),
+      rel_widths = c(2,0.8),
+      labels = c(NA, "C")
+    )
+  )
+  dev.off()
+  
+  
+  # Sigma-t
+  ragg::agg_png(file = here::here("paper", "plots", 
+                                  paste0("process_sigmat", 
+                                         unique_deployments$VESSEL[jj], "_", 
+                                         unique_deployments$CRUISE[jj], "_", 
+                                         unique_deployments$HAUL[jj], ".png")), 
+                width = 220, 
+                height = 110, 
+                res = 600, 
+                units = "mm")
+  
   print(
       cowplot::plot_grid(
         cowplot::plot_grid(
@@ -626,6 +696,30 @@ for(jj in 1:nrow(unique_deployments)) {
         rel_widths = c(2,0.8),
         labels = c(NA, "C")
       )
+  )
+  dev.off()
+  
+  # Sigma
+  ragg::agg_png(file = here::here("paper", "plots", 
+                                  paste0("process_sigma_", 
+                                         unique_deployments$VESSEL[jj], "_", 
+                                         unique_deployments$CRUISE[jj], "_", 
+                                         unique_deployments$HAUL[jj], ".png")), 
+                width = 220, 
+                height = 110, 
+                res = 600, 
+                units = "mm")
+  print(
+    cowplot::plot_grid(
+      cowplot::plot_grid(
+        plot_T + theme(legend.position = "none"),
+        plot_S + theme(legend.position = "none"),
+        align = "hv", labels = c("A", "B")),
+      plot_density + theme(legend.position = "right",
+                          legend.title = element_text(size = 8, hjust = 0)),
+      rel_widths = c(2,0.8),
+      labels = c(NA, "C")
+    )
   )
   dev.off()
 }
