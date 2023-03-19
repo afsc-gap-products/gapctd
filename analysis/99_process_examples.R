@@ -216,7 +216,7 @@ for(ii in 1:length(ex_files)) {
   stage_6_typical <- run_gapctd(x = sel_ctd, 
                         haul_df = haul_df, 
                         ctd_tz = "America/Anchorage",
-                        return_stage = "loopedit",
+                        return_stage = "slowdown",
                         align_pars = list(temperature = -0.5),
                         ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
                         cor_var = "conductivity") |>
@@ -259,7 +259,7 @@ for(ii in 1:length(ex_files)) {
   round1_6 <- run_gapctd(x = sel_ctd, 
                         haul_df = haul_df, 
                         ctd_tz = "America/Anchorage",
-                        return_stage = "loopedit",
+                        return_stage = "slowdown",
                         ctm_pars = round1_5$downcast@metadata$ctm$both) |>
     derive_and_bin(bin_width = 1)
   
@@ -298,7 +298,7 @@ for(ii in 1:length(ex_files)) {
                         ctd_tz = "America/Anchorage",
                         align_pars = list(),
                         ctm_pars = round2_5$downcast@metadata$ctm$both,
-                        return_stage = "loopedit") |>
+                        return_stage = "slowdown") |>
     derive_and_bin(bin_width = 1)
   
   round2_7 <- run_gapctd(x = sel_ctd, 
@@ -337,7 +337,7 @@ for(ii in 1:length(ex_files)) {
   round3_6 <- run_gapctd(x = sel_downcast, 
                          haul_df = haul_df, 
                          ctd_tz = "America/Anchorage",
-                         return_stage = "loopedit",
+                         return_stage = "slowdown",
                          ctm_pars = round3_5$downcast@metadata$ctm$both) |>
     derive_and_bin(bin_width = 1)
   
@@ -375,7 +375,7 @@ for(ii in 1:length(ex_files)) {
   round3_6_uc <- run_gapctd(x = sel_upcast, 
                          haul_df = haul_df, 
                          ctd_tz = "America/Anchorage",
-                         return_stage = "loopedit",
+                         return_stage = "slowdown",
                          ctm_pars = round3_5_uc$upcast@metadata$ctm$both) |>
     derive_and_bin(bin_width = 1)
   
@@ -397,27 +397,27 @@ for(ii in 1:length(ex_files)) {
                                 make_stage_df(stage_3, stage = "lowpass_filter", method = "All"),
                                 make_stage_df(round1_4, stage = "align", method = "Typ. CTM"),
                                 make_stage_df(round1_5, stage = "ctmcorrect", method = "Typ. CTM"),
-                                make_stage_df(round1_6, stage = "loopedit", method = "Typ. CTM"),
+                                make_stage_df(round1_6, stage = "slowdown", method = "Typ. CTM"),
                                 make_stage_df(round1_7, stage = "bin_average", method = "Typ. CTM"),
                                 make_stage_df(round1_8, stage = "slowdown", method = "Typ. CTM"),
                                 make_stage_df(round2_4, stage = "align", method = "TSA"),
                                 make_stage_df(round2_5, stage = "ctmcorrect", method = "TSA"),
-                                make_stage_df(round2_6, stage = "loopedit", method = "TSA"),
+                                make_stage_df(round2_6, stage = "slowdown", method = "TSA"),
                                 make_stage_df(round2_7, stage = "bin_average", method = "TSA"),
                                 make_stage_df(round2_8, stage = "slowdown", method = "TSA"),
                                 make_stage_df(round3_4, stage = "align", method = "SPD"),
                                 make_stage_df(round3_5, stage = "ctmcorrect", method = "SPD"),
-                                make_stage_df(round3_6, stage = "loopedit", method = "SPD"),
+                                make_stage_df(round3_6, stage = "slowdown", method = "SPD"),
                                 make_stage_df(round3_7, stage = "bin_average", method = "SPD"),
                                 make_stage_df(round3_8, stage = "slowdown", method = "SPD"),
                                 make_stage_df(round3_4_uc, stage = "align", method = "SPD"),
                                 make_stage_df(round3_5_uc, stage = "ctmcorrect", method = "SPD"),
-                                make_stage_df(round3_6_uc, stage = "loopedit", method = "SPD"),
+                                make_stage_df(round3_6_uc, stage = "slowdown", method = "SPD"),
                                 make_stage_df(round3_7_uc, stage = "bin_average", method = "SPD"),
                                 make_stage_df(round3_8_uc, stage = "slowdown", method = "SPD"),
                                 make_stage_df(stage_4_typical, stage = "align", method = "Typical"),
                                 make_stage_df(stage_5_typical, stage = "ctmcorrect", method = "Typical"),
-                                make_stage_df(stage_6_typical, stage = "loopedit", method = "Typical"),
+                                make_stage_df(stage_6_typical, stage = "slowdown", method = "Typical"),
                                 make_stage_df(stage_7_typical, stage = "bin_average", method = "Typical"),
                                 make_stage_df(stage_8_typical, stage = "slowdown", method = "Typical")
   )
@@ -489,7 +489,7 @@ for(jj in 1:nrow(unique_deployments)) {
     dplyr::filter(VESSEL == unique_deployments$VESSEL[jj],
                   CRUISE == unique_deployments$CRUISE[jj],
                   HAUL == unique_deployments$HAUL[jj],
-                  !(stage %in% c("loopedit", "bin_average")))
+                  !(stage %in% c("slowdown", "bin_average")))
   
   sel_dat$sigmat <- oce::swSigmaT(salinity = sel_dat$salinity,
                                   temperature = sel_dat$temperature,
@@ -733,7 +733,7 @@ sel_dat <- process_df |>
   dplyr::filter(VESSEL == 148,
                 CRUISE == 202201,
                 HAUL == 186,
-                !(stage %in% c("loopedit", "bin_average")))
+                !(stage %in% c("slowdown", "bin_average")))
 
 sel_dat$range_temperature <- diff(range(sel_dat$temperature, na.rm = TRUE))
 sel_dat$range_salinity <- diff(range(sel_dat$salinity, na.rm = TRUE))

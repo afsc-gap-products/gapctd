@@ -295,8 +295,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anchorage", ctm_pars = list(), align_pars = c(),
                        cor_var = "conductivity") {
   
-  stopifnot("run_gapctd: Invalid return_stage. Must be one of 'split', 'median_filter', 'lowpass_filter', 'align', 'ctmcorrect', 'loopedit', 'bin_average', or 'full'" = 
-              return_stage %in% c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "loopedit", "bin_average", "full"))
+  stopifnot("run_gapctd: Invalid return_stage. Must be one of 'split', 'median_filter', 'lowpass_filter', 'align', 'ctmcorrect', 'slowdown', 'bin_average', or 'full'" = 
+              return_stage %in% c("split", "median_filter", "lowpass_filter", "align", "ctmcorrect", "slowdown", "bin_average", "full"))
   
   output_list <- list()
   
@@ -488,20 +488,20 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
     }
     
     
-    # Loop edit ------------------------------------------------------------------------------------
+    # Slowdown  ------------------------------------------------------------------------------------
     
     downcast <- downcast |>
-      gapctd:::loop_edit(min_speed = 0.1, 
+      gapctd:::slowdown(min_speed = 0.1, 
                          window = 5, 
                          cast_direction = "downcast") 
     
     upcast <- upcast |> 
-      gapctd:::loop_edit(min_speed = 0.1, 
+      gapctd:::slowdown(min_speed = 0.1, 
                          window = 5, 
                          cast_direction = "upcast")
     
     
-    if(return_stage == "loopedit") {
+    if(return_stage == "slowdown") {
       output_list[["downcast"]] <- downcast
       output_list[["upcast"]] <- upcast
       output_list[["bottom"]] <- bottom

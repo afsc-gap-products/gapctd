@@ -132,7 +132,7 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   print(paste0("Copying ", length(bat_files), " .bat files."))
   file.copy(bat_files, "./")
   
-  # Get data, filter, loop edit, align ----
+  # Get data directories ----
   if(is.null(bat_file)) {
     message("setup_gapctd_directory: Automatically selecting getdata.bat file (no user-specified argument to bat_file)")
     bat_file <- list.files(pattern = "getdata.bat")

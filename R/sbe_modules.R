@@ -9,7 +9,7 @@
 #' @return oce object with flags updated to denote scans for which speeds were below the threshold.
 #' @export
 
-loop_edit <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, exclude_bottom = 2) {
+slowdown <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, exclude_bottom = 2) {
   
   if(is.null(x)) {
     return(x)
