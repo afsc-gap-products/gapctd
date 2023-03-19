@@ -16,6 +16,6 @@ ex_haul <- ex_oce |>
                        cast_direction = "downcast") |>
   gapctd::conductivity_correction(alpha_C = 0.04, 
                                   beta_C = 1/8) |>
-  gapctd::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+  gapctd::slowdown(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1)

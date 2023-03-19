@@ -164,13 +164,13 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
   if(!is.null(dc) & !is.null(uc)) {
     dc_eval <- dc |>
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+      gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
       gapctd:::derive_eos() |>
       gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
     uc_eval <- uc |>
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
+      gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
       gapctd:::derive_eos() |>
       gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
@@ -185,7 +185,7 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
   if(!is.null(dc) & is.null(uc)) {
     dc_eval <- dc |>
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+      gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
       gapctd:::derive_eos() |>
       gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     
@@ -195,7 +195,7 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
   if(is.null(dc) & !is.null(uc)) {
     uc_eval <- uc |>
       gapctd:::conductivity_correction(alpha_C = alpha_C, beta_C = beta_C) |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
+      gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = "upcast") |>
       gapctd:::derive_eos() |>
       gapctd:::bin_average(by = "depth", bin_width = 1, exclude_surface = 4)
     

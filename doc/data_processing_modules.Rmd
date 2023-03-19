@@ -140,12 +140,12 @@ text(x = 31.58, y = 35, labels = "(5) Correct C")
 ```
 
 
-## Loop edit
+## Slowdown
 
-The `loop_edit()` module is based on the SBEDP Loop Edit (loopedit) module that flags slowdowns and reversals in scan data based on a threshold. 
+The `slowdown()` module is based on the SBEDP Loop Edit (loopedit) module that flags slowdowns and reversals in scan data based on a threshold. To account for variable profiling speeds in trawl-mounted CTDs, the function also excludes the surface and bottom from flagging.
 
 ```{r}
-dc_5 <- gapctd::loop_edit(dc_4,
+dc_5 <- gapctd::slowdown(dc_4,
                           min_speed = 0.1, 
                           window = 5, 
                           cast_direction = "downcast")

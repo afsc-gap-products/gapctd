@@ -40,7 +40,7 @@ channel_correlation <- function(x, exclude_flag = TRUE, c1 = "temperature", c2 =
 #' Estimate optimal alignment parameter for a channel (e.g. "temperature") within a range of candidate alignment offsets. The 'best' alignment is taken to be the one that maximizes the correlation between channels.
 #' 
 #' @param x oce object
-#' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::loop_edit()
+#' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::slowdown()
 #' @param variable Variable to be aligned ("temperature")
 #' @param offsets Numerical vector of offsets to evaluate, in seconds.
 #' @param cor_method Correlation method, passed to gapctd::channel_correlation().
@@ -59,7 +59,7 @@ optim_align_par <- function(x, cast_direction, variable = "temperature", offsets
     if(variable == "temperature") {
       offset_corr[ii] <- x |>
         gapctd:::align_var(variables = variable, offset = offsets[ii], interp_method = "linear") |>
-        # gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
+        # gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
         gapctd:::channel_correlation(exclude_flag = TRUE, 
                                      min_pressure = 1.01, 
                                      cor_method = cor_method, 
@@ -86,7 +86,7 @@ optim_align_par <- function(x, cast_direction, variable = "temperature", offsets
 #' @param align_pars A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
 #' @param cor_var A vector of variable names that channels being aligned should be compared with (e.g., corr_var = "conductivity")
 #' @param cor_method Correlation method, passed to gapctd::channel_correlation().
-#' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::loop_edit()
+#' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::slowdown()
 #' @export
 
 fixed_alignment <- function(x, align_pars, cor_var = "conductivity", cor_method = "pearson", cast_direction) {
@@ -99,7 +99,7 @@ fixed_alignment <- function(x, align_pars, cor_var = "conductivity", cor_method 
       gapctd:::align_var(variables = names(align_pars[jj]), 
                          offset = offset, 
                          interp_method = "linear") |>
-      gapctd:::loop_edit(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
+      gapctd:::slowdown(min_speed = 0.1, window = 5, cast_direction = cast_direction) |>
       gapctd:::channel_correlation(exclude_flag = TRUE, 
                                    min_pressure = 4, 
                                    cor_method = cor_method, 

@@ -16,7 +16,7 @@ optim_align_par(
 \arguments{
 \item{x}{oce object}
 
-\item{cast_direction}{Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::loop_edit()}
+\item{cast_direction}{Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::slowdown()}
 
 \item{variable}{Variable to be aligned ("temperature")}
 

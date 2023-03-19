@@ -21,7 +21,7 @@ fixed_alignment(
 
 \item{cor_method}{Correlation method, passed to gapctd::channel_correlation().}
 
-\item{cast_direction}{Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::loop_edit()}
+\item{cast_direction}{Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::slowdown()}
 }
 \description{
 Calculate alignment correlation for fixed parameters
