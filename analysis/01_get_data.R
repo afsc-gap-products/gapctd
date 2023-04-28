@@ -92,7 +92,7 @@ trawl_height_df <- events_df |>
 trawl_height_df <- trawl_height_df |>
   dplyr::filter(date_time > eq & date_time < hb)
 
-# Get 2021 GOA cTD data
+# Get 2021 GOA CTD data
 nc <- RNetCDF::open.nc(con = nc_path)
 
 goa_haul_df <- data.frame(vessel = RNetCDF::var.get.nc(ncfile = nc, variable = "vessel"),

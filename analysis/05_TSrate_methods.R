@@ -11,7 +11,8 @@ ctd_dat <- dplyr::bind_rows(
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_AI.rds")) |>
     dplyr::mutate(region = "AI"),
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_EBS.rds")) |>
-    dplyr::mutate(region = "EBS+NBS"))
+    dplyr::mutate(region = "EBS+NBS")) |>
+  dplyr::mutate(processing_method = ifelse(processing_method == "SPD", "MSG", processing_method))
 
 
 # Function to calculate summary statistics for gradients
@@ -82,12 +83,12 @@ print(
     ggplot() +
       geom_boxplot(data = ts_gradient_df,
                    mapping = aes(x = factor(processing_method, 
-                                            levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
-                                            labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")), 
+                                            levels = c("All", "Typical", "Typical CTM", "TSA", "MSG"),
+                                            labels = c("All", "Typ.", "Typ. CTM", "TSA", "MSG")), 
                                  y = temperature_max_gradient_s,
                                  color = factor(processing_method, 
-                                                levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
-                                                labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")))) +
+                                                levels = c("All", "Typical", "Typical CTM", "TSA", "MSG"),
+                                                labels = c("All", "Typ.", "Typ. CTM", "TSA", "MSG")))) +
       scale_y_continuous(name = expression("Max. T rate "~(degree*C~s^-1)),
                          limits = c(0, 2.5)
       ) +
@@ -100,12 +101,12 @@ print(
     ggplot() +
       geom_boxplot(data = ts_gradient_df,
                    mapping = aes(x = factor(processing_method, 
-                                            levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
-                                            labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")), 
+                                            levels = c("All", "Typical", "Typical CTM", "TSA", "MSG"),
+                                            labels = c("All", "Typ.", "Typ. CTM", "TSA", "MSG")), 
                                  y = temperature_max_gradient_z,
                                  color = factor(processing_method, 
-                                                levels = c("All", "Typical", "Typical CTM", "TSA", "SPD"),
-                                                labels = c("All", "Typ.", "Typ. CTM", "TSA", "SPD")))) +
+                                                levels = c("All", "Typical", "Typical CTM", "TSA", "MSG"),
+                                                labels = c("All", "Typ.", "Typ. CTM", "TSA", "MSG")))) +
       scale_y_continuous(name = expression("Max. T rate "~(degree*C~m^-1)),
                          limits = c(0, 2.5)
       ) +

@@ -10,7 +10,7 @@ ex_tsa_init <- run_gapctd(x = ex_oce,
                       haul_df = readRDS(here::here("paper", "data", "ex_hauls.rds")), 
                       ctd_tz = "America/Anchorage",
                       return_stage = "align") |>
-  gapctd:::derive_and_bin(bin_width = 1)
+  gapctd::derive_and_bin(bin_width = 1)
 
 ex_area_init <- gapctd::ts_area(dc = ex_tsa_init$downcast,
                                 uc = ex_tsa_init$upcast,
@@ -196,65 +196,65 @@ cowplot::plot_grid(plot_tsa_init,
 dev.off()
 
 
-# Salinity path distance ----
+# Minimum Salinity Gradient ----
 
-# Using SPD method
-ex_spd_downcast <- oce::ctdTrim(x = ex_oce,
+# Using MSG method
+ex_msg_downcast <- oce::ctdTrim(x = ex_oce,
                              method = "range", 
                              parameters = list(item = "timeS",
                                                from = 0,
                                                to = max(ex_tsa_init$downcast@data$timeS + 0.25, na.rm = TRUE)))
 
-ex_spd_downcast_init <- run_gapctd(x = ex_spd_downcast, 
+ex_msg_downcast_init <- run_gapctd(x = ex_msg_downcast, 
                        haul_df = haul_df, 
                        ctd_tz = "America/Anchorage",
                        return_stage = "align") |>
   gapctd:::derive_and_bin(bin_width = 1)
 
-ex_spd_downcast_final <- run_gapctd(x = ex_spd_downcast, 
+ex_msg_downcast_final <- run_gapctd(x = ex_msg_downcast, 
                                    haul_df = haul_df, 
                                    ctd_tz = "America/Anchorage",
                                    return_stage = "ctmcorrect") |>
   gapctd:::derive_and_bin(bin_width = 1)
 
-ex_spd_upcast <- oce::ctdTrim(x = ex_oce,
+ex_msg_upcast <- oce::ctdTrim(x = ex_oce,
                            method = "range", 
                            parameters = list(item = "timeS",
                                              from = min(ex_tsa_init$upcast@data$timeS - 0.25, na.rm = TRUE),
                                              to = 5e6))
 
-ex_spd_upcast_init <- run_gapctd(x = ex_spd_upcast, 
+ex_msg_upcast_init <- run_gapctd(x = ex_msg_upcast, 
                           haul_df = haul_df, 
                           ctd_tz = "America/Anchorage",
                           return_stage = "align") |>
   gapctd:::derive_and_bin(bin_width = 1)
 
-ex_spd_upcast_final <- run_gapctd(x = ex_spd_upcast, 
+ex_msg_upcast_final <- run_gapctd(x = ex_msg_upcast, 
                                     haul_df = haul_df, 
                                     ctd_tz = "America/Anchorage",
                                     return_stage = "ctmcorrect") |>
   gapctd:::derive_and_bin(bin_width = 1)
 
 # After optimizing temperature alignment, before CTM
-ex_spd_init <- dplyr::bind_rows(
-  data.frame(pressure = ex_spd_downcast_init$downcast@data$pressure,
-             salinity = ex_spd_downcast_init$downcast@data$salinity,
+ex_msg_init <- dplyr::bind_rows(
+  data.frame(pressure = ex_msg_downcast_init$downcast@data$pressure,
+             salinity = ex_msg_downcast_init$downcast@data$salinity,
              cast = "downcast"),
-  data.frame(pressure = ex_spd_upcast_init$upcast@data$pressure,
-             salinity = ex_spd_upcast_init$upcast@data$salinity,
+  data.frame(pressure = ex_msg_upcast_init$upcast@data$pressure,
+             salinity = ex_msg_upcast_init$upcast@data$salinity,
              cast = "upcast"))
 
-# After CTM using SPD
-ex_spd_final <- dplyr::bind_rows(
-  data.frame(pressure = ex_spd_downcast_final$downcast@data$pressure,
-             salinity = ex_spd_downcast_final$downcast@data$salinity,
+# After CTM using MSG
+ex_msg_final <- dplyr::bind_rows(
+  data.frame(pressure = ex_msg_downcast_final$downcast@data$pressure,
+             salinity = ex_msg_downcast_final$downcast@data$salinity,
              cast = "downcast"),
-  data.frame(pressure = ex_spd_upcast_final$upcast@data$pressure,
-             salinity = ex_spd_upcast_final$upcast@data$salinity,
+  data.frame(pressure = ex_msg_upcast_final$upcast@data$pressure,
+             salinity = ex_msg_upcast_final$upcast@data$salinity,
              cast = "upcast"))
 
 # After CTM  using typical parameters
-ex_spd_typctm <- dplyr::bind_rows(
+ex_msg_typctm <- dplyr::bind_rows(
   data.frame(pressure = ex_typctm_final$downcast@data$pressure,
              salinity = ex_typctm_final$downcast@data$salinity,
              cast = "downcast"),
@@ -262,20 +262,20 @@ ex_spd_typctm <- dplyr::bind_rows(
              salinity = ex_typctm_final$upcast@data$salinity,
              cast = "upcast"))
 
-# Make SPD plots
-spd_srange <- range(ex_spd_init$salinity, 
-                    ex_spd_final$salinity, 
-                    ex_spd_typctm$salinity)
+# Make MSG plots
+msg_srange <- range(ex_msg_init$salinity, 
+                    ex_msg_final$salinity, 
+                    ex_msg_typctm$salinity)
 
-dc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_spd_init$salinity[ex_spd_init$cast == "downcast"]))), 4))
-uc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_spd_init$salinity[ex_spd_init$cast == "upcast"]))), 4))
+dc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_msg_init$salinity[ex_msg_init$cast == "downcast"]))), 4))
+uc_dist_init <- sprintf("%.4f", round(sum(abs(diff(ex_msg_init$salinity[ex_msg_init$cast == "upcast"]))), 4))
 
-plot_spd_init <- ggplot() +
-  geom_path(data = ex_spd_init,
+plot_msg_init <- ggplot() +
+  geom_path(data = ex_msg_init,
             mapping = aes(x = salinity, 
                           y = pressure, 
                           color = cast)) +
-  geom_point(data = ex_spd_init,
+  geom_point(data = ex_msg_init,
             mapping = aes(x = salinity, 
                           y = pressure, 
                           color = cast,
@@ -294,7 +294,7 @@ plot_spd_init <- ggplot() +
             size = 3) +
   scale_color_manual(name = "Cast", values = c("grey50", "black")) +
   scale_shape(name = "Cast") +
-  scale_x_continuous(name = "Salinity (PSS-78)", limits = spd_srange) +
+  scale_x_continuous(name = "Salinity (PSS-78)", limits = msg_srange) +
   scale_y_reverse(name = "Pressure (dbar)") +
   ggtitle(label = "Align T (Optimized)") +
   theme_bw() +
@@ -309,12 +309,12 @@ plot_spd_init <- ggplot() +
 dc_dist_typctm <- sprintf("%.4f", round(sum(abs(diff(ex_area_typctm$cast_df$salinity[ex_area_typctm$cast_df$cast == "downcast"]))), 4))
 uc_dist_typctm <- sprintf("%.4f", round(sum(abs(diff(ex_area_typctm$cast_df$salinity[ex_area_typctm$cast_df$cast == "upcast"]))), 4))
 
-plot_spd_typctm <- ggplot() +
-  geom_path(data = ex_spd_typctm,
+plot_msg_typctm <- ggplot() +
+  geom_path(data = ex_msg_typctm,
             mapping = aes(x = salinity, 
                           y = pressure, 
                           color = cast)) +
-  geom_point(data = ex_spd_typctm,
+  geom_point(data = ex_msg_typctm,
              mapping = aes(x = salinity, 
                            y = pressure, 
                            color = cast,
@@ -333,7 +333,7 @@ plot_spd_typctm <- ggplot() +
             size = 3) +
   scale_color_manual(name = "Cast", values = c("grey50", "black")) +
   scale_shape(name = "Cast") +
-  scale_x_continuous(name = "Salinity (PSS-78)", limits = spd_srange) +
+  scale_x_continuous(name = "Salinity (PSS-78)", limits = msg_srange) +
   scale_y_reverse(name = "Pressure (dbar)") +
   ggtitle(label = "CTM Corr. (Typical CTM)") +
   theme_bw() +
@@ -345,15 +345,15 @@ plot_spd_typctm <- ggplot() +
         panel.background = element_blank(),
         plot.background = element_blank())
 
-dc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_spd_final$salinity[ex_spd_final$cast == "downcast"]))), 4))
-uc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_spd_final$salinity[ex_spd_final$cast == "upcast"]))), 4))
+dc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_msg_final$salinity[ex_msg_final$cast == "downcast"]))), 4))
+uc_dist_final <- sprintf("%.4f", round(sum(abs(diff(ex_msg_final$salinity[ex_msg_final$cast == "upcast"]))), 4))
 
-plot_spd_final <- ggplot() +
-  geom_path(data = ex_spd_final,
+plot_msg_final <- ggplot() +
+  geom_path(data = ex_msg_final,
             mapping = aes(x = salinity, 
                           y = pressure, 
                           color = cast)) +
-  geom_point(data = ex_spd_final,
+  geom_point(data = ex_msg_final,
              mapping = aes(x = salinity, 
                            y = pressure, 
                            color = cast,
@@ -372,9 +372,9 @@ plot_spd_final <- ggplot() +
             size = 3) +
   scale_color_manual(name = "Cast", values = c("grey50", "black")) +
   scale_shape(name = "Cast") +
-  scale_x_continuous(name = "Salinity (PSS-78)", limits = spd_srange) +
+  scale_x_continuous(name = "Salinity (PSS-78)", limits = msg_srange) +
   scale_y_reverse(name = "Pressure (dbar)") +
-  ggtitle(label = "CTM Corr. (SPD)") +
+  ggtitle(label = "CTM Corr. (MSG)") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, size = 9),
         axis.title = element_text(size = 9),
@@ -384,20 +384,20 @@ plot_spd_final <- ggplot() +
         panel.background = element_blank(),
         plot.background = element_blank())
 
-distance_legend <- cowplot::get_legend(plot_spd_final)
+distance_legend <- cowplot::get_legend(plot_msg_final)
 
-ragg::agg_png(here::here("paper", "plots", "ex_spd.png"), width = 169, height = 75, units = "mm", res = 600)
+ragg::agg_png(here::here("paper", "plots", "ex_msg.png"), width = 169, height = 75, units = "mm", res = 600)
 print(
-  cowplot::plot_grid(plot_spd_init + theme(legend.position = "none"),
-                     plot_spd_typctm  + theme(legend.position = "none"),
-                     plot_spd_final + theme(legend.position = "none"), 
+  cowplot::plot_grid(plot_msg_init + theme(legend.position = "none"),
+                     plot_msg_typctm  + theme(legend.position = "none"),
+                     plot_msg_final + theme(legend.position = "none"), 
                      distance_legend, nrow = 1, rel_widths = c(1, 1, 1, 0.4))
 )
 dev.off()
 
 
-# Combined SPD and TSA plot ----
-ragg::agg_png(here::here("paper", "plots", "ex_tsa_spd.png"), width = 169, height = 150, units = "mm", res = 600)
+# Combined MSG and TSA plot ----
+ragg::agg_png(here::here("paper", "plots", "ex_tsa_msg.png"), width = 169, height = 150, units = "mm", res = 600)
 print(
   cowplot::plot_grid(
     cowplot::plot_grid(plot_tsa_init,
@@ -407,9 +407,9 @@ print(
                        nrow = 1, 
                        rel_widths = c(1,1,1,0.4),
                        labels = c(LETTERS[1:3], NULL)),
-  cowplot::plot_grid(plot_spd_init + theme(legend.position = "none"),
-                     plot_spd_typctm  + theme(legend.position = "none"),
-                     plot_spd_final + theme(legend.position = "none"), 
+  cowplot::plot_grid(plot_msg_init + theme(legend.position = "none"),
+                     plot_msg_typctm  + theme(legend.position = "none"),
+                     plot_msg_final + theme(legend.position = "none"), 
                      distance_legend, 
                      nrow = 1, 
                      rel_widths = c(1,1,1,0.4),

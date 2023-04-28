@@ -5,7 +5,7 @@
 #    - Typical: Manfacturer recommendend temperature offset (-0.5) and CTM parameters (alpha_C = 0.04, beta_C = 1/8)
 #    - Typ. CTM: Estimate temperature offset and manufacturer recommended CTM parameters (alpha_C = 0.04, beta_C = 1/8)
 #    - Temperature-Salinity Curve Area (TSA): Estimated temperature offset and CTM parameters. CTM optimization based on area between temperature-salinity curves.
-#    - Salinity Path Distance (SPD): Estimated temperature offset and CTM parameters. CTM optimization based on path distance of salinity curves.
+#    - Minimum Salinity Gradient (MSG): Estimated temperature offset and CTM parameters. CTM optimization based on path distance of salinity curves.
 #
 
 
@@ -315,7 +315,7 @@ for(ii in 1:length(ex_files)) {
                         ctd_tz = "America/Anchorage",
                         return_stage = "full")
   
-  # Estimated alignment and CTM parameters, with optimization based on Salinity Path Distance (SPD)
+  # Estimated alignment and CTM parameters, with optimization based on Minimum Salinity Gradient (MSG)
   sel_downcast <- oce::ctdTrim(x = sel_ctd,
                                method = "range", 
                                parameters = list(item = "timeS",
@@ -405,16 +405,16 @@ for(ii in 1:length(ex_files)) {
                                 make_stage_df(round2_6, stage = "slowdown", method = "TSA"),
                                 make_stage_df(round2_7, stage = "bin_average", method = "TSA"),
                                 make_stage_df(round2_8, stage = "slowdown", method = "TSA"),
-                                make_stage_df(round3_4, stage = "align", method = "SPD"),
-                                make_stage_df(round3_5, stage = "ctmcorrect", method = "SPD"),
-                                make_stage_df(round3_6, stage = "slowdown", method = "SPD"),
-                                make_stage_df(round3_7, stage = "bin_average", method = "SPD"),
-                                make_stage_df(round3_8, stage = "slowdown", method = "SPD"),
-                                make_stage_df(round3_4_uc, stage = "align", method = "SPD"),
-                                make_stage_df(round3_5_uc, stage = "ctmcorrect", method = "SPD"),
-                                make_stage_df(round3_6_uc, stage = "slowdown", method = "SPD"),
-                                make_stage_df(round3_7_uc, stage = "bin_average", method = "SPD"),
-                                make_stage_df(round3_8_uc, stage = "slowdown", method = "SPD"),
+                                make_stage_df(round3_4, stage = "align", method = "MSG"),
+                                make_stage_df(round3_5, stage = "ctmcorrect", method = "MSG"),
+                                make_stage_df(round3_6, stage = "slowdown", method = "MSG"),
+                                make_stage_df(round3_7, stage = "bin_average", method = "MSG"),
+                                make_stage_df(round3_8, stage = "slowdown", method = "MSG"),
+                                make_stage_df(round3_4_uc, stage = "align", method = "MSG"),
+                                make_stage_df(round3_5_uc, stage = "ctmcorrect", method = "MSG"),
+                                make_stage_df(round3_6_uc, stage = "slowdown", method = "MSG"),
+                                make_stage_df(round3_7_uc, stage = "bin_average", method = "MSG"),
+                                make_stage_df(round3_8_uc, stage = "slowdown", method = "MSG"),
                                 make_stage_df(stage_4_typical, stage = "align", method = "Typical"),
                                 make_stage_df(stage_5_typical, stage = "ctmcorrect", method = "Typical"),
                                 make_stage_df(stage_6_typical, stage = "slowdown", method = "Typical"),
@@ -480,7 +480,7 @@ unique_deployments <- process_df |>
 
 process_df <- dplyr::filter(process_df, depth > 1)
 
-offset_curves <- data.frame(processing_method = c("All", NA, "Typ. CTM", "TSA", "SPD", "Typical"),
+offset_curves <- data.frame(processing_method = c("All", NA, "Typ. CTM", "TSA", "MSG", "Typical"),
                             shift_var = c(0, 0, 0.125, 0.25, 0.375, 0))
 
 for(jj in 1:nrow(unique_deployments)) {
@@ -519,7 +519,7 @@ for(jj in 1:nrow(unique_deployments)) {
     geom_path(data = sel_dat,
               mapping = aes(y = depth,
                             x = temperature + range_temperature*shift_var,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = expression("Temperature ("*degree*C*')'), 
@@ -542,7 +542,7 @@ for(jj in 1:nrow(unique_deployments)) {
     geom_path(data = sel_dat,
               mapping = aes(y = depth,
                             x = salinity + range_salinity*shift_var,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = "Salnity (PSS-78)", 
@@ -569,7 +569,7 @@ for(jj in 1:nrow(unique_deployments)) {
                 dplyr::filter(stage == "slowdown"),
               mapping = aes(y = depth,
                             x = density-1000 + range_density*shift_var,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = expression(sigma~'('*kg~m^-3*')'), 
@@ -597,7 +597,7 @@ for(jj in 1:nrow(unique_deployments)) {
                 dplyr::filter(stage == "slowdown"),
               mapping = aes(y = depth,
                             x = sigmat + range_sigmat*shift_var,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = expression(sigma[t]~'('*kg~m^-3*')'), 
@@ -625,7 +625,7 @@ for(jj in 1:nrow(unique_deployments)) {
                 dplyr::filter(stage == "slowdown"),
               mapping = aes(y = depth,
                             x = sigmatheta + range_sigmatheta*shift_var,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = expression(sigma[theta]~'('*kg~m^-3*')'), 
@@ -749,7 +749,7 @@ plotly::ggplotly(
       geom_path(data = sel_dat,
                 mapping = aes(y = depth,
                               x = temperature + range_temperature*shift_var,
-                              color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                              color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                               linetype = cast_direction),
                 size = rel(0.3)) +
       scale_x_continuous(name = expression("Temperature,"~degree*C), 
@@ -774,7 +774,7 @@ plotly::ggplotly(
       geom_path(data = sel_dat,
                 mapping = aes(y = depth,
                               x = salinity + range_salinity*shift_var,
-                              color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                              color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                               linetype = cast_direction),
                 size = rel(0.3)) +
       scale_x_continuous(name = "Salnity, PSS-78", 
@@ -804,7 +804,7 @@ plotly::ggplotly(
     geom_path(data = sel_dat,
               mapping = aes(y = depth,
                             x = density,
-                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "SPD")),
+                            color = factor(processing_method, levels = c("All", "Typical", "Typ. CTM", "TSA", "MSG")),
                             linetype = cast_direction),
               size = rel(0.3)) +
     scale_x_continuous(name = "Density", 

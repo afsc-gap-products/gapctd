@@ -1,6 +1,6 @@
 #' Select best processing method (R workflow)
 #' 
-#' Simultaneously review multiple temperature, salinity, and density profiles from downcasts and upcasts that were contained in .rds files that were processed using different methods (e.g., Typical, Typical CTM, TSA, SPD) then select the best profile. Renames the rds file with the best profile by replacing the method with the suffix ("_best.rds"). Run after wrapper_run_gapctd().
+#' Simultaneously review multiple temperature, salinity, and density profiles from downcasts and upcasts that were contained in .rds files that were processed using different methods (e.g., Typical, Typical CTM, TSA, MSG) then select the best profile. Renames the rds file with the best profile by replacing the method with the suffix ("_best.rds"). Run after wrapper_run_gapctd().
 #' 
 #' @param rds_dir_path Filepath to directory containing .rds files.
 #' @export
@@ -65,7 +65,7 @@ select_best_method <- function(rds_dir_path) {
                         y = depth,
                         linetype = cast_direction,
                         color = factor(gapctd_method, 
-                                       levels = c("Typical", "Typical CTM", "TSA", "SPD"),
+                                       levels = c("Typical", "Typical CTM", "TSA", "MSG"),
                                        labels = c("(1) Typical", "(2) Typical CTM", "(3) T-S Area", "(4) S Path Dist")))) +
           scale_color_manual(name = "",
                              values = c("(1) Typical" = "#E69F00", 
@@ -90,7 +90,7 @@ select_best_method <- function(rds_dir_path) {
     # Clear last plot
     dev.off()
     
-    best_suffix <- c("_typical.rds", "_typical_ctm.rds", "_tsa.rds", "_spd.rds")[as.numeric(response)]
+    best_suffix <- c("_typical.rds", "_typical_ctm.rds", "_tsa.rds", "_msg.rds")[as.numeric(response)]
     
     #  Rename best file
     best_file <- deployment_files[grepl(pattern = best_suffix, x = deployment_files)]

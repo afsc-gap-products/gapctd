@@ -5,7 +5,7 @@ dc_df <- data.frame(pressure = 1:5,
            cast = rep("downcast", 5),
            temperature = c(8.25,8,7,5,4),
            salinity = c(31, 31, 31.2, 31.5, 32.2),
-           spd = c(rep(FALSE,4), TRUE)) |>
+           msg = c(rep(FALSE,4), TRUE)) |>
   dplyr::mutate(cumsum_salinity = c(0, cumsum(abs(diff(salinity)))))
 
 uc_df <- data.frame(pressure = 1:8,
@@ -13,7 +13,7 @@ uc_df <- data.frame(pressure = 1:8,
                     cast = rep("upcast", 8),
                     temperature = c(8.5, 8, 6, 4, 2.5, 2.5, 2.5, 2.5),
                     salinity = c(31.5, 31.5, 31.5, 31.75, 32, 32.25, 32.5, 32.5),
-                    spd = c(rep(FALSE,7), TRUE)) |>
+                    msg = c(rep(FALSE,7), TRUE)) |>
   dplyr::mutate(cumsum_salinity = c(0, cumsum(abs(diff(salinity)))))
 
 dcuc_df <- dplyr::bind_rows(dc_df, uc_df)
@@ -130,7 +130,7 @@ ts_profile <- ggplot() +
         axis.text = element_text(size = 8),
         legend.position = c(0.7, 0.8))
 
-spd_profile <- ggplot() + 
+msg_profile <- ggplot() + 
   geom_path(data = dcuc_df,
                      mapping = aes(x = pressure, 
                                    y = cumsum_salinity,
@@ -141,11 +141,11 @@ spd_profile <- ggplot() +
                           color = cast,
                           shape = cast)) +
   geom_text(data = dcuc_df |>
-                    dplyr::filter(spd),
+                    dplyr::filter(msg),
              mapping = aes(x = pressure, 
                            y = cumsum_salinity,
                            color = cast,
-                           label = "  SPD"),
+                           label = "  MSG"),
             hjust = 0) +
   geom_text_repel(data = dcuc_df,
             mapping = aes(x = pressure, 
@@ -162,14 +162,14 @@ spd_profile <- ggplot() +
   scale_shape(name = "Cast") +
   scale_x_continuous(name = expression("Pressure"~(dbar^-1)), limits = c(0,10.5)) +
   scale_y_continuous(name = expression("Cumulative Sum of "~abs(Delta*S/Delta*P))) +
-  ggtitle("Salinity Path Distance") +
+  ggtitle("Minimum Salinity Gradient") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, size = 9),
         axis.title = element_text(size = 9),
         axis.text = element_text(size = 8),
         legend.position = "right")
 
-ts_legend <- cowplot::get_legend(spd_profile)
+ts_legend <- cowplot::get_legend(msg_profile)
 
 ragg::agg_png(filename = here::here("paper", "plots", "ex_optimization.png"), width = 140, height = 120, units = "mm", res = 600)
 print(
@@ -177,7 +177,7 @@ cowplot::plot_grid(
   cowplot::plot_grid(t_profile, 
                      s_profile, 
                      ts_profile, 
-                     spd_profile + theme(legend.position = "none"),
+                     msg_profile + theme(legend.position = "none"),
                      align = "hv",
                      labels = LETTERS[1:4]),
   cowplot::plot_grid(NULL, 

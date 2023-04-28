@@ -18,9 +18,9 @@ project_crs <- "EPSG:3338"
 # Yakutat Bay freshwater lens (424-75)
 
 # Retrieve sample locations from netCDF file
-samples_ebs <- RNetCDF::open.nc(con = here::here("data", "EBS", "GAPCTD_2021_BS.nc"))
+samples_ebs <- RNetCDF::open.nc(con = here::here("data", "GAPCTD_2021_EBS.nc"))
 
-samples_goa <- RNetCDF::open.nc(con = here::here("data", "GOA", "GAPCTD_2021_GOA.nc")) 
+samples_goa <- RNetCDF::open.nc(con = here::here("data", "GAPCTD_2021_GOA.nc")) 
 
 # Find closest to M2
 sample_locations_df <- dplyr::bind_rows(

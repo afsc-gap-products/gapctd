@@ -13,7 +13,8 @@ ctd_dat <- dplyr::bind_rows(
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_AI.rds")) |>
     dplyr::mutate(region = "AI"),
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_EBS.rds")) |>
-    dplyr::mutate(region = "EBS+NBS"))
+    dplyr::mutate(region = "EBS+NBS")) |>
+  dplyr::mutate(processing_method = ifelse(processing_method == "SPD", "MSG", processing_method))
 
 proportion_direction_df <- ctd_dat |>
   dplyr::select(vessel, cruise, haul, processing_method, region) |>
@@ -61,7 +62,7 @@ proportion_method_df <- ctd_dat |>
                      names_from = "processing_method",
                      values_from = "proportion",
                      values_fill = "0.0") |>
-  dplyr::select(Survey, Typical, `Typical CTM`, TSA, SPD)
+  dplyr::select(Survey, Typical, `Typical CTM`, TSA, MSG)
 
 ctd_dat |>
   dplyr::select(vessel, cruise, haul, processing_method, region) |>

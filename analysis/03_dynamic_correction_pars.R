@@ -13,8 +13,8 @@ ctd_dat <- dplyr::bind_rows(
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_AI.rds")) |>
     dplyr::mutate(region = "AI"),
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_EBS.rds")) |>
-    dplyr::mutate(region = "EBS+NBS"))
-
+    dplyr::mutate(region = "EBS+NBS")) |>
+  dplyr::mutate(processing_method = ifelse(processing_method == "SPD", "MSG", processing_method))
 
 optimized_params_df <- dplyr::filter(ctd_dat, 
                                      processing_method != "Typical") |>
@@ -31,7 +31,7 @@ cowplot::plot_grid(
     geom_density(data = optimized_params_df, 
                  mapping = aes(x = temperature_offset,
                                color = factor(processing_method, 
-                                              levels = c("Typical CTM", "TSA", "SPD"))),
+                                              levels = c("Typical CTM", "TSA", "MSG"))),
                  alpha = 0.7) +
     scale_y_continuous(name = "Density", 
                        expand = c(0, 0)) +
@@ -52,7 +52,7 @@ cowplot::plot_grid(
                                       processing_method != "Typical CTM"), 
                  mapping = aes(x = alpha_C,
                                color = factor(processing_method, 
-                                              levels = c("Typical CTM", "TSA", "SPD"))),
+                                              levels = c("Typical CTM", "TSA", "MSG"))),
                  alpha = 0.7) +
     scale_y_continuous(name = " ", 
                        expand = c(0, 0)) +
@@ -65,12 +65,12 @@ cowplot::plot_grid(
   ggplot() +
     geom_vline(xintercept = 8, 
                linetype = 2, 
-               size = rel(0.3)) +
+               linewidth = rel(0.3)) +
     geom_density(data = dplyr::filter(optimized_params_df, 
                                       processing_method != "Typical CTM"), 
                  mapping = aes(x = beta_C^-1,
                                color = factor(processing_method, 
-                                              levels = c("Typical CTM", "TSA", "SPD"))),
+                                              levels = c("Typical CTM", "TSA", "MSG"))),
                  alpha = 0.7) +
     scale_y_continuous(name = " ", 
                        expand = c(0, 0)) +

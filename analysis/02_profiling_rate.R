@@ -13,6 +13,7 @@ ctd_dat <- dplyr::bind_rows(
     dplyr::mutate(region = "AI"),
   readRDS(file = here::here("paper", "data", "all_profiles","GAPCTD_2022_EBS.rds")) |>
     dplyr::mutate(region = "EBS+NBS")) |>
+  dplyr::mutate(processing_method = ifelse(processing_method == "SPD", "MSG", processing_method)) |>
   dplyr::filter(!(vessel == 94 & cruise == 202101 & haul == 74))
 
 haul_files <- list.files(here::here("paper", "data", "haul_data"), full.names = TRUE)

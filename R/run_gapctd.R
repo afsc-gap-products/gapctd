@@ -86,10 +86,10 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                           gsub(pattern = "raw.cnv", 
                                                replacement = "typical_ctm.rds", 
                                                x = cnv_short))
-  rds_filenames_spd <- here::here("output", 
+  rds_filenames_msg <- here::here("output", 
                                   processing_method, 
                                   gsub(pattern = "raw.cnv", 
-                                       replacement = "spd.rds", 
+                                       replacement = "msg.rds", 
                                        x = cnv_short))
   rds_filenames_typical <- here::here("output", 
                                       processing_method, 
@@ -162,17 +162,17 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                        gapctd_method = "TSA",
                        exclude_bottom = TRUE)
       
-      spd_pars_dc <- ctd_tsa$downcast@metadata$ctm$downcast
-      spd_pars_uc <- ctd_tsa$upcast@metadata$ctm$upcast
+      msg_pars_dc <- ctd_tsa$downcast@metadata$ctm$downcast
+      msg_pars_uc <- ctd_tsa$upcast@metadata$ctm$upcast
       
     } else {
-      spd_pars_dc <- list()
-      spd_pars_uc <- list()
+      msg_pars_dc <- list()
+      msg_pars_uc <- list()
     }
     
-    # SPD: Estimate temperature alignment and CTM parameters (optimization using S path distance)
-    ctd_downcast_spd <- NULL
-    ctd_upcast_spd <- NULL
+    # MSG: Estimate temperature alignment and CTM parameters (optimization using S path distance)
+    ctd_downcast_msg <- NULL
+    ctd_upcast_msg <- NULL
     
     if("downcast" %in% names(ctd_split)) {
       sel_downcast <- oce::ctdTrim(x = ctd_dat,
@@ -181,12 +181,12 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                                      from = 0,
                                                      to = max(ctd_split$downcast@data$timeS + 0.25, na.rm = TRUE)))
       
-      ctd_downcast_spd <- gapctd::run_gapctd(x = sel_downcast, 
+      ctd_downcast_msg <- gapctd::run_gapctd(x = sel_downcast, 
                                              haul_df = haul_df, 
                                              ctd_tz = "America/Anchorage",
                                              return_stage = "full",
                                              align_pars = list(),
-                                             ctm_pars = spd_pars_dc)
+                                             ctm_pars = msg_pars_dc)
     }
     
     if("upcast" %in% names(ctd_split)) {
@@ -196,32 +196,32 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                                    from = min(ctd_split$upcast@data$timeS - 0.25, na.rm = TRUE),
                                                    to = 5e6))
       
-      ctd_upcast_spd <- gapctd::run_gapctd(x = sel_upcast, 
+      ctd_upcast_msg <- gapctd::run_gapctd(x = sel_upcast, 
                                            haul_df = haul_df, 
                                            ctd_tz = "America/Anchorage",
                                            return_stage = "full", 
                                            align_pars = list(),
-                                           ctm_pars = spd_pars_uc)
+                                           ctm_pars = msg_pars_uc)
     }
     
-    if(all("downcast" %in% names(ctd_downcast_spd), "upcast" %in% names(ctd_upcast_spd))) {
-      ctd_spd <- list(downcast = ctd_downcast_spd[['downcast']],
-                      upcast = ctd_upcast_spd[['upcast']])
+    if(all("downcast" %in% names(ctd_downcast_msg), "upcast" %in% names(ctd_upcast_msg))) {
+      ctd_msg <- list(downcast = ctd_downcast_msg[['downcast']],
+                      upcast = ctd_upcast_msg[['upcast']])
     } 
     
-    if(("downcast" %in% names(ctd_downcast_spd)) & !("upcast" %in% names(ctd_upcast_spd))) {
-      ctd_spd <- ctd_downcast_spd
+    if(("downcast" %in% names(ctd_downcast_msg)) & !("upcast" %in% names(ctd_upcast_msg))) {
+      ctd_msg <- ctd_downcast_msg
       
     }
     
-    if(!("downcast" %in% names(ctd_downcast_spd)) & ("upcast" %in% names(ctd_upcast_spd))) {
-      ctd_spd <- ctd_upcast_spd
+    if(!("downcast" %in% names(ctd_downcast_msg)) & ("upcast" %in% names(ctd_upcast_msg))) {
+      ctd_msg <- ctd_upcast_msg
     }
     
-    gapctd_write_rds(x = ctd_spd,
+    gapctd_write_rds(x = ctd_msg,
                      in_path = cnv_files[II],
-                     out_path = rds_filenames_spd[II],
-                     gapctd_method = "SPD",
+                     out_path = rds_filenames_msg[II],
+                     gapctd_method = "MSG",
                      exclude_bottom = TRUE)
     
     
@@ -273,7 +273,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
   
   # Move 'bad' files to bad_cnv
   move_bad_rds(rds_dir_path = here::here("output", processing_method),
-               in_pattern = c("typical.rds", "typical_ctm.rds", "tsa.rds", "spd.rds"))
+               in_pattern = c("typical.rds", "typical_ctm.rds", "tsa.rds", "msg.rds"))
   
 }
 
