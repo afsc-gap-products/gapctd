@@ -489,7 +489,8 @@ for(jj in 1:nrow(unique_deployments)) {
     dplyr::filter(VESSEL == unique_deployments$VESSEL[jj],
                   CRUISE == unique_deployments$CRUISE[jj],
                   HAUL == unique_deployments$HAUL[jj],
-                  !(stage %in% c("slowdown", "bin_average")))
+                  !(stage %in% c("bin_average"))) |>
+    dplyr::arrange(depth)
   
   sel_dat$sigmat <- oce::swSigmaT(salinity = sel_dat$salinity,
                                   temperature = sel_dat$temperature,

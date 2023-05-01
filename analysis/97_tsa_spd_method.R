@@ -1,4 +1,5 @@
 library(shadowtext)
+library(ggrepel)
 
 dc_df <- data.frame(pressure = 1:5,
            depth = 1:5,
@@ -132,36 +133,45 @@ ts_profile <- ggplot() +
 
 msg_profile <- ggplot() + 
   geom_path(data = dcuc_df,
-                     mapping = aes(x = pressure, 
-                                   y = cumsum_salinity,
+                     mapping = aes(y = pressure, 
+                                   x = cumsum_salinity,
                                    color = cast)) +
   geom_point(data = dcuc_df,
-            mapping = aes(x = pressure, 
-                          y = cumsum_salinity,
+            mapping = aes(y = pressure, 
+                          x = cumsum_salinity,
                           color = cast,
                           shape = cast)) +
+  geom_shadowtext(data = dcuc_df,
+                  mapping = aes(y = pressure, 
+                                x = cumsum_salinity,
+                                color = cast,
+                                label = pressure),
+                  bg.color = "white",
+                  vjust = 1.2,
+                  hjust = 1.4) +
   geom_text(data = dcuc_df |>
-                    dplyr::filter(msg),
-             mapping = aes(x = pressure, 
-                           y = cumsum_salinity,
-                           color = cast,
-                           label = "  MSG"),
-            hjust = 0) +
-  geom_text_repel(data = dcuc_df,
-            mapping = aes(x = pressure, 
-                          y = cumsum_salinity,
+              dplyr::filter(msg),
+            mapping = aes(y = pressure, 
+                          x = cumsum_salinity,
                           color = cast,
-                          label = pressure),
-            hjust = 0) +
+                          label = "  MSG"),
+            hjust = 0,
+            size = rel(2.5)) +
+  # geom_text_repel(data = dcuc_df,
+  #           mapping = aes(y = pressure, 
+  #                         x = cumsum_salinity,
+  #                         color = cast,
+  #                         label = pressure),
+  #           hjust = 0) +
   geom_point(data = dcuc_df,
-             mapping = aes(x = pressure, 
-                           y = cumsum_salinity,
+             mapping = aes(y = pressure, 
+                           x = cumsum_salinity,
                            color = cast,
                            shape = cast)) +
   scale_color_manual(values = c("grey50", "black"), name = "Cast") +
   scale_shape(name = "Cast") +
-  scale_x_continuous(name = expression("Pressure"~(dbar^-1)), limits = c(0,10.5)) +
-  scale_y_continuous(name = expression("Cumulative Sum of "~abs(Delta*S/Delta*P))) +
+  scale_y_reverse(name = expression("Pressure"~(dbar^-1)), limits = c(9.6, 0)) +
+  scale_x_continuous(name = expression("Cumulative Sum of "~abs(Delta*S/Delta*P)), limits = c(-0.1,1.5)) +
   ggtitle("Minimum Salinity Gradient") +
   theme_bw() +
   theme(plot.title = element_text(hjust = 0.5, size = 9),

@@ -1,16 +1,15 @@
 library(gapctd)
 
-ex_files
 # Temperature-Salinity Area Example ----
 ex_oce <- read.oce(file = "C:/Users/sean.rohan/Work/afsc/gapctd/paper/data/cnv/2021_07_08_0001_raw.cnv")
 haul_df <- readRDS(here::here("paper", "data", "ex_hauls.rds"))
 
 # T-S area after estimating alignment
 ex_tsa_init <- run_gapctd(x = ex_oce, 
-                      haul_df = readRDS(here::here("paper", "data", "ex_hauls.rds")), 
-                      ctd_tz = "America/Anchorage",
-                      return_stage = "align") |>
-  gapctd::derive_and_bin(bin_width = 1)
+                          haul_df = readRDS(here::here("paper", "data", "ex_hauls.rds")), 
+                          ctd_tz = "America/Anchorage",
+                          return_stage = "align") |>
+  gapctd:::derive_and_bin(bin_width = 1)
 
 ex_area_init <- gapctd::ts_area(dc = ex_tsa_init$downcast,
                                 uc = ex_tsa_init$upcast,
