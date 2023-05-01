@@ -127,8 +127,7 @@ gapctd::select_best_method(
 ![](/doc/assets/r_process/6_select_best_1.png)
 
 **Plotly interface for select_best_method() showing data processed using
-four methods (Typical, Typical CTM, Temperature-Salinity Area, salinity
-path distance).**
+four methods (Typical, Typical CTM, Temperature-Salinity Area, Minimal Salinity Gradient).**
 
 ![](/doc/assets/r_process/6_select_best_2.png) **Console prompt for
 select_best_method() input, where inputs correspond with method numbers
