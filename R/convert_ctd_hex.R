@@ -38,11 +38,11 @@ convert_ctd_hex <- function(ctd_directory_path,
                       x = hex_file_paths))
   
   # Run batch processing to generate raw .cnv files
-  system(command = paste0("sbebatch ", 
-                          bat_file, " ", 
-                          getwd(), " ", 
-                          datcnv_file, " ",
-                          xmlcon_path))
+  system(command = paste0("sbebatch \"", 
+                          bat_file, "\" \"", 
+                          getwd(), "\" \"", 
+                          datcnv_file, "\" \"",
+                          xmlcon_path, "\""))
 }
 
 
