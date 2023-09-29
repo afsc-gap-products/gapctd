@@ -148,26 +148,30 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     
     
     # TSA: Estimate temperature alignment and CTM parameters (optimization using area between T-S curves)
+    
+    msg_pars_dc <- list()
+    msg_pars_uc <- list()
+    
     if(all(c("downcast", "upcast") %in% names(ctd_split))) {
-      ctd_tsa <- gapctd::run_gapctd(x = ctd_dat, 
-                                    haul_df = haul_df, 
-                                    ctd_tz = "America/Anchorage",
-                                    return_stage = "full", # w/ Density inversion check and completeness check
-                                    align_pars = list(),
-                                    ctm_pars = list())
+      ctd_tsa <- try(gapctd::run_gapctd(x = ctd_dat, 
+                                        haul_df = haul_df, 
+                                        ctd_tz = "America/Anchorage",
+                                        return_stage = "full", # w/ Density inversion check and completeness check
+                                        align_pars = list(),
+                                        ctm_pars = list()),
+                     silent = TRUE)
       
-      gapctd_write_rds(x = ctd_tsa,
-                       in_path = cnv_files[II],
-                       out_path = rds_filenames_tsa[II],
-                       gapctd_method = "TSA",
-                       exclude_bottom = TRUE)
+      if(is.list(ctd_tsa)) {
+        gapctd_write_rds(x = ctd_tsa,
+                         in_path = cnv_files[II],
+                         out_path = rds_filenames_tsa[II],
+                         gapctd_method = "TSA",
+                         exclude_bottom = TRUE)
+
+        msg_pars_dc <- ctd_tsa$downcast@metadata$ctm$downcast
+        msg_pars_uc <- ctd_tsa$upcast@metadata$ctm$upcast
+      }  
       
-      msg_pars_dc <- ctd_tsa$downcast@metadata$ctm$downcast
-      msg_pars_uc <- ctd_tsa$upcast@metadata$ctm$upcast
-      
-    } else {
-      msg_pars_dc <- list()
-      msg_pars_uc <- list()
     }
     
     # MSG: Estimate temperature alignment and CTM parameters (optimization using S path distance)

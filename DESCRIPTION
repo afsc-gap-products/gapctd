@@ -1,7 +1,7 @@
 Package: gapctd
 Type: Package
 Title: Process RACE/GAP CTD data and generate output.
-Version: 1.5.0
+Version: 1.5.1
 Authors@R: c(person("Sean", "Rohan", 
               email = "sean.rohan@noaa.gov", 
               role = c("aut", "cre")),
