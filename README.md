@@ -1,8 +1,6 @@
 # GAP CTD Data Processing
 
-Process CTD data collected during AFSC bottom trawl surveys using trawl-mounted CTDs. Current support for data collected using SBE 19 and SBE 19plus V2 SeaCAT Profiler CTDs.
-
-The most recent version of this package was built for use with SBE Data Processing (Version 7.26.7).
+This package is used to process CTD data that are collected during AFSC bottom trawl surveys using trawl-mounted SBE 19plus V2 SeaCAT Profiler CTDs.
 
 
 # Installation 
