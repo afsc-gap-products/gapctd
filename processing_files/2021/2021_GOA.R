@@ -23,9 +23,9 @@ region <- "GOA"
 data_set_name <- "CTD Data from AFSC 2021 Gulf of Alaska Bottom Trawl Survey"
 cruise_name <- "2021 Gulf of Alaska Bottom Trawl Survey"
 ctd_team <- "Nicole Charriere, Cecilia O'Leary, Nate Raring, Bethany Riggle" # Do not list yourself!
-creator_name <- "Sean Rohan" # your name
-creator_email <- "sean.rohan@noaa.gov" # your email
-dataset_doi <- "doi"
+creator_name <- "Sean Rohan"
+creator_email <- "sean.rohan@noaa.gov"
+dataset_doi <- ""
 ctd_unit <- "SBE19plus V2"
 
 # Create a netCDF file with cast data and metadata in the working directory.
@@ -34,7 +34,7 @@ gapctd::make_oce_ncdf(
   metadata_files = metadata_files,
   output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".nc")),
   global_attributes = list(title = data_set_name, 
-                           references = "CTD TEAM...",
+                           references = "Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.",
                            id = dataset_doi,
                            cdm_data_type = "Point",
                            cruise = cruise_name,
