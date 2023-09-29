@@ -1,4 +1,4 @@
-# GAP CTD Data Processing
+# gapctd R Package
 
 This package is used to process CTD data that are collected during AFSC bottom trawl surveys using trawl-mounted SBE 19plus V2 SeaCAT Profiler CTDs.
 
