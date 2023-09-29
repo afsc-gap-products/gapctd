@@ -1,7 +1,5 @@
 # GAP CTD Data Processing
 
-*This package is in development.*
-
 Process CTD data collected during AFSC bottom trawl surveys using trawl-mounted CTDs. Current support for data collected using SBE 19 and SBE 19plus V2 SeaCAT Profiler CTDs.
 
 The most recent version of this package was built for use with SBE Data Processing (Version 7.26.7).
@@ -16,12 +14,16 @@ remotes::install_github("afsc-gap-products/gapctd")
 library(gapctd)
 ```
 
-# Documentation
+# Documentation and usage
 
 - [Data processing modules](./doc/data_processing_modules.md)
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
 - [Data file structure](./doc/ctd_data_files.md)
+
+# References
+
+Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
 
 ## NOAA README
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project code is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
