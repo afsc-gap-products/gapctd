@@ -286,7 +286,6 @@ derive_and_bin <- function(x, bin_width = NULL) {
 }
 
 
-
 #' Internal function for analysis
 #' 
 #' @noRd
@@ -322,4 +321,57 @@ make_stage_df <- function(x, stage, method) {
   out$stage <- stage
   
   return(out)
+}
+
+
+#' Check for duplicates (Internal)
+#' 
+#' Check /data/ directory for .hex files for multiple files from the same deployment and deployments from multiple CTDs. Either of these cases results in an error.
+#' 
+#' @noRd
+
+.check_duplicates <- function() {
+  
+  file_paths <- list.files(here::here("data"), full.names = TRUE, pattern = ".hex")
+  serial_number <- numeric(length = length(file_paths))
+  deployment_datetime <- character(length = length(file_paths))
+  
+  message(paste0("Checking ", length(file_paths), " .hex files in /data/ for duplicates and multiple CTD serial numbers."))
+  
+  for(ii in 1:length(file_paths)) {
+    lines <- readLines(con = file_paths[ii])
+    
+    # Serial number
+    serial_number[ii] <- as.numeric(
+      gsub("[^0-9]", 
+           "", 
+           lines[grepl(pattern = "* Temperature SN", x = lines)])
+    )
+    
+    # Date
+    date_line <- lines[grepl(pattern = "* cast", x = lines)]
+    match_positions <- gregexpr(pattern = "\\d{2} [A-Za-z]{3} \\d{4} \\d{2}:\\d{2}:\\d{2}", 
+                                text = date_line)
+    deployment_datetime[ii] <- regmatches(x = date_line, m = match_positions)[[1]]
+  }
+  
+  if(any(table(deployment_datetime) > 1)) {
+    
+    deployment_freq <- table(deployment_datetime)
+    
+    duplicates <- names(deployment_freq)[which(deployment_freq > 1)]
+    
+    duplicate_filenames <- file_paths[deployment_datetime %in% duplicates]
+    
+    stop(paste0("Error: Multiple files found from the same deployment:\n", paste(duplicate_filenames, collapse = "\n")))
+    
+  }
+  
+  if(length(unique(serial_number)) > 1) {
+    stop(paste0("Error: Multiple serial numbers detected among .hex files. Serial numbers:\n", 
+                paste(paste0(serial_number, " - ", file_paths), collapse = "\n")))
+  }
+  
+  message("No duplicates or multiple serial numbers detected among .hex files.")
+  
 }

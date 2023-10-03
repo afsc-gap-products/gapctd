@@ -176,4 +176,6 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
     
   }
   
+  gapctd:::.check_duplicates()
+  
 }

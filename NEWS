@@ -3,7 +3,9 @@ gapctd 1.5.1 (September 22, 2023)
 
 FUNCTIONALITY CHANGES
 
-New error check for the Temperature-Salinity Error method in run_gapctd() to handle 
-cases where the temperature-salinity area method doesn't converge because 
-temperature-salinity curves from upcasts and downcasts produce identical values.
-
+- New error check for the Temperature-Salinity Error method in run_gapctd() to handle 
+  cases where the temperature-salinity area method doesn't converge because 
+  temperature-salinity curves from upcasts and downcasts produce identical values.
+  
+- Added internal function to gapctd workflow to check for duplicate casts and multiple CTDs in 
+  /data/ to avoid data processing errors.
