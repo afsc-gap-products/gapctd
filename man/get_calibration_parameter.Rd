@@ -4,7 +4,12 @@
 \alias{get_calibration_parameter}
 \title{Extract variable from xml}
 \usage{
-get_calibration_parameter(header, cal_par)
+get_calibration_parameter(
+  header,
+  cal_par,
+  start_block = NULL,
+  end_block = NULL
+)
 }
 \description{
 Extract variable from xml

@@ -160,18 +160,14 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
     for(II in 1:length(hex_files)) {
       message("setup_gapctd_directory: Converting ", hex_files[II])
       hex_to_cnv(hex_path = hex_files[II], 
-                 output_path = cnv_output[II], 
+                 output_path = cnv_output[II],
+                 xmlcon_path = list.files(path = here::here("psa_xmlcon"), 
+                                          pattern = "xmlcon", 
+                                          full.names = TRUE),
                  sample_interval = 0.25,
-                 output_channels = c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
-                                     "temperature" = "tv290C: Temperature [ITS-90, deg C]",
-                                     "pressure" = "prdM: Pressure, Strain Gauge [db]",
-                                     "conductivity" = "c0S/m: Conductivity [S/m]", 
-                                     "flag" = "flag:  0.000e+00"),
-                 output_sig_digits = c("time_elapsed" = 3,
-                                       "temperature" = 4,
-                                       "pressure" = 3,
-                                       "conductivity" = 6, 
-                                       "flag" = 1))
+                 output_channels = NULL,
+                 output_sig_digits = NULL
+                 )
     }
     
   }
