@@ -11,6 +11,7 @@ run_gapctd(
   ctd_tz = "America/Anchorage",
   ctm_pars = list(),
   align_pars = c(),
+  cal_rds_path = NULL,
   cor_var = "conductivity"
 )
 }
@@ -26,10 +27,16 @@ run_gapctd(
 \item{ctm_pars}{Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.}
 
 \item{align_pars}{A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)}
+
+\item{cal_rds_path}{Filepath to RDS containing calibration parameters. Required for oxygen data processing.}
 }
 \value{
 A list of oce objects at stages of processing specified in return_stage.
 }
 \description{
-Run all gapctd modules in order to process data from a cnv file.
+Run gapctd modules in the order described in Rohan et al. (2023) to process data from a cnv file.
+}
+\references{
+Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
 }

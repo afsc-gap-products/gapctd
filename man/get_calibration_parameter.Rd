@@ -8,7 +8,8 @@ get_calibration_parameter(
   header,
   cal_par,
   start_block = NULL,
-  end_block = NULL
+  end_block = NULL,
+  make_numeric = TRUE
 )
 }
 \description{
