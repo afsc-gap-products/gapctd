@@ -162,7 +162,7 @@ hex_to_cnv <- function(hex_path,
       paste0("hex_to_cnv: ", 
                    length(index_channels), 
                    " data channels detected (", 
-                   paste(names(output_channels), sep = ", "), ")\n"
+                   paste(names(output_channels), collapse = ", "), ")"
              )
       )
   }
@@ -218,7 +218,7 @@ hex_to_cnv <- function(hex_path,
   # Check that necessary calibration parameters were in the hex file header if no .xmlcon file was provided
   if(is.null(xmlcon_path)) {
     if(any(is.na(cal_par_list))) {
-      stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], sep = ", "), "not found in ", hex_path))
+      stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], collapse = ", "), "not found in ", hex_path))
     }
   }
   
@@ -248,7 +248,7 @@ hex_to_cnv <- function(hex_path,
     pa0 = cal_par_list[['PA0']],
     pa1 = cal_par_list[['PA1']],
     pa2 = cal_par_list[['PA2']],
-    sig_figs = 3,
+    sig_figs = output_sig_digits['pressure'],
     convert_to_dbar = TRUE
   )
   
@@ -264,7 +264,7 @@ hex_to_cnv <- function(hex_path,
     ctcor = cal_par_list[['CTCOR']],
     par0 = 256,
     par1 = 1000.0,
-    sig_figs = 6
+    sig_figs = output_sig_digits['conductivity']
   )
   
   # Process dissolved oxygen and pH if used
@@ -272,22 +272,28 @@ hex_to_cnv <- function(hex_path,
   ph <- NA
   
   if(deployed_do) {
-    salinity <- oce::swSCTp(conductivity = conductivity,
+    salinity <- round(oce::swSCTp(conductivity = conductivity,
                             temperature = temperature,
                             pressure = pressure,
-                            conductivityUnit = "S/m")
+                            conductivityUnit = "S/m"), 4)
     
     dissolved_oxygen <- gapctd:::integer_to_dissolved_oxygen(do_integer = values_int$doxygen_int,
-                                                             doa = cal_par_list[['DO_A']],
-                                                             dob = cal_par_list[['DO_B']],
-                                                             doc = cal_par_list[['DO_C']],
-                                                             doe = cal_par_list[['DO_E']],
-                                                             dosoc = cal_par_list[['DO_Soc']],
                                                              temperature = temperature,
-                                                             par0 = 13107,
                                                              pressure = pressure,
                                                              salinity = salinity,
-                                                             Voffset = cal_par_list[['DO_Offset']])
+                                                             a = cal_par_list[['DO_A']],
+                                                             b = cal_par_list[['DO_B']],
+                                                             c = cal_par_list[['DO_C']],
+                                                             e = cal_par_list[['DO_E']],
+                                                             soc = cal_par_list[['DO_Soc']],
+                                                             Voffset = cal_par_list[['DO_Offset']],
+                                                             d0 = cal_par_list[['DO_D0']],
+                                                             d1 = cal_par_list[['DO_D1']],
+                                                             d2 = cal_par_list[['DO_D2']],
+                                                             tau20 = cal_par_list[['DO_Tau20']],
+                                                             sample_interval = sample_interval,
+                                                             sig_figs = output_sig_digits['oxygen'],
+                                                             tau_correction = TRUE)
   }
   
   if(deployed_ph) {
@@ -295,7 +301,7 @@ hex_to_cnv <- function(hex_path,
                                  ph_offset = cal_par_list[['ph_Offset']],
                                  ph_slope = cal_par_list[['ph_Slope']],
                                  temperature = temperature,
-                                 sig_figs = 3)
+                                 sig_figs = output_sig_digits['ph'])
   }
   
   time_elapsed <- seq(0, (length(lines_data)-1)*sample_interval, sample_interval)
@@ -327,7 +333,7 @@ hex_to_cnv <- function(hex_path,
     cnv_dat$data <- dplyr::select(cnv_dat$data, -ph)
   }
   
-  message("hex_to_cnv: Preparing to write data to cnv.")
+  message("hex_to_cnv: Writing data to cnv.\n")
   gapctd:::write_to_cnv(data_list = cnv_dat, output_path = output_path)
   
   return(cnv_dat)
@@ -347,6 +353,8 @@ hex_line_to_raw <- function(line) {
   )
   as.raw(paste0("0x", line_raw))
 }
+
+
 
 #' Convert bytes to unsigned integers
 #' @noRd
@@ -423,6 +431,7 @@ integer_to_temperature <- function(temperature_integer,
 }
 
 
+
 #' Convert SBE integer to pressure
 #' @export
 
@@ -487,10 +496,11 @@ integer_to_conductivity <- function(conductivity_integer, temperature, pressure,
 }
 
 
+
 #' Convert SBE integer to pH
 #' @export
-integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, par0 = 13107, sig_figs = 3) {
-  ph_voltage <- ph_integer/par0
+integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs = 3) {
+  ph_voltage <- ph_integer/13107
   ph <- 7.0 + (ph_voltage - ph_offset)/(ph_slope * (temperature + 273.15) * 1.98416e-4)
   
   if(is.numeric(sig_figs)) {
@@ -498,6 +508,7 @@ integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, par0 = 1
   }
   return(ph)
 }
+
 
 
 #' Extract variable from xml
@@ -595,8 +606,8 @@ write_to_cnv <- function(data_list, output_path) {
 #' 
 #' Calculate oxygen saturation as a function of temperature and salinity based on oxygen solubility from Garcia and Gordon (1992).
 #' 
-#' @param temperature Temperature in degrees Celsius
-#' @param salinity salinity in PSU (PSS-78)
+#' @param temperature Temperature (degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
 #' @export
 #' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
 
@@ -629,43 +640,13 @@ oxygen_saturation <- function(temperature, salinity) {
 
 
 
-#' Convert SBE integer to dissolved oxygen (ml/l)
-#' @export
- 
-integer_to_dissolved_oxygen <- function(do_integer,
-                                        doa,
-                                        dob,
-                                        doc,
-                                        doe,
-                                        dosoc,
-                                        temperature,
-                                        par0 = 13107,
-                                        pressure,
-                                        salinity,
-                                        Voffset
-) {
-  
-  do_voltage <- do_integer/par0
-  
-  oxsol <- gapctd:::oxygen_saturation(temperature = temperature,
-                                      salinity = salinity)
-  
-  temperature_K <- temperature + 273.15
-  
-  oxygen_mll <- dosoc * (do_voltage + Voffset) * (1 + doa * temperature + dob * temperature^2 + doc * temperature^3) * oxsol * exp(doe*pressure/temperature_K)
-  
-  return(oxygen_mll)
-}
-
-
-
 #' Calculate oxygen saturation (percent) from dissolved oxygen (ml/l)
 #' 
 #' Dissolved oxygen divided by oxygen saturation calculated following Garcia and Gordon (1992)
 #' 
 #' @param oxygen Dissolved oxygen in ml/l
-#' @param temperature Temperature in degrees Celsius (IPTS-68, deg C) 
-#' @param salinity salinity in PSU (PSS-78)
+#' @param temperature Temperature (IPTS-68, degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
 #' @export
 #' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
 
@@ -675,4 +656,65 @@ convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
                                       salinity = salinity)
   
   return(oxygen/oxsol)
+}
+
+
+
+#' Convert SBE integer to dissolved oxygen (ml/l)
+#' 
+#' @param do_integer Integer value of dissolved oxygen decoded from hex
+#' @param tau_correction Should the tau correction (Edwards et al., 2009) be used to account for time-dynamic errors in oxygen?
+#' @param temperature Temperature (IPTS-68, degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
+#' @param pressure Pressure (dbar).
+#' @param Voffset Voltage channel offset.
+#' @param a Calibration parameter A.
+#' @param b Calibration parameter b.
+#' @param c Calibration equation parameter C.
+#' @param e Calibration equation parameter E.
+#' @param soc Calibration equation parameter Soc.
+#' @param d0 Tau correction calibration parameter D0.
+#' @param d1 Tau correction calibration parameter D1.
+#' @param d2 Tau correction calibration parameter D2.
+#' @param d0 Tau correction calibration parameter Tau20.
+#' @param sample_interval Sample interval in seconds (default = 0.25).
+#' @export
+#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+ 
+integer_to_dissolved_oxygen <- function(do_integer,
+                                        temperature,
+                                        pressure,
+                                        salinity,
+                                        a,
+                                        b,
+                                        c,
+                                        e,
+                                        soc,
+                                        Voffset,
+                                        tau20 = NULL,
+                                        d0 = NULL,
+                                        d1 = NULL,
+                                        d2 = NULL,
+                                        sample_interval = 0.25,
+                                        tau_correction = TRUE
+) {
+  
+  do_voltage <- do_integer/13107
+  
+  oxsol <- gapctd:::oxygen_saturation(temperature = temperature,
+                                      salinity = salinity)
+  
+  tau <- 0
+  dVdt <- 0
+  
+  if(tau_correction) {
+    tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
+    dVdt <- c(0, diff(do_voltage)/sample_interval)
+  }
+  
+  temperature_K <- temperature + 273.15
+  
+  oxygen_mll <- soc * (do_voltage + Voffset + tau * dVdt) * (1 + a * temperature + b * temperature^2 + c * temperature^3) * oxsol * exp(e*pressure/temperature_K)
+  
+  return(oxygen_mll)
 }

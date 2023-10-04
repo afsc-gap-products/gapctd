@@ -9,9 +9,9 @@ convert_do_to_o2sat(oxygen, temperature, salinity)
 \arguments{
 \item{oxygen}{Dissolved oxygen in ml/l}
 
-\item{temperature}{Temperature in degrees Celsius (IPTS-68, deg C)}
+\item{temperature}{Temperature (IPTS-68, degrees Celsius).}
 
-\item{salinity}{salinity in PSU (PSS-78)}
+\item{salinity}{Salinity (PSU, PSS-78).}
 }
 \description{
 Dissolved oxygen divided by oxygen saturation calculated following Garcia and Gordon (1992)

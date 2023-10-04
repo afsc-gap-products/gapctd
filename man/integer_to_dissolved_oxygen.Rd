@@ -6,18 +6,57 @@
 \usage{
 integer_to_dissolved_oxygen(
   do_integer,
-  doa,
-  dob,
-  doc,
-  doe,
-  dosoc,
   temperature,
-  par0 = 13107,
   pressure,
   salinity,
-  Voffset
+  a,
+  b,
+  c,
+  e,
+  soc,
+  Voffset,
+  tau20 = NULL,
+  d0 = NULL,
+  d1 = NULL,
+  d2 = NULL,
+  sample_interval = 0.25,
+  tau_correction = TRUE
 )
+}
+\arguments{
+\item{do_integer}{Integer value of dissolved oxygen decoded from hex}
+
+\item{temperature}{Temperature (IPTS-68, degrees Celsius).}
+
+\item{pressure}{Pressure (dbar).}
+
+\item{salinity}{Salinity (PSU, PSS-78).}
+
+\item{a}{Calibration parameter A.}
+
+\item{b}{Calibration parameter b.}
+
+\item{c}{Calibration equation parameter C.}
+
+\item{e}{Calibration equation parameter E.}
+
+\item{soc}{Calibration equation parameter Soc.}
+
+\item{Voffset}{Voltage channel offset.}
+
+\item{d0}{Tau correction calibration parameter Tau20.}
+
+\item{d1}{Tau correction calibration parameter D1.}
+
+\item{d2}{Tau correction calibration parameter D2.}
+
+\item{sample_interval}{Sample interval in seconds (default = 0.25).}
+
+\item{tau_correction}{Should the tau correction (Edwards et al., 2009) be used to account for time-dynamic errors in oxygen?}
 }
 \description{
 Convert SBE integer to dissolved oxygen (ml/l)
+}
+\references{
+Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
 }

@@ -4,14 +4,7 @@
 \alias{integer_to_ph}
 \title{Convert SBE integer to pH}
 \usage{
-integer_to_ph(
-  ph_integer,
-  ph_offset,
-  ph_slope,
-  temperature,
-  par0 = 13107,
-  sig_figs = 3
-)
+integer_to_ph(ph_integer, ph_offset, ph_slope, temperature, sig_figs = 3)
 }
 \description{
 Convert SBE integer to pH

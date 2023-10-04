@@ -7,9 +7,9 @@
 oxygen_saturation(temperature, salinity)
 }
 \arguments{
-\item{temperature}{Temperature in degrees Celsius}
+\item{temperature}{Temperature (degrees Celsius).}
 
-\item{salinity}{salinity in PSU (PSS-78)}
+\item{salinity}{Salinity (PSU, PSS-78).}
 }
 \description{
 Calculate oxygen saturation as a function of temperature and salinity based on oxygen solubility from Garcia and Gordon (1992).
