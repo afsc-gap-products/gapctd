@@ -719,7 +719,7 @@ integer_to_dissolved_oxygen <- function(do_integer,
   oxygen_mll <- soc * (do_voltage + Voffset + tau * dVdt) * (1 + a * temperature + b * temperature^2 + c * temperature^3) * oxsol * exp(e*pressure/temperature_K)
   
   if(is.numeric(sig_figs)) {
-    oxygen_mll <- round(sig_figs, digits = sig_figs)
+    oxygen_mll <- round(oxygen_mll, digits = sig_figs)
   }
   
   return(oxygen_mll)
