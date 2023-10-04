@@ -162,7 +162,7 @@ hex_to_cnv <- function(hex_path,
       paste0("hex_to_cnv: ", 
                    length(index_channels), 
                    " data channels detected (", 
-                   paste(names(output_channels), sep = ", "), ")"
+                   paste(names(output_channels), sep = ", "), ")\n"
              )
       )
   }
