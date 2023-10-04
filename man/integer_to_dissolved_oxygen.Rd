@@ -20,7 +20,8 @@ integer_to_dissolved_oxygen(
   d1 = NULL,
   d2 = NULL,
   sample_interval = 0.25,
-  tau_correction = TRUE
+  tau_correction = TRUE,
+  sig_figs = 4
 )
 }
 \arguments{

@@ -678,6 +678,7 @@ convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
 #' @param d2 Tau correction calibration parameter D2.
 #' @param d0 Tau correction calibration parameter Tau20.
 #' @param sample_interval Sample interval in seconds (default = 0.25).
+#' @sig_figs Optional. Significant digits for output.
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
  
@@ -696,7 +697,8 @@ integer_to_dissolved_oxygen <- function(do_integer,
                                         d1 = NULL,
                                         d2 = NULL,
                                         sample_interval = 0.25,
-                                        tau_correction = TRUE
+                                        tau_correction = TRUE,
+                                        sig_figs = 4
 ) {
   
   do_voltage <- do_integer/13107
@@ -715,6 +717,10 @@ integer_to_dissolved_oxygen <- function(do_integer,
   temperature_K <- temperature + 273.15
   
   oxygen_mll <- soc * (do_voltage + Voffset + tau * dVdt) * (1 + a * temperature + b * temperature^2 + c * temperature^3) * oxsol * exp(e*pressure/temperature_K)
+  
+  if(is.numeric(sig_figs)) {
+    oxygen_mll <- round(sig_figs, digits = sig_figs)
+  }
   
   return(oxygen_mll)
 }
