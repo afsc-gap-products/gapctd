@@ -156,19 +156,27 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
     hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
     cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
     cnv_output <- gsub(x = cnv_output, pattern = "/data/", replacement = "/cnv/")
+    xmlcon_path <- list.files(path = here::here("psa_xmlcon"), 
+                              pattern = "xmlcon", 
+                              full.names = TRUE)
     
     for(II in 1:length(hex_files)) {
       message("setup_gapctd_directory: Converting ", hex_files[II])
       hex_to_cnv(hex_path = hex_files[II], 
                  output_path = cnv_output[II],
-                 xmlcon_path = list.files(path = here::here("psa_xmlcon"), 
-                                          pattern = "xmlcon", 
-                                          full.names = TRUE),
+                 xmlcon_path = xmlcon_path,
                  sample_interval = 0.25,
                  output_channels = NULL,
                  output_sig_digits = NULL
                  )
     }
+    
+    # Save calibration parameters to RDS
+    calibration_parameters <- gapctd::extract_calibration_xmlcon(xmlcon_path = xmlcon_path)
+    
+    calibration_file <- here::here("psa_xmlcon", "calibration_parameters.rds")
+    message("setup_gapctd_directory: Saving calibration parameters to ", calibration_file)
+    saveRDS(calibration_parameters, file = calibration_file)
     
   }
   
