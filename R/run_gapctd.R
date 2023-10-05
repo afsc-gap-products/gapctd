@@ -323,6 +323,7 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
   return_obj <- function(downcast, upcast, bottom) {
     output <- list()
     
+    # Oxygen derived here because dynamic corrections should be applied to temperature and conductivity channels first, since oxygen is calculated using temperature and salinity.
     output[["downcast"]] <- downcast |> gapctd::derive_oxygen(cal_rds_path = cal_rds_path)
     output[["upcast"]] <- upcast |> gapctd::derive_oxygen(cal_rds_path = cal_rds_path)
     output[["bottom"]] <- bottom |> gapctd::derive_oxygen(cal_rds_path = cal_rds_path)
