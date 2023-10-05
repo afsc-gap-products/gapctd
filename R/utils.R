@@ -375,3 +375,78 @@ make_stage_df <- function(x, stage, method) {
   message("No duplicates or multiple serial numbers detected among .hex files.")
   
 }
+
+
+
+#' Extract calibration parameters from xmlcon to a list
+#' 
+#' Retrives calibration parameters for temperature, conductivity, pressure, oxygen, and pH sensors from an instrument configuration (.xmlcon) file.
+#' 
+#' @param xmlcon_path Path to an xmlcon file.
+#' @export
+
+extract_calibration_xmlcon <- function(xmlcon_path) {
+  
+  lines <- readLines(con = xmlcon_path)
+  
+  data_channels <- c("temperature", "conductivity", "pressure", "oxygen", "ph")
+  channel_tag_start <- c("<TemperatureSensor", "<ConductivitySensor", "<PressureSensor ", "<!-- Coefficients for Sea-Bird equation", "<pH_Sensor")
+  channel_tag_end <- c("</TemperatureSensor", "</ConductivitySensor", "</PressureSensor>", "</OxygenSensor", "</pH_Sensor")
+  
+  calibration_params <- list(temperature = c("A0" = -9e9, "A1" = -9e9, "A2" = -9e9, "A3" = -9e9, "Slope" = -9e9, "Offset" = -9e9),
+                             conductivity = c("A" = -9e9, "B" = -9e9, "C" = -9e9, "D" = -9e9, "M" = -9e9, "G" = -9e9, "H" = -9e9, "I" = -9e9, "J" = -9e9, "CPcor" = -9e9, "CTcor" = -9e9),
+                             pressure = c("PA0" = -9e9, "PA1" = -9e9, "PA2" = -9e9, "PTEMPA0" = -9e9, "PTEMPA1" = -9e9, "PTEMPA2" = -9e9, "PTCA0" = -9e9, "PTCA1" = -9e9, "PTCA2" = -9e9, "PTCB0" = -9e9, "PTCB1" = -9e9, "PTCB2" = -9e9, "Offset" = -9e9),
+                             oxygen = c("Soc" = -9e9, "offset" = -9e9, "A" = -9e9, "B" = -9e9, "C" = -9e9, "D0" = -9e9, "D1" = -9e9, "D2" = -9e9, "E" = -9e9, "Tau20" = -9e9, "H1" = -9e9, "H2" = -9e9, "H3" = -9e9),
+                             ph = c("Slope" = -9e9, "Offset" = -9e9))
+  
+  omit <- numeric()
+  
+  calibration_df <- data.frame()
+  
+  for(ii in 1:length(data_channels)) {
+    
+    cal_pars <- numeric(length = length(calibration_params[[data_channels[ii]]]))
+    
+    if(!any(grepl(pattern = channel_tag_start[ii], x = lines))) {
+      message(paste0("xmlcon_to_df: Skpping ", data_channels[ii], ". Channel tags not detected in xmlcon file."))
+      omit <- c(omit, ii)
+      next
+    }
+    
+    serial_number <- gapctd::get_calibration_parameter(header = lines, 
+                                                       cal_par = "SerialNumber", 
+                                                       start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                                       end_block = channel_tag_end[ii])
+    
+    calibration_date <- gapctd::get_calibration_parameter(header = lines, 
+                                                          cal_par = "CalibrationDate", 
+                                                          start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                                          end_block = channel_tag_end[ii],
+                                                          make_numeric = FALSE)
+    
+    calibration_df <- dplyr::bind_rows(calibration_df,
+                                       data.frame(
+                                         channel = data_channels[ii],
+                                         serial_number = serial_number,
+                                         calibration_date = as.Date(calibration_date, format = "%d-%b-%y")
+                                       )
+    )
+    
+    for(jj in 1:length(calibration_params[[data_channels[ii]]])) {
+      calibration_params[[data_channels[ii]]][jj] <- gapctd::get_calibration_parameter(header = lines, 
+                                                                                       cal_par = names(calibration_params[[data_channels[ii]]][jj]), 
+                                                                                       start_block = channel_tag_start[ii], 
+                                                                                       end_block = channel_tag_end[ii])
+    }
+    
+  }
+  
+  calibration_params$calibration <- calibration_df
+  
+  if(length(omit) > 0) {
+    calibration_params[[omit]] <- NULL
+  }
+  
+  return(calibration_params)
+  
+}
