@@ -85,11 +85,16 @@ hex_to_cnv <- function(hex_path,
   
   # xmlcon variable names do not match hex file names and must be substituted
   if(!is.null(xmlcon_path)) {
+    
     xmlcon_header <- readLines(xmlcon_path)
     
+    # Get list of calibration parameters
+    cal_par_list <- gapctd::extract_calibration_xmlcon(xmlcon_path)
+    
+    # Change tags for calibration coefficients to match SBE Data Processing output
     init_var <- c("<A0>", "<A1>", "<A2>", "<A3>", "</A0>", "</A1>", "</A2>", "</A3>", "CPcor", "CTcor")
     repl_var <- c("<TA0>", "<TA1>", "<TA2>", "<TA3>", "</TA0>", "</TA1>", "</TA2>", "</TA3>", "CPCOR", "CTCOR")
-    
+
     for(hh in 1:length(init_var)) {
       xmlcon_header <- gsub(x = xmlcon_header, pattern = init_var[hh], replacement = repl_var[hh])
     }
@@ -113,7 +118,7 @@ hex_to_cnv <- function(hex_path,
                        big_endian = c(rep(TRUE, 4)),
                        name = c("temperature_int", "conductivity_int", "pressure_int", "tvoltage_int"))
   
-  index_calibration_pars <- 1:25
+  # index_calibration_pars <- 1:25
   index_channels <- c(1:4,7)
   
   if(deployed_do) {
@@ -123,7 +128,7 @@ hex_to_cnv <- function(hex_path,
                          name = c("temperature_int", "conductivity_int", "pressure_int", "tvoltage_int",
                                   "doxygen_int"))
     
-    index_calibration_pars <- 1:38
+    # index_calibration_pars <- 1:38
     index_channels <- c(1:5,7)
   }
   
@@ -135,7 +140,7 @@ hex_to_cnv <- function(hex_path,
                                   "doxygen_int",
                                   "ph_int"))
     
-    index_calibration_pars <- 1:40
+    # index_calibration_pars <- 1:40
     index_channels <- 1:7
   }
   
@@ -146,7 +151,7 @@ hex_to_cnv <- function(hex_path,
                          "temperature" = "tv290C: Temperature [ITS-90, deg C]",
                          "pressure" = "prdM: Pressure, Strain Gauge [db]",
                          "conductivity" = "c0S/m: Conductivity [S/m]",
-                         "oxygen" = "sbeox0ML/L: Oxygen, SBE 43 [ml/l]",
+                         "oxygen_voltage" = "sbeox0V: Oxygen raw, SBE 43 [V]",
                          "ph" = "ph: pH",
                          "flag" = "flag:  0.000e+00")[index_channels]
     
@@ -154,7 +159,7 @@ hex_to_cnv <- function(hex_path,
                            "temperature" = 4,
                            "pressure" = 3,
                            "conductivity" = 6,
-                           "oxygen" = 4,
+                           "oxygen_voltage" = 4,
                            "ph" = 3,
                            "flag" = 1)[index_channels]
     
@@ -189,65 +194,31 @@ hex_to_cnv <- function(hex_path,
     dplyr::group_by(scan) |>
     dplyr::summarise(gapctd:::hex_extract_raw_uint_tbl(lines_raw, cols = cols))
   
-  
-  # Retrieve calibration coefficients from header
-  
-  cal_par_names <- c("TA0", "TA1", "TA2", "TA3", "TOFFSET", "G", "H", "I", "J", "CPCOR", "CTCOR", "CSLOPE", "PA0", "PA1", "PA2", "PTEMPA0", "PTEMPA1", "PTEMPA2", "PTCA0", "PTCA1", "PTCA2", "PTCB0", "PTCB1", "PTCB2", "POFFSET", "A", "B", "C", "D0", "D1", "D2", "E", "Tau20", "H1", "H2", "H3", "offset", "Soc", "Slope", "Offset")[index_calibration_pars]
-  
-  cal_par_alias <- c("TA0", "TA1", "TA2", "TA3", "TOFFSET", "G", "H", "I", "J", "CPCOR", "CTCOR", "CSLOPE", "PA0", "PA1", "PA2", "PTEMPA0", "PTEMPA1", "PTEMPA2", "PTCA0", "PTCA1", "PTCA2", "PTCB0", "PTCB1", "PTCB2", "POFFSET", "DO_A", "DO_B", "DO_C", "DO_D0", "DO_D1", "DO_D2", "DO_E", "DO_Tau20", "DO_H1", "DO_H2", "DO_H3", "DO_Offset", "DO_Soc", "ph_Slope", "ph_Offset")[index_calibration_pars]
-  
-  start_block <- c(rep(NA, 25), rep("<OxygenSensor", 11), rep("Coefficients for Sea-Bird equation - SBE calibration in 2007 and later", 2), rep("<pH_Sensor", 2))[index_calibration_pars]
-  end_block <- c(rep(NA, 25), rep("</OxygenSensor", 13), rep("</pH_Sensor", 2))[index_calibration_pars]
-  
-  cal_par_list <- list()
-  
-  for(ii in 1:length(cal_par_names)) {
-    
-    if(is.na(start_block[ii])) {
-      cal_par_list[[cal_par_alias[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header,
-                                                                              cal_par = cal_par_names[ii])
-    } else {
-      cal_par_list[[cal_par_alias[ii]]] <- gapctd:::get_calibration_parameter(header = lines_header,
-                                                                              cal_par = cal_par_names[ii],
-                                                                              start_block = start_block[ii],
-                                                                              end_block = end_block[ii])
-    }
-    
-  }
-  
-  # Check that necessary calibration parameters were in the hex file header if no .xmlcon file was provided
-  if(is.null(xmlcon_path)) {
-    if(any(is.na(cal_par_list))) {
-      stop(paste0("hex_to_cnv: Calibration parameters ", paste(names(cal_par_list)[is.na(cal_par_list)], collapse = ", "), "not found in ", hex_path))
-    }
-  }
-  
   temperature  <- gapctd:::integer_to_temperature(
     temperature_integer = values_int$temperature_int,
     sig_figs = 4,
-    a0 = cal_par_list[['TA0']],
-    a1 = cal_par_list[['TA1']],
-    a2 = cal_par_list[['TA2']],
-    a3 = cal_par_list[['TA3']]
+    a0 = cal_par_list[['temperature']]['A0'],
+    a1 = cal_par_list[['temperature']]['A1'],
+    a2 = cal_par_list[['temperature']]['A2'],
+    a3 = cal_par_list[['temperature']]['A3']
   )
-  
   
   pressure <- gapctd:::integer_to_pressure(
     pressure_integer = values_int$pressure_int,
     temperature_integer = values_int$temperature_int,
     tvoltage_integer = values_int$tvoltage_int,
-    ptempa0 = cal_par_list[['PTEMPA0']],
-    ptempa1 = cal_par_list[['PTEMPA1']],
-    ptempa2 = cal_par_list[['PTEMPA2']],
-    ptca0 = cal_par_list[['PTCA0']],
-    ptca1 = cal_par_list[['PTCA1']],
-    ptca2 = cal_par_list[['PTCA2']],
-    ptcb0 = cal_par_list[['PTCB0']],
-    ptcb1 = cal_par_list[['PTCB1']],
-    ptcb2 = cal_par_list[['PTCB2']],
-    pa0 = cal_par_list[['PA0']],
-    pa1 = cal_par_list[['PA1']],
-    pa2 = cal_par_list[['PA2']],
+    ptempa0 = cal_par_list[['pressure']]['PTEMPA0'],
+    ptempa1 = cal_par_list[['pressure']]['PTEMPA1'],
+    ptempa2 = cal_par_list[['pressure']]['PTEMPA2'],
+    ptca0 = cal_par_list[['pressure']]['PTCA0'],
+    ptca1 = cal_par_list[['pressure']]['PTCA1'],
+    ptca2 = cal_par_list[['pressure']]['PTCA2'],
+    ptcb0 = cal_par_list[['pressure']]['PTCB0'],
+    ptcb1 = cal_par_list[['pressure']]['PTCB1'],
+    ptcb2 = cal_par_list[['pressure']]['PTCB2'],
+    pa0 = cal_par_list[['pressure']]['PA0'],
+    pa1 = cal_par_list[['pressure']]['PA1'],
+    pa2 = cal_par_list[['pressure']]['PA2'],
     sig_figs = output_sig_digits['pressure'],
     convert_to_dbar = TRUE
   )
@@ -256,12 +227,12 @@ hex_to_cnv <- function(hex_path,
     conductivity_integer = values_int$conductivity_int,
     temperature = temperature,
     pressure = pressure,
-    condg = cal_par_list[['G']],
-    condh = cal_par_list[['H']],
-    condi = cal_par_list[['I']],
-    condj = cal_par_list[['J']],
-    cpcor = cal_par_list[['CPCOR']],
-    ctcor = cal_par_list[['CTCOR']],
+    condg = cal_par_list[['conductivity']]['G'],
+    condh = cal_par_list[['conductivity']]['H'],
+    condi = cal_par_list[['conductivity']]['I'],
+    condj = cal_par_list[['conductivity']]['J'],
+    cpcor = cal_par_list[['conductivity']]['CPcor'],
+    ctcor = cal_par_list[['conductivity']]['CTcor'],
     par0 = 256,
     par1 = 1000.0,
     sig_figs = output_sig_digits['conductivity']
@@ -272,34 +243,13 @@ hex_to_cnv <- function(hex_path,
   ph <- NA
   
   if(deployed_do) {
-    salinity <- round(oce::swSCTp(conductivity = conductivity,
-                            temperature = temperature,
-                            pressure = pressure,
-                            conductivityUnit = "S/m"), 4)
-    
-    dissolved_oxygen <- gapctd:::integer_to_dissolved_oxygen(do_integer = values_int$doxygen_int,
-                                                             temperature = temperature,
-                                                             pressure = pressure,
-                                                             salinity = salinity,
-                                                             a = cal_par_list[['DO_A']],
-                                                             b = cal_par_list[['DO_B']],
-                                                             c = cal_par_list[['DO_C']],
-                                                             e = cal_par_list[['DO_E']],
-                                                             soc = cal_par_list[['DO_Soc']],
-                                                             Voffset = cal_par_list[['DO_Offset']],
-                                                             d0 = cal_par_list[['DO_D0']],
-                                                             d1 = cal_par_list[['DO_D1']],
-                                                             d2 = cal_par_list[['DO_D2']],
-                                                             tau20 = cal_par_list[['DO_Tau20']],
-                                                             sample_interval = sample_interval,
-                                                             sig_figs = output_sig_digits['oxygen'],
-                                                             tau_correction = TRUE)
+    oxygen_voltage <- gapctd:::integer_to_ox_voltage(values_int$doxygen_int)
   }
   
   if(deployed_ph) {
     ph <- gapctd:::integer_to_ph(ph_integer = values_int$ph_int,
-                                 ph_offset = cal_par_list[['ph_Offset']],
-                                 ph_slope = cal_par_list[['ph_Slope']],
+                                 ph_offset = cal_par_list[['ph']]['Offset'],
+                                 ph_slope = cal_par_list[['ph']]['Slope'],
                                  temperature = temperature,
                                  sig_figs = output_sig_digits['ph'])
   }
@@ -312,7 +262,7 @@ hex_to_cnv <- function(hex_path,
       conductivity = conductivity,
       temperature = temperature,
       pressure = pressure,
-      oxygen = dissolved_oxygen,
+      oxygen_voltage = oxygen_voltage,
       ph = ph,
       time_elapsed = time_elapsed,
       flag = flag
@@ -514,18 +464,22 @@ integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs
 #' Extract variable from xml
 #' @export
 
-get_calibration_parameter <- function(header, cal_par, start_block = NULL, end_block = NULL) {
+get_calibration_parameter <- function(header, cal_par, start_block = NULL, end_block = NULL, make_numeric = TRUE) {
   
   # Subset header lines between start and end text
   if(!is.null(start_block) & !is.null(end_block)) {
-    header <- header[which(grepl(pattern = start_block, x = header)):which(grepl(pattern = end_block, x = header))]
+    header <- header[grep(pattern = start_block, x = header):grep(pattern = end_block, x = header)]
   }
   
-  lines_par <- header[which(grepl(pattern = paste0("<", cal_par, ">"), header))][1]
+  lines_par <- header[grep(pattern = paste0("<", cal_par, ">"), header)][1]
   lines_par <- gsub(pattern = paste0(".*<", cal_par,">"), "", lines_par)
   lines_par <- gsub(pattern = paste0("</", cal_par, ">.*"), "", lines_par)
-  par_value <- as.numeric(lines_par)
-  return(par_value)
+  
+  if(make_numeric) {
+    lines_par <- as.numeric(lines_par)
+  }
+  
+  return(lines_par)
   
 }
 
@@ -663,7 +617,7 @@ convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
 #' Convert SBE integer to dissolved oxygen (ml/l)
 #' 
 #' @param do_integer Integer value of dissolved oxygen decoded from hex
-#' @param tau_correction Should the tau correction (Edwards et al., 2009) be used to account for time-dynamic errors in oxygen?
+#' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
 #' @param temperature Temperature (IPTS-68, degrees Celsius).
 #' @param salinity Salinity (PSU, PSS-78).
 #' @param pressure Pressure (dbar).
@@ -673,13 +627,13 @@ convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
 #' @param c Calibration equation parameter C.
 #' @param e Calibration equation parameter E.
 #' @param soc Calibration equation parameter Soc.
-#' @param d0 Tau correction calibration parameter D0.
-#' @param d1 Tau correction calibration parameter D1.
-#' @param d2 Tau correction calibration parameter D2.
-#' @param d0 Tau correction calibration parameter Tau20.
+#' @param d0 Optional. Tau correction calibration parameter D0.
+#' @param d1 Optional. Tau correction calibration parameter D1.
+#' @param d2 Optional. Tau correction calibration parameter D2.
+#' @param d0 Optional. Tau correction calibration parameter Tau20.
 #' @param sample_interval Sample interval in seconds (default = 0.25).
-#' @sig_figs Optional. Significant digits for output.
-#' @export
+#' @param sig_figs Optional. Significant digits for output.
+#' @noRd
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
  
 integer_to_dissolved_oxygen <- function(do_integer,
@@ -692,12 +646,13 @@ integer_to_dissolved_oxygen <- function(do_integer,
                                         e,
                                         soc,
                                         Voffset,
+                                        tau,
                                         tau20 = NULL,
                                         d0 = NULL,
                                         d1 = NULL,
                                         d2 = NULL,
                                         sample_interval = 0.25,
-                                        tau_correction = TRUE,
+                                        tau_correction = FALSE,
                                         sig_figs = 4
 ) {
   
@@ -707,11 +662,10 @@ integer_to_dissolved_oxygen <- function(do_integer,
                                       salinity = salinity)
   
   tau <- 0
-  dVdt <- 0
+  dVdt <- c(0, diff(do_voltage)/sample_interval)
   
   if(tau_correction) {
-    tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
-    dVdt <- c(0, diff(do_voltage)/sample_interval)
+    tau <- DO_tau_correction(temperature, pressure, tau20, d0, d1, d2)
   }
   
   temperature_K <- temperature + 273.15
@@ -723,4 +677,28 @@ integer_to_dissolved_oxygen <- function(do_integer,
   }
   
   return(oxygen_mll)
+}
+
+
+#' Tau correction for dissolved oxygen voltage
+#' 
+#' Tau correction following Edwards et al. (2010).
+#' 
+#' @param d0 Tau correction calibration parameter D0.
+#' @param d1 Tau correction calibration parameter D1.
+#' @param d2 Tau correction calibration parameter D2.
+#' @param tau20 Tau correction calibration parameter Tau20.
+#' @param sample_interval Sample interval in seconds (default = 0.25).
+#' @export
+#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+
+tau_par <- function(temperature, pressure, tau20, d0, d1, d2) {
+  tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
+}
+
+#' Oxygen integer to raw voltage
+#' @noRd
+
+integer_to_ox_voltage <- function(ox_integer) {
+  return(ox_integer/13107)
 }
