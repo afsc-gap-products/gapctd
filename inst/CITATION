@@ -5,5 +5,6 @@ citEntry(entry = "TechReport",
  year = "2023",
  institution = "NOAA Fisheries Alaska Fisheries Science Center",
  author = "S.K. Rohan, N.E. Charriere, B. Riggle, C.A. O'Leary, and N.W. Raring",
- textVersion = "A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p."
+ textVersion = "A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p. https://doi.org/10.25923/8ape-q461",
+ doi = "10.25923/8ape-q461"
 )

@@ -41,7 +41,7 @@ gapctd::make_oce_ncdf(
   metadata_files = metadata_files,
   output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".nc")),
   global_attributes = list(title = data_set_name, 
-                           references = "Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.",
+                           references = "Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p. https://doi.org/10.25923/8ape-q461",
                            id = dataset_doi,
                            cdm_data_type = "Point",
                            cruise = cruise_name,
