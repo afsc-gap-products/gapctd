@@ -63,6 +63,21 @@ qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
                                                              y = x_oce@data$conductivity[-flag_index], 
                                                              xout = x_oce@data$depth[flag_index], 
                                                              method = "unesco")
+      
+      if("oxygen" %in% names(x_oce@data)) {
+        x_oce@data$oxygen[flag_index] <- oce::oce.approx(x = x_oce@data$depth[-flag_index], 
+                                                         y = x_oce@data$oxygen[-flag_index], 
+                                                         xout = x_oce@data$depth[flag_index], 
+                                                         method = "unesco")
+      }
+      
+      if("pH" %in% names(x_oce@data)) {
+        x_oce@data$pH[flag_index] <- oce::oce.approx(x = x_oce@data$depth[-flag_index], 
+                                                         y = x_oce@data$pH[-flag_index], 
+                                                         xout = x_oce@data$depth[flag_index], 
+                                                         method = "unesco")
+      }
+      
       x_oce <- x_oce |> gapctd:::derive_eos()
       
       if(bin_var == "depth") {
@@ -193,6 +208,60 @@ qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
       
       x@data$flag[new_flags] <- -7
       
+      x <- interp_flags(x_oce = x, bin_var = bin_var)
+    }
+  }
+  
+  if("oxygen" %in% review) {
+    
+    loop_ind <- 1
+    while(loop_ind == 1) {
+      
+      par(mfrow = c(1,1))
+      plot(x@data$oxygen, -1*x@data$pressure,
+           xlab = "Oxygen",
+           ylab = "Pressure",
+           col = "purple3",
+           main = "Left-click on points to be removed then press 'Esc'")
+      abline(h = -1, lty = 2)
+      lines(x = x@data$oxygen, y = -1*x@data$pressure)
+      
+      new_flags <- identify(x@data$oxygen, -1*x@data$pressure)
+      
+      
+      if(!(length(new_flags) > 0)) {
+        loop_ind <- 0
+        next
+      }
+      
+      x@data$flag[new_flags] <- -7
+      x <- interp_flags(x_oce = x, bin_var = bin_var)
+    }
+  }
+  
+  if("ph" %in% tolower(review)) {
+    
+    loop_ind <- 1
+    while(loop_ind == 1) {
+      
+      par(mfrow = c(1,1))
+      plot(x@data$pH, -1*x@data$pressure,
+           xlab = "pH",
+           ylab = "Pressure",
+           col = "deepskyblue3",
+           main = "Left-click on points to be removed then press 'Esc'")
+      abline(h = -1, lty = 2)
+      lines(x = x@data$pH, y = -1*x@data$pressure)
+      
+      new_flags <- identify(x@data$pH, -1*x@data$pressure)
+      
+      
+      if(!(length(new_flags) > 0)) {
+        loop_ind <- 0
+        next
+      }
+      
+      x@data$flag[new_flags] <- -7
       x <- interp_flags(x_oce = x, bin_var = bin_var)
     }
   }
