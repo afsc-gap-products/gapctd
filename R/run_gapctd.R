@@ -298,11 +298,11 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 
 
 
-#' Process a .cnv file using the R workflow (R workflow)
+#' Process an oce object using the gapctd workflow (R workflow)
 #' 
-#' Run gapctd modules in the order described in Rohan et al. (2023) to process data from a cnv file.
+#' Run gapctd modules in the order described in Rohan et al. (2023) to process data from an oce object.
 #' 
-#' @param x oce file
+#' @param x oce object
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
 #' @param return_stage Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full"). Can return multiple stages simultaneously. Default = "full"
 #' @param ctd_tz timezone for CTD as a character vector or numeric that is valid for POSIXct.
@@ -417,16 +417,17 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
                                            cor_method = "pearson",
                                            cast_direction = "downcast")
     } else {
-      dc_align <- fixed_alignment(x = downcast, 
-                                  align_pars = align_pars, 
-                                  cor_var = cor_var, 
-                                  cast_direction = "downcast", 
-                                  cor_method = "pearson")
+      dc_align <- gapctd::fixed_alignment(x = downcast, 
+                                          align_pars = align_pars, 
+                                          cor_var = cor_var, 
+                                          cast_direction = "downcast", 
+                                          cor_method = "pearson")
+      print(dc_align)
     }
 
   downcast <- gapctd:::align_var(x = downcast, 
-                                 variables = "temperature", 
-                                 offset = dc_align[["temperature"]]['offset'], 
+                                 variables = names(dc_align), 
+                                 offset = dc_align, 
                                  interp_method = "linear")
   
   downcast@metadata[['align']] <- dc_align
@@ -450,8 +451,8 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
     }
     
     upcast <- gapctd:::align_var(x = upcast, 
-                                 variables = "temperature", 
-                                 offset = uc_align[["temperature"]]['offset'], 
+                                 variables = names(uc_align), 
+                                 offset = uc_align, 
                                  interp_method = "linear")
     
     upcast@metadata[['align']] <- uc_align
