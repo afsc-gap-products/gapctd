@@ -37,7 +37,8 @@ gapctd::wrapper_run_gapctd(cnv_dir_path = here::here("cnv"),
 #3. Select best method -----------------------------------------------------------------------------
 
 # Review profile plots from data processing using four methods; choose the best method.
-# Files chosen as the best will be renamed to end with "_best.rds"
+# Files chosen as the best will be renamed to end with "
+# Outputs written to /output/gapctd/_best.rds
 
 gapctd::select_best_method(
   rds_dir_path = here::here("output", processing_method))
@@ -46,14 +47,15 @@ gapctd::select_best_method(
 # 4. Align oxygen ----------------------------------------------------------------------------------
 
 # Test oxygen alignment offsets ranging from 2-7 seconds
-# Candidate aligned oxygen data will be saved to /output/align_oxygen/*_ox_align.rds
+# Outputs written to /output/align_oxygen/*_ox_align.rds
 gapctd:::wrapper_align_oxygen()
 
 
 # 5. Select best oxygen alignment ------------------------------------------------------------------
 
 # Review profiles of oxygen with different alignments from step 4 and select the best one.
-# Data are reprocessed using run_gapctd(). Profiles written to /output/gapctd/*_best_oxygen.rds
+# Data are reprocessed using run_gapctd().
+# Outputs written to /output/gapctd/*_best_oxygen.rds
 
 gapctd:::select_best_oxygen_method()
 
@@ -61,7 +63,7 @@ gapctd:::select_best_oxygen_method()
 # 6. Flag and interpolate --------------------------------------------------------------------------
 
 # Visually inspect, flag, and interpolate
-# Outputs written to /output/gapctd/ in rds files ending with "_qc.rds"
+# Outputs written to /output/gapctd/*_qc.rds
 
 gapctd::wrapper_flag_interpolate(rds_dir_path = here::here("output", processing_method),
                                  review = c("density", "salinity"))
