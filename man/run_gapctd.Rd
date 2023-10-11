@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_gapctd.R
 \name{run_gapctd}
 \alias{run_gapctd}
-\title{Process a .cnv file using the R workflow (R workflow)}
+\title{Process an oce object using the gapctd workflow (R workflow)}
 \usage{
 run_gapctd(
   x,
@@ -16,7 +16,7 @@ run_gapctd(
 )
 }
 \arguments{
-\item{x}{oce file}
+\item{x}{oce object}
 
 \item{haul_df}{data.frame containing haul data from RACEBASE that includes metadata for the cnv file.}
 
@@ -34,7 +34,7 @@ run_gapctd(
 A list of oce objects at stages of processing specified in return_stage.
 }
 \description{
-Run gapctd modules in the order described in Rohan et al. (2023) to process data from a cnv file.
+Run gapctd modules in the order described in Rohan et al. (2023) to process data from an oce object.
 }
 \references{
 Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1

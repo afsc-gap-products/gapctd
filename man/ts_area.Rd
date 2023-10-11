@@ -13,7 +13,7 @@ ts_area(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts")
 
 \item{return_sf}{Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.}
 
-\item{area_method}{Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")}
+\item{area_method}{Area between temperature-salinity ("ts") curves or oxygen-pressure ("op") curves.}
 }
 \value{
 When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
