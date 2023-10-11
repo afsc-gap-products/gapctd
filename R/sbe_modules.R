@@ -208,6 +208,11 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
     return(x)
   }
   
+  if(class(offset) == "list") {
+    offset <- gapctd:::offset_list_to_vector(offset_list = offset,
+                                             variables = variables)
+  }
+  
   in_timeS <- x@data$timeS
   
   for(ii in 1:length(variables)) {

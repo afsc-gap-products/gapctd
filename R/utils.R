@@ -450,3 +450,25 @@ extract_calibration_xmlcon <- function(xmlcon_path) {
   return(calibration_params)
   
 }
+
+
+
+#' Internal function converts offset list to numeric vector
+#' 
+#' @param offset_list List of named vectors one element is named 'offset'
+#' @param variable Character vector of data variable names to offset.
+#' @noRd
+
+offset_list_to_vector <- function(offset_list, variables) {
+  
+  out <- numeric(length = length(variables))
+  
+  for(jj in 1:length(variables)) {
+    
+    out[jj] <- as.numeric(offset_list[[variables[jj]]]['offset'])
+    
+  }
+  
+  return(out)
+  
+}
