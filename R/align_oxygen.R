@@ -55,7 +55,7 @@ wrapper_align_oxygen <- function(rds_dir_path = "auto", best_suffix = "_best.rds
 #' @noRd
 
 align_oxygen <- function(x,
-                         alignment = c(-1:-7),
+                         alignment = c(-2:-7),
                          mode = "test",
                          channel = NULL,
                          haul_df = NULL,
