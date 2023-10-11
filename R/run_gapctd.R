@@ -422,7 +422,6 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
                                           cor_var = cor_var, 
                                           cast_direction = "downcast", 
                                           cor_method = "pearson")
-      print(dc_align)
     }
 
   downcast <- gapctd:::align_var(x = downcast, 
