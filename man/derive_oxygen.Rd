@@ -6,6 +6,7 @@
 \usage{
 derive_oxygen(
   x,
+  cal_rds_path = NULL,
   tau_correction = TRUE,
   aa = NA,
   bb = NA,
@@ -17,13 +18,27 @@ derive_oxygen(
   d0 = NA,
   d1 = NA,
   d2 = NA,
-  cal_rds_path = NULL
+  sig_digits = 4
 )
 }
 \arguments{
 \item{x}{oce object containing raw oxygen voltage data (rawOxygen).}
 
+\item{cal_rds_path}{Optional path to calibration parameter file.}
+
 \item{tau_correction}{Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?}
+
+\item{aa}{Calibration parameter A}
+
+\item{bb}{Calibration parameter B}
+
+\item{cc}{Calibration parameter C}
+
+\item{ee}{Calibration parameter E}
+
+\item{soc}{Calibration parameter Soc}
+
+\item{Voffset}{Calibration parameter voltage offset}
 
 \item{tau20}{Tau correction calibration parameter Tau20.}
 
@@ -32,6 +47,8 @@ derive_oxygen(
 \item{d1}{Tau correction calibration parameter D1.}
 
 \item{d2}{Tau correction calibration parameter D2.}
+
+\item{sig_digits}{Significant digits for oxygen (ml/l).}
 }
 \value{
 oce object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.

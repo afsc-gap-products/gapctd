@@ -364,18 +364,26 @@ derive_eos <- function(x, precision = NULL) {
 #' Tau correction following Edwards et al. (2010). Should be run after dynamic corrections to temperature and conductivity channels.
 #' 
 #' @param x oce object containing raw oxygen voltage data (rawOxygen).
+#' @param cal_rds_path Optional path to calibration parameter file. 
 #' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
+#' @param aa Calibration parameter A
+#' @param bb Calibration parameter B
+#' @param cc Calibration parameter C
+#' @param ee Calibration parameter E
+#' @param soc Calibration parameter Soc
+#' @param Voffset Calibration parameter voltage offset
 #' @param d0 Tau correction calibration parameter D0.
 #' @param d1 Tau correction calibration parameter D1.
 #' @param d2 Tau correction calibration parameter D2.
 #' @param tau20 Tau correction calibration parameter Tau20.
+#' @param sig_digits Significant digits for oxygen (ml/l).
 #' @return oce object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
 #' Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
 
-derive_oxygen <- function(x, tau_correction = TRUE, aa = NA, bb = NA, cc = NA, ee = NA, soc = NA,
-                          Voffset = NA, tau20 = NA, d0 = NA, d1 = NA, d2 = NA, cal_rds_path = NULL) {
+derive_oxygen <- function(x, cal_rds_path = NULL, tau_correction = TRUE, aa = NA, bb = NA, cc = NA, ee = NA, soc = NA,
+                          Voffset = NA, tau20 = NA, d0 = NA, d1 = NA, d2 = NA, sig_digits = 4) {
   
   if(is.null(x)) {
     return(x)
@@ -434,6 +442,8 @@ derive_oxygen <- function(x, tau_correction = TRUE, aa = NA, bb = NA, cc = NA, e
   
   x@data$oxygen <- soc * (x@data$oxygenRaw + Voffset + tau * dVdt) * 
     (1 + aa * x@data$temperature + bb * x@data$temperature^2 + cc * x@data$temperature^3) * oxsol * exp(ee*x@data$pressure/temperature_K)
+  
+  x@data$oxygen <- round(x@data$oxygen, sig_digits)
   
   x@processingLog$time <- c(x@processingLog$time, Sys.time())
   x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
