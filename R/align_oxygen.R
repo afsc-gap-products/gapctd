@@ -1,3 +1,46 @@
+#' Wrapper for align_oxygen
+#' 
+#' @param rds_dir_path Filepath to directory containing rds files for the best method. If "auto", uses files from /output/gapctd/*_best.rds
+#' @param best_suffix Filename suffix for the best rds files. Default is _best.rds
+#' @param haul_data_path Path to haul data rds file. If "auto" uses, the HAUL_DATA rds file in /output/
+#' @param oxygen_alignment_offset_values Vector of oxygen alignment offset values to test.
+#' @noRd
+
+wrapper_align_oxygen <- function(rds_dir_path = "auto", best_suffix = "_best.rds", haul_data_path = "auto", oxygen_alignment_offset_values = -2:-7) {
+  
+  if(rds_dir_path == "auto") {
+    
+    rds_dir_path <- here::here("output", "gapctd")
+    
+  }
+  
+  rds_filename <- list.files(rds_dir_path, pattern = best_suffix, full.names = TRUE)
+  
+  if(haul_data_path == "auto") {
+    
+    haul_data_path <- list.files(path = here::here("output"),
+                                 full.names = TRUE,
+                                 pattern = "HAUL_DATA")
+    
+    stopifnot("wrapper_align_oxygen: More than one haul data file detected in /output/. Either provide a filepath to haul_data_path or move/delete the files that shouldn't be used." = length(haul_data_path) == 1)
+    
+  }
+  
+  haul_df <- readRDS(file = haul_data_path)
+  
+  for(ii in 1:length(rds_filename)) {
+    
+    gapctd:::align_oxygen(x = rds_filename[ii],
+                          haul_df = haul_df,
+                          alignment = oxygen_alignment_offset_values,
+                          mode = "test")
+    
+  }
+  
+}
+
+
+
 #' Align oxygen after selecting best method (gapctd)
 #'
 #' This function aligns oxygen channels after dynamic errors in temperature and salinity have been corrected and the best profile has been selected. Processing is performed by rerunning run_gapctd() using the parameters selected for the 'best' method.
@@ -19,7 +62,9 @@ align_oxygen <- function(x,
                          racebase_tzone = "America/Anchorage",
                          output_path = NULL) {
   
-  dir.create(path = here::here("output", "align_oxygen"))
+  suppressWarnings(
+    dir.create(path = here::here("output", "align_oxygen"))
+    )
   
   stopifnot("align_oxygen: mode argument must be either 'test' or 'align'" = mode %in% c("test", "align"))
   
@@ -32,7 +77,7 @@ align_oxygen <- function(x,
   }
   
   if(mode == "align" & !is.null(output_path)) {
-    stopifnot("align_oxygen: output_path must have file extension .rds when mode = 'align'" = tolower(tools::file_ext(output_path)) == ".rds")
+    stopifnot("align_oxygen: output_path must have file extension .rds when mode = 'align'" = tolower(tools::file_ext(output_path)) == "rds")
   }
   
   if(class(x) == "character") {
@@ -92,6 +137,7 @@ align_oxygen <- function(x,
                                                               cor_var = "conductivity")[[cast]])
       
       deploy_id <- new_obj[[cast]]@metadata$race_metadata$deploy_id
+      filename <- dat[[cast]]@metadata$filename
       
       new_obj[[cast]]@metadata$align$rawOxygen['offset'] <- alignment[kk]
       
@@ -99,6 +145,8 @@ align_oxygen <- function(x,
                                  as.data.frame(new_obj[[cast]]@data) |>
                                    dplyr::mutate(cast = cast,
                                                  deploy_id = deploy_id,
+                                                 filename = filename,
+                                                 rds_name = x,
                                                  oxygen_offset = alignment[kk]))
       
     }
@@ -132,6 +180,129 @@ align_oxygen <- function(x,
       saveRDS(object = new_obj, file = output_path)
       
     }
+    
+  }
+  
+}
+
+
+
+#' Visually inspect and select the best oxygen profile alignment
+#' 
+#' @param ox_align_path Path to the directory containing oxygen alignment rds test files.
+#' @param haul_data_path Path to haul data rds file. If "auto" uses, the HAUL_DATA rds file in /output/
+#' @param ox_suffix Filename suffix to append to the best file with corrected oxygen data added.
+#' @param best_suffix Filename suffix for the best rds files. Default is _best.rds
+#' @noRd
+
+select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "auto", ox_suffix = "_best_oxygen.rds", best_suffix = "_best.rds") {
+  
+  # Get paths to oxygen alignment candidate offset data, best T-S casts, and haul data
+  if(ox_align_path == "auto") {
+    
+    ox_align_path <- here::here("output", "align_oxygen")
+    
+  }
+  
+  ox_filename <- list.files(ox_align_path, full.names = TRUE)
+  
+  if(haul_data_path == "auto") {
+    
+    haul_data_path <- list.files(path = here::here("output"),
+                                 full.names = TRUE,
+                                 pattern = "HAUL_DATA")
+    
+    stopifnot("wrapper_align_oxygen: More than one haul data file detected in /output/. Either provide a filepath to haul_data_path or move/delete the files that shouldn't be used." = length(haul_data_path) == 1)
+    
+  }
+  
+  haul_df <- readRDS(file = haul_data_path)
+  
+  
+  for(ii in 1:length(ox_filename)) {
+    
+    ox_dat <- readRDS(file = ox_filename[ii])
+    
+    output_path <- gsub(pattern = best_suffix,
+                        replacement = ox_suffix,
+                        x = ox_dat$rds_name[1])
+    
+    if(file.exists(output_path)) {
+      message("Skipping ", ox_filename[ii], ". Output file already exists at ", output_path)
+      next
+    }
+    
+    unique_offsets <- unique(ox_dat$oxygen_offset)
+    
+    if(all(c("upcast", "downcast") %in% ox_dat$cast)) {
+      
+      abs_sum_dist <- ox_dat |>
+        tidyr::pivot_wider(id_cols = c("oxygen_offset", "depth"),
+                           values_from = oxygen,
+                           names_from = cast) |>
+        dplyr::mutate(abs_delta = abs(upcast-downcast)) |>
+        dplyr::filter(!is.na(abs_delta)) |>
+        dplyr::group_by(oxygen_offset) |>
+        dplyr::summarise(sum_abs_delta = signif(sum(abs_delta), 3))
+      
+      abs_sum_dist$lowest <- abs_sum_dist$sum_abs_delta == min(abs_sum_dist$sum_abs_delta)
+      
+      ox_dat <- dplyr::inner_join(ox_dat, 
+                                  abs_sum_dist,
+                                  by = "oxygen_offset")
+      
+      print(
+        plotly::ggplotly(
+          ggplot() +
+            geom_path(data = ox_dat,
+                      mapping = aes(x = oxygen,
+                                    y = depth,
+                                    linetype = cast,
+                                    color = lowest)) +
+            scale_y_reverse(name = "Depth") +
+            scale_x_continuous(name = "Dissolved Oxygen (ml/l)") +
+            scale_linetype(name = "Cast") +
+            scale_color_manual(name = "Lowest?", values = c("black", "red")) +
+            facet_wrap(~paste0(abs(oxygen_offset), " (", sum_abs_delta,")")) +
+            ggtitle(ox_dat$deploy_id[1]) +
+            theme_bw()
+        )
+      )
+        
+    } else {
+      
+      print(
+        plotly::ggplotly(
+          ggplot() +
+            geom_path(data = ox_dat,
+                      mapping = aes(x = oxygen,
+                                    y = depth,
+                                    linetype = cast)) +
+            scale_y_reverse(name = "Depth") +
+            scale_x_continuous(name = "Dissolved Oxygen (ml/l)") +
+            scale_linetype(name = "Cast") +
+            facet_wrap(~abs(oxygen_offset)) +
+            ggtitle(ox_dat$deploy_id[1]) +
+            theme_bw()
+        )
+      )
+      
+    }
+    
+    
+    # Prompt user to select the best method
+    response <- gapctd:::accept_response(valid_responses = abs(unique_offsets),
+                                         prompt = paste0("Select the best offset (",
+                                                         paste(abs(unique_offsets), collapse = ", "),"): ") )
+    
+    best_offset <- unique_offsets[match(x = response, table = abs(unique_offsets))]
+    
+    gapctd:::align_oxygen(x = ox_dat$rds_name[1],
+                          haul_df = haul_df,
+                          alignment = best_offset,
+                          mode = "align",
+                          output_path = output_path
+                          )
     
   }
   
