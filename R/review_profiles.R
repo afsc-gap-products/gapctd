@@ -130,7 +130,7 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       n_casts <- sum(names(ctd_dat) %in% c("downcast", "upcast"))
       
       if(!any(c("upcast", "downcast") %in% names(ctd_dat))) {
-        message("reviewing_profiles: No casts to review.")
+        message("review_profiles: No casts to review.")
         next
       }
       
@@ -192,7 +192,7 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       }
       
       if(remove_rds) {
-        message(paste0("manual_review: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
+        message(paste0("review_profiles: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
         
         rm_paths <- list.files(path = rds_dir_path, full.names = TRUE)
         rm_paths <- rm_paths[grepl(pattern = rds_rm[ii], x = rm_paths)]
