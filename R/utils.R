@@ -324,7 +324,7 @@ extract_calibration_xmlcon <- function(xmlcon_path) {
     cal_pars <- numeric(length = length(calibration_params[[data_channels[ii]]]))
     
     if(!any(grepl(pattern = channel_tag_start[ii], x = lines))) {
-      message(paste0("xmlcon_to_df: Skpping ", data_channels[ii], ". Channel tags not detected in xmlcon file."))
+      message(paste0("xmlcon_to_df: Skpping ", data_channels[ii], ". Sensor calibration parameters not detected in xmlcon file."))
       omit <- c(omit, ii)
       next
     }
@@ -360,7 +360,7 @@ extract_calibration_xmlcon <- function(xmlcon_path) {
   calibration_params$calibration <- calibration_df
   
   if(length(omit) > 0) {
-    calibration_params[[omit]] <- NULL
+    calibration_params[omit] <- NULL
   }
   
   return(calibration_params)

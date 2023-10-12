@@ -269,9 +269,9 @@ hex_to_cnv <- function(hex_path,
     sig_figs = output_sig_digits['conductivity']
   )
   
-  # Process dissolved oxygen and pH if used
-  dissolved_oxygen <- NA
-  ph <- NA
+  # Process oxygen and pH if used
+  oxygen_voltage <- NULL
+  ph <- NULL
   
   if(deployed_do) {
     oxygen_voltage <- gapctd:::integer_to_ox_voltage(values_int$doxygen_int)
@@ -289,14 +289,15 @@ hex_to_cnv <- function(hex_path,
   flag <- rep(0, length(lines_data))
   
   cnv_dat <- list(
-    data = data.frame(
-      conductivity = conductivity,
-      temperature = temperature,
-      pressure = pressure,
-      oxygen_voltage = oxygen_voltage,
-      ph = ph,
-      time_elapsed = time_elapsed,
-      flag = flag
+    data = as.data.frame(
+      cbind(
+        conductivity,
+        temperature,
+        pressure,
+        oxygen_voltage,
+        time_elapsed,
+        flag
+      )
     ),
     hex_path = hex_path,
     sample_interval = sample_interval,
@@ -305,14 +306,6 @@ hex_to_cnv <- function(hex_path,
     output_channels = output_channels,
     output_sig_digits = output_sig_digits
   )
-  
-  if(!deployed_do) {
-    cnv_dat$data <- dplyr::select(cnv_dat$data, -oxygen)
-  }
-  
-  if(!deployed_ph) {
-    cnv_dat$data <- dplyr::select(cnv_dat$data, -ph)
-  }
   
   message("hex_to_cnv: Writing data to cnv.\n")
   gapctd:::write_to_cnv(data_list = cnv_dat, output_path = output_path)
