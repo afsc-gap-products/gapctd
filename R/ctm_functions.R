@@ -1,6 +1,6 @@
 #' Optimize cell thermal mass correction parameters (R workflow)
 #' 
-#' Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the path distance of the salinity profile
+#' Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the gradient of the salinity profile
 #' 
 #' @param dc downcast oce object
 #' @param uc upcast oce object

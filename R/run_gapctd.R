@@ -442,7 +442,7 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
                                            cor_method = "pearson",
                                            cast_direction = "upcast")
     } else {
-      uc_align <- fixed_alignment(x = upcast, 
+      uc_align <- gapctd:::fixed_alignment(x = upcast, 
                                   align_pars = align_pars, 
                                   cor_var = cor_var, 
                                   cast_direction = "upcast", 

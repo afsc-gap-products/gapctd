@@ -321,11 +321,15 @@ wrapper_flag_interpolate <- function(rds_dir_path,
       message(paste0("Processing ", rds_short[JJ]))
       
       if("downcast" %in% names(ctd_dat)) {
-        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, review = review, bin_var = bin_var)
+        ctd_dat$downcast <- gapctd:::qc_flag_interpolate(ctd_dat$downcast, 
+                                                         review = review, 
+                                                         bin_var = bin_var)
       }
       
       if("upcast" %in% names(ctd_dat)) {
-        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast, review = review, bin_var = bin_var)
+        ctd_dat$upcast <- gapctd:::qc_flag_interpolate(ctd_dat$upcast, 
+                                                       review = review, 
+                                                       bin_var = bin_var)
       }
       
       saveRDS(ctd_dat, file = output_files[JJ])

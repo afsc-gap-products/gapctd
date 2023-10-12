@@ -1,12 +1,12 @@
 #' Wrapper for align_oxygen
 #' 
 #' @param rds_dir_path Filepath to directory containing rds files for the best method. If "auto", uses files from /output/gapctd/*_best.rds
-#' @param best_suffix Filename suffix for the best rds files. Default is _best.rds
+#' @param in_pattern Filename suffix for the best rds files. Default is _best.rds
 #' @param haul_data_path Path to haul data rds file. If "auto" uses, the HAUL_DATA rds file in /output/
 #' @param oxygen_alignment_offset_values Vector of oxygen alignment offset values to test.
 #' @noRd
 
-wrapper_align_oxygen <- function(rds_dir_path = "auto", best_suffix = "_best.rds", haul_data_path = "auto", oxygen_alignment_offset_values = -2:-7) {
+wrapper_align_oxygen <- function(rds_dir_path = "auto", in_pattern = "_best.rds", haul_data_path = "auto", oxygen_alignment_offset_values = -2:-7) {
   
   if(rds_dir_path == "auto") {
     
@@ -14,7 +14,7 @@ wrapper_align_oxygen <- function(rds_dir_path = "auto", best_suffix = "_best.rds
     
   }
   
-  rds_filename <- list.files(rds_dir_path, pattern = best_suffix, full.names = TRUE)
+  rds_filename <- list.files(rds_dir_path, pattern = in_pattern, full.names = TRUE)
   
   if(haul_data_path == "auto") {
     
@@ -81,28 +81,39 @@ align_oxygen <- function(x,
   }
   
   if(class(x) == "character") {
-    
     stopifnot("align_oxygen: x argument is not a valid filepath." = file.exists(x))
-    
     dat <- readRDS(file = x)
-    
   }
   
   if(class(x) == "list" & mode == "test") {
-    
       stopifnot("align_oxygen: x does not contain downcast or upcast oce objects." = any(names(x) %in% c("downcast", "upcast")))
-    
   }
   
   if(class(x) == "list" & mode == "align") {
-    
     stopifnot("align_oxygen: output_path argument must be provided when x is a list and mode = 'align'." = !is.null(output_path))
     
     if(!dir.exists(dirname(output_path))) {
       dir.create(dirname(output_path))
     }
+  }
+  
+  deploy_id <- dat[[1]]@metadata$race_metadata$deploy_id
+  
+  if(mode == "test") {
+    
+    ox_path <- here::here("output", "align_oxygen", paste0(deploy_id, "_ox_align.rds"))
+    
+    if(file.exists(ox_path)) {
+      
+      message("align_oxygen: Skipping ", deploy_id, ". Output file already exists at ", ox_path)
+      
+      return()
+      
+    }
     
   }
+  
+  message("align_oxygen: Processing ", deploy_id, ". From file ", dat[[1]]@metadata$filename)
   
   if(is.null(haul_df)) {
     if(is.null(channel)) {
@@ -124,20 +135,32 @@ align_oxygen <- function(x,
     new_obj <- list()
     
     for(ii in 1:length(valid_casts)) {
+      
       cast <- valid_casts[ii]
       
-      new_obj[[cast]] <- suppressWarnings(gapctd:::run_gapctd(x = read.oce(file = dat[[cast]]@metadata$filename),
+      filename <- dat[[cast]]@metadata$filename
+      
+      if(("both" %in% names(dat[[cast]]@metadata$ctm))) {
+        
+        ctm_pars <- dat[[cast]]@metadata$ctm$both
+        
+      } else {
+        
+        ctm_pars <- dat[[cast]]@metadata$ctm
+        
+      }
+      
+      oce_obj <- suppressWarnings(read.oce(file = dat[[cast]]@metadata$filename))
+      
+      new_obj[[cast]] <- suppressWarnings(gapctd:::run_gapctd(x = oce_obj,
                                                               haul_df = haul_df,
                                                               return_stage = "full",
                                                               ctd_tz = "America/Anchorage",
-                                                              ctm_pars = dat[[cast]]@metadata$ctm,
+                                                              ctm_pars = ctm_pars,
                                                               align_pars = c(temperature = as.numeric(dat[[cast]]@metadata$align$temperature['offset']),
                                                                              oxygenRaw = alignment[kk]),
                                                               cal_rds_path = here::here("psa_xmlcon", "calibration_parameters.rds"),
                                                               cor_var = "conductivity")[[cast]])
-      
-      deploy_id <- new_obj[[cast]]@metadata$race_metadata$deploy_id
-      filename <- dat[[cast]]@metadata$filename
       
       new_obj[[cast]]@metadata$align$rawOxygen['offset'] <- alignment[kk]
       
@@ -151,35 +174,34 @@ align_oxygen <- function(x,
       
     }
     
-    # 'test' mode saves a data.frame with oxygen aligned by a specified value
-    if(mode == "test") {
+  }
+  
+  if(mode == "align") {
+    
+    if("bottom" %in% names(dat)) {
       
-      ox_path <- here::here("output", "align_oxygen", paste0(deploy_id, "_ox_align.rds"))
+      new_obj[["bottom"]] <- dat[["bottom"]]
       
-      message("align_oxygen: Writing candidate oxygen profiles to ", ox_path)
-      
-      saveRDS(object = out_df, file = ox_path)
     }
     
-    if(mode == "align") {
+    if(is.null(output_path)) {
       
-      if("bottom" %in% names(dat)) {
-        
-        new_obj[["bottom"]] <- dat[["bottom"]]
-        
-      }
-      
-      if(is.null(output_path)) {
-        
-        out_file <- x
-        
-      }
-      
-      message("align_oxygen: Writing processed cast data to ", output_path)
-      
-      saveRDS(object = new_obj, file = output_path)
+      out_file <- x
       
     }
+    
+    message("align_oxygen: Writing processed cast data to ", output_path)
+    
+    saveRDS(object = new_obj, file = output_path)
+    
+  }
+  
+  # 'test' mode saves a data.frame with oxygen aligned by a specified value
+  if(mode == "test") {
+    
+    message("align_oxygen: Writing candidate oxygen profiles to ", ox_path)
+    
+    saveRDS(object = out_df, file = ox_path)
     
   }
   
@@ -191,11 +213,11 @@ align_oxygen <- function(x,
 #' 
 #' @param ox_align_path Path to the directory containing oxygen alignment rds test files.
 #' @param haul_data_path Path to haul data rds file. If "auto" uses, the HAUL_DATA rds file in /output/
-#' @param ox_suffix Filename suffix to append to the best file with corrected oxygen data added.
-#' @param best_suffix Filename suffix for the best rds files. Default is _best.rds
+#' @param out_pattern Filename suffix to append to the output file with corrected oxygen data added.
+#' @param in_pattern Filename suffix for the input best rds files. Default is _best.rds
 #' @noRd
 
-select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "auto", ox_suffix = "_best_oxygen.rds", best_suffix = "_best.rds") {
+select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "auto", out_pattern = "_best_oxygen.rds", in_pattern = "_best.rds") {
   
   # Get paths to oxygen alignment candidate offset data, best T-S casts, and haul data
   if(ox_align_path == "auto") {
@@ -223,8 +245,8 @@ select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "
     
     ox_dat <- readRDS(file = ox_filename[ii])
     
-    output_path <- gsub(pattern = best_suffix,
-                        replacement = ox_suffix,
+    output_path <- gsub(pattern = in_pattern,
+                        replacement = out_pattern,
                         x = ox_dat$rds_name[1])
     
     if(file.exists(output_path)) {
@@ -241,7 +263,7 @@ select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "
                            values_from = oxygen,
                            names_from = cast) |>
         dplyr::mutate(abs_delta = abs(upcast-downcast)) |>
-        dplyr::filter(!is.na(abs_delta)) |>
+        dplyr::filter(!is.na(abs_delta) & depth > 3) |>
         dplyr::group_by(oxygen_offset) |>
         dplyr::summarise(sum_abs_delta = signif(sum(abs_delta), 3))
       
@@ -301,8 +323,7 @@ select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "
                           haul_df = haul_df,
                           alignment = best_offset,
                           mode = "align",
-                          output_path = output_path
-                          )
+                          output_path = output_path)
     
   }
   
