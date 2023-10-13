@@ -37,11 +37,11 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   }
   
   # Empty directory
-  repl_cnv_files <- list.files(path = here::here("cnv"), full.names = TRUE)
-  repl_rds_files <- list.files(path = here::here("output", processing_method), full.names = TRUE, pattern = ".rds")
+  repl_cnv_files <- list.files(path = here::here("cnv"), full.names = TRUE, recursive = TRUE)
+  repl_rds_files <- list.files(path = here::here("output"), full.names = TRUE, pattern = ".rds", recursive = TRUE)
   repl_bad_cnv_files <- list.files(path = here::here("bad_cnv"), full.names = TRUE)
   repl_meta_files <- list.files(path = here::here("metadata"), full.names = TRUE)
-  repl_data_files <-  list.files(path = here::here("data"), full.names = TRUE, pattern = ".hex")
+  repl_data_files <-  list.files(path = here::here("data"), full.names = TRUE, pattern = ".hex", recursive = TRUE)
   repl_psa_files <- list.files(path = here::here("psa_xmlcon"), full.names = TRUE, pattern = ".psa")
   repl_xmlcon_files <- list.files(path = here::here("psa_xmlcon"), full.names = TRUE, pattern = ".xmlcon")
   repl_bat_files <- list.files(path = here::here(), full.names = TRUE, pattern = ".bat")
