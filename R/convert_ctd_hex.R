@@ -295,6 +295,7 @@ hex_to_cnv <- function(hex_path,
         temperature,
         pressure,
         oxygen_voltage,
+        ph,
         time_elapsed,
         flag
       )
@@ -474,13 +475,18 @@ integer_to_conductivity <- function(conductivity_integer, temperature, pressure,
 #' Convert SBE integer to pH
 #' @export
 integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs = 3) {
+  
   ph_voltage <- ph_integer/13107
+  
   ph <- 7.0 + (ph_voltage - ph_offset)/(ph_slope * (temperature + 273.15) * 1.98416e-4)
   
   if(is.numeric(sig_figs)) {
+    
     ph <- round(ph, sig_figs)
+    
   }
   return(ph)
+  
 }
 
 
