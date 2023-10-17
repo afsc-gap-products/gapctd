@@ -447,7 +447,7 @@ calc_bottom_mean_oce <- function(x,
                        vars = NULL) {
   
   if(is.null(vars)) {
-    vars <- c("temperature", "salinity", "absolute_salinity", "sound_speed", "density")
+    vars <- c("temperature", "salinity", "absolute_salinity", "sound_speed", "density", "oxygen", "pH")
   }
   
   out_df <- as.data.frame(x@data) |>
