@@ -1,8 +1,9 @@
 gapctd 2.0.0 (October 19, 2023)
 ----------------------------------------------------------------
 
-This release includes major updates to data processing functions
-to process data from SBE43 dissolved oxygen and SBE18 pH sensors.
+This release includes substantial changes to data processing 
+functions in order to process data from SBE43 dissolved oxygen 
+and SBE18 pH sensors.
 
 NEW FEATURES
 
