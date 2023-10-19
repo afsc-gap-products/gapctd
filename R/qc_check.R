@@ -38,7 +38,7 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
 #' Visually inspect plots of depth versus salinity, and depth versus pressure. Flag data for removal in a GUI and interpolate missing data. Write interpolated data to output/manual_flag
 #' 
 #' @param x oce object
-#' @param review variable to review ("density", "temperature" or "salinity"). Default = "density"
+#' @param review variable to review ("density", "temperature", "salinity", "oxygen", "ph"). Default = "density"
 #' @return An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.
 #' @export
 
