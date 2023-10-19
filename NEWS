@@ -42,7 +42,6 @@ NEW FEATURES
   temperature/salinity/density, an interface for users to select
   oxygen and pH profiles to include in the final data product.
 
-	
 FUNCTIONALITY CHANGES
 
 - qc_flag_interpolate(): Allows "oxygen" and "ph" as arguments
@@ -51,6 +50,7 @@ FUNCTIONALITY CHANGES
 - .check_duplicates: Internal (AFSC) use. Checks hex files for
 	duplicate casts and multiple serial numbers to avoid processing
 	errors.
+	
 
 gapctd 1.5.1 (September 22, 2023)
 ----------------------------------------------------------------
