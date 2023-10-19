@@ -15,10 +15,10 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.2.3
 Depends: R(>= 4.1), 
-         ggplot2,
          plyr,
          dplyr, 
          tidyr, 
+         ggplot2,
          oce, 
          here, 
          bbmle,
