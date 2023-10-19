@@ -2,20 +2,27 @@
 % Please edit documentation in R/review_profiles.R
 \name{review_profiles}
 \alias{review_profiles}
-\title{Visually inspect profiles (R workflow)}
+\title{Visually inspect temperature, salinity, and density profiles (R workflow)}
 \usage{
-review_profiles(rds_dir_path, threshold = -1e-05, in_pattern = "_qc.rds")
+review_profiles(
+  rds_dir_path,
+  threshold = -1e-05,
+  in_pattern = "_qc.rds",
+  out_pattern = "_final.rds"
+)
 }
 \arguments{
 \item{rds_dir_path}{Filepath to directory containing rds files to be reviewed.}
 
 \item{threshold}{Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.}
 
-\item{in_pattern}{Character vector search pattern for input files.}
+\item{in_pattern}{Character vector search pattern for input files. Default = "_qc.rds"}
+
+\item{out_pattern}{Character vector to append to filename. Default = "_final.rds"}
 }
 \value{
-Writes accepted profiles to rds_dir_path with suffix "_final.rds"
+Writes accepted profiles to rds_dir_path with out_pattern appended.
 }
 \description{
-Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
+Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using wrapper_flag_interpolate() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
 }

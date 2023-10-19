@@ -37,11 +37,11 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   }
   
   # Empty directory
-  repl_cnv_files <- list.files(path = here::here("cnv"), full.names = TRUE)
-  repl_rds_files <- list.files(path = here::here("output", processing_method), full.names = TRUE, pattern = ".rds")
+  repl_cnv_files <- list.files(path = here::here("cnv"), full.names = TRUE, recursive = TRUE)
+  repl_rds_files <- list.files(path = here::here("output"), full.names = TRUE, pattern = ".rds", recursive = TRUE)
   repl_bad_cnv_files <- list.files(path = here::here("bad_cnv"), full.names = TRUE)
   repl_meta_files <- list.files(path = here::here("metadata"), full.names = TRUE)
-  repl_data_files <-  list.files(path = here::here("data"), full.names = TRUE, pattern = ".hex")
+  repl_data_files <-  list.files(path = here::here("data"), full.names = TRUE, pattern = ".hex", recursive = TRUE)
   repl_psa_files <- list.files(path = here::here("psa_xmlcon"), full.names = TRUE, pattern = ".psa")
   repl_xmlcon_files <- list.files(path = here::here("psa_xmlcon"), full.names = TRUE, pattern = ".xmlcon")
   repl_bat_files <- list.files(path = here::here(), full.names = TRUE, pattern = ".bat")
@@ -156,23 +156,27 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
     hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
     cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
     cnv_output <- gsub(x = cnv_output, pattern = "/data/", replacement = "/cnv/")
+    xmlcon_path <- list.files(path = here::here("psa_xmlcon"), 
+                              pattern = "xmlcon", 
+                              full.names = TRUE)
     
     for(II in 1:length(hex_files)) {
       message("setup_gapctd_directory: Converting ", hex_files[II])
       hex_to_cnv(hex_path = hex_files[II], 
-                 output_path = cnv_output[II], 
+                 output_path = cnv_output[II],
+                 xmlcon_path = xmlcon_path,
                  sample_interval = 0.25,
-                 output_channels = c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
-                                     "temperature" = "tv290C: Temperature [ITS-90, deg C]",
-                                     "pressure" = "prdM: Pressure, Strain Gauge [db]",
-                                     "conductivity" = "c0S/m: Conductivity [S/m]", 
-                                     "flag" = "flag:  0.000e+00"),
-                 output_sig_digits = c("time_elapsed" = 3,
-                                       "temperature" = 4,
-                                       "pressure" = 3,
-                                       "conductivity" = 6, 
-                                       "flag" = 1))
+                 output_channels = NULL,
+                 output_sig_digits = NULL
+                 )
     }
+    
+    # Save calibration parameters to RDS
+    calibration_parameters <- gapctd::extract_calibration_xmlcon(xmlcon_path = xmlcon_path)
+    
+    calibration_file <- here::here("psa_xmlcon", "calibration_parameters.rds")
+    message("setup_gapctd_directory: Saving calibration parameters to ", calibration_file)
+    saveRDS(calibration_parameters, file = calibration_file)
     
   }
   

@@ -71,90 +71,6 @@ accept_response <- function(valid_responses, prompt) {
 
 
 
-#' Convert CTD .hex file to .cnv using SBE Data Processing
-#'
-#' Converts SBE19plus V2 CTD hex file to cnv using Sea-Bird Data Processing software. cnv files generated with this function will be properly formatted for conversion to BTD using CTDtoBTD().
-#'
-#' @param hex_file_path Path to a single .hex file from the CTD.
-#' @param xmlcon_path Path to CTD the config file (.xmlcon) for the CTD that was used to collect data in the .hex file.
-#' @param bat_file Optional. Filepath to a batch (.bat) file to be executed in command line to run SBE Data Processing. Default NULL automatically uses the .bat file that is included in GAPsurvey.
-#' @param datcnv_file Optional. Filepath to .psa file for the SBE Data Processing Datcnv module. Default NULL automatically uses the .psa file that is included in GAPsurvey.
-#' @return Writes decoded CTD data to a cnv file and returns the path to the file as a 1L character vector.
-#' @export
-#'
-#' @examples
-#' # Copy system files to working directory for example
-#' file.copy(from = system.file("exdata/CTDtoBTD/2021_06_13_0003.hex", package = "GAPsurvey"),
-#' to = gsub(pattern = system.file("exdata/CTDtoBTD/", package = "GAPsurvey"),
-#'           replacement = getwd(),
-#'           x = system.file("exdata/CTDtoBTD/2021_06_13_0003.hex", package = "GAPsurvey")))
-#'
-#' file.copy(from = system.file("exdata/CTDtoBTD/19-8102_Deploy2021.xmlcon", package = "GAPsurvey"),
-#'           to = gsub(pattern = system.file("exdata/CTDtoBTD/", package = "GAPsurvey"),
-#'                     replacement = getwd(),
-#'                     x = system.file("exdata/CTDtoBTD/19-8102_Deploy2021.xmlcon", package = "GAPsurvey")))
-#'
-#' # Run convert_ctd_hex()
-#' GAPsurvey:::convert_ctd_hex(hex_file_path = "2021_06_13_0003.hex",
-#'                             xmlcon_path = "19-8102_Deploy2021.xmlcon",
-#'                             bat_file = NULL,
-#'                             datcnv_file = NULL)
-
-convert_ctd_hex <- function(hex_file_path,
-                            xmlcon_path,
-                            bat_file = NULL,
-                            datcnv_file = NULL) {
-  
-  # Replace double backslashes in filepaths with forward slashes
-  hex_file_path <- gsub(pattern = "\\\\", replacement = "/", x = hex_file_path)
-  xmlcon_path<- gsub(pattern = "\\\\", replacement = "/", x = xmlcon_path)
-  
-  # Handle case where file is in the root directory
-  if(dirname(hex_file_path) == ".") {
-    hex_file_path <- paste0(getwd(), "/", hex_file_path)
-  }
-  
-  if(dirname(xmlcon_path) == ".") {
-    xmlcon_path <- paste0(getwd(), "/", xmlcon_path)
-  }
-  
-  if(!file.exists(hex_file_path)) {
-    stop("convert_ctd_hex: Specified hex_file_path (", hex_file_path,  ") does not exist. Please replace with a valid path to a .hex file.")
-  }
-  
-  message("convert_ctd_hex: Attempting to convert ", hex_file_path, " to .cnv")
-  
-  out_path <- gsub(pattern = ".hex", replacement = "_raw.cnv", x = hex_file_path)
-  
-  # Specify paths to .bat and .psa files for SBE data processing
-  if(is.null(bat_file)) {
-    bat_file <- system.file("exdata/CTDtoBTD/atsea_getdata.bat", package = "GAPsurvey")
-  }
-  
-  if(is.null(datcnv_file)) {
-    datcnv_file <- system.file("exdata/CTDtoBTD/DatCnv.psa", package = "GAPsurvey")
-  }
-  
-  # Run SBE data processing
-  system(command = paste0("sbebatch \"",
-                          bat_file, "\" \"",
-                          hex_file_path, "\" \"",
-                          datcnv_file, "\" \"",
-                          xmlcon_path, "\" \"",
-                          sub("/[^/]+$", "", hex_file_path), "\""
-  ))
-  
-  if(file.exists(out_path)) {
-    message("convert_ctd_hex: .cnv file created at ", out_path, ".")
-  } else {
-    stop("convert_ctd_hex: Failed to convert .hex to .cnv.")
-  }
-  
-  return(out_path)
-}
-
-
-
 #' Remove rds files based on QA/QC flags (R workflow)
 #' 
 #' Remove deployment rds files that contain bottom, upcast, and/or bottom ctd objects based on QA/QC flags.
@@ -373,5 +289,102 @@ make_stage_df <- function(x, stage, method) {
   }
   
   message("No duplicates or multiple serial numbers detected among .hex files.")
+  
+}
+
+
+
+#' Extract calibration parameters from xmlcon to a list
+#' 
+#' Retrives calibration parameters for temperature, conductivity, pressure, oxygen, and pH sensors from an instrument configuration (.xmlcon) file.
+#' 
+#' @param xmlcon_path Path to an xmlcon file.
+#' @export
+
+extract_calibration_xmlcon <- function(xmlcon_path) {
+  
+  lines <- readLines(con = xmlcon_path)
+  
+  data_channels <- c("temperature", "conductivity", "pressure", "oxygen", "ph")
+  channel_tag_start <- c("<TemperatureSensor", "<ConductivitySensor", "<PressureSensor ", "<!-- Coefficients for Sea-Bird equation", "<pH_Sensor")
+  channel_tag_end <- c("</TemperatureSensor", "</ConductivitySensor", "</PressureSensor>", "</OxygenSensor", "</pH_Sensor")
+  
+  calibration_params <- list(temperature = c("A0" = -9e9, "A1" = -9e9, "A2" = -9e9, "A3" = -9e9, "Slope" = -9e9, "Offset" = -9e9),
+                             conductivity = c("A" = -9e9, "B" = -9e9, "C" = -9e9, "D" = -9e9, "M" = -9e9, "G" = -9e9, "H" = -9e9, "I" = -9e9, "J" = -9e9, "CPcor" = -9e9, "CTcor" = -9e9),
+                             pressure = c("PA0" = -9e9, "PA1" = -9e9, "PA2" = -9e9, "PTEMPA0" = -9e9, "PTEMPA1" = -9e9, "PTEMPA2" = -9e9, "PTCA0" = -9e9, "PTCA1" = -9e9, "PTCA2" = -9e9, "PTCB0" = -9e9, "PTCB1" = -9e9, "PTCB2" = -9e9, "Offset" = -9e9),
+                             oxygen = c("Soc" = -9e9, "offset" = -9e9, "A" = -9e9, "B" = -9e9, "C" = -9e9, "D0" = -9e9, "D1" = -9e9, "D2" = -9e9, "E" = -9e9, "Tau20" = -9e9, "H1" = -9e9, "H2" = -9e9, "H3" = -9e9),
+                             ph = c("Slope" = -9e9, "Offset" = -9e9))
+  
+  omit <- numeric()
+  
+  calibration_df <- data.frame()
+  
+  for(ii in 1:length(data_channels)) {
+    
+    cal_pars <- numeric(length = length(calibration_params[[data_channels[ii]]]))
+    
+    if(!any(grepl(pattern = channel_tag_start[ii], x = lines))) {
+      message(paste0("xmlcon_to_df: Skpping ", data_channels[ii], ". Sensor calibration parameters not detected in xmlcon file."))
+      omit <- c(omit, ii)
+      next
+    }
+    
+    serial_number <- gapctd::get_calibration_parameter(header = lines, 
+                                                       cal_par = "SerialNumber", 
+                                                       start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                                       end_block = channel_tag_end[ii])
+    
+    calibration_date <- gapctd::get_calibration_parameter(header = lines, 
+                                                          cal_par = "CalibrationDate", 
+                                                          start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                                          end_block = channel_tag_end[ii],
+                                                          make_numeric = FALSE)
+    
+    calibration_df <- dplyr::bind_rows(calibration_df,
+                                       data.frame(
+                                         channel = data_channels[ii],
+                                         serial_number = serial_number,
+                                         calibration_date = as.Date(calibration_date, format = "%d-%b-%y")
+                                       )
+    )
+    
+    for(jj in 1:length(calibration_params[[data_channels[ii]]])) {
+      calibration_params[[data_channels[ii]]][jj] <- gapctd::get_calibration_parameter(header = lines, 
+                                                                                       cal_par = names(calibration_params[[data_channels[ii]]][jj]), 
+                                                                                       start_block = channel_tag_start[ii], 
+                                                                                       end_block = channel_tag_end[ii])
+    }
+    
+  }
+  
+  calibration_params$calibration <- calibration_df
+  
+  if(length(omit) > 0) {
+    calibration_params[omit] <- NULL
+  }
+  
+  return(calibration_params)
+  
+}
+
+
+
+#' Internal function converts offset list to numeric vector
+#' 
+#' @param offset_list List of named vectors one element is named 'offset'
+#' @param variable Character vector of data variable names to offset.
+#' @noRd
+
+offset_list_to_vector <- function(offset_list, variables) {
+  
+  out <- numeric(length = length(variables))
+  
+  for(jj in 1:length(variables)) {
+    
+    out[jj] <- as.numeric(offset_list[[variables[jj]]]['offset'])
+    
+  }
+  
+  return(out)
   
 }

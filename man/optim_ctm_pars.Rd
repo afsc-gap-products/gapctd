@@ -36,5 +36,5 @@ optim_ctm_pars(
 A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
 }
 \description{
-Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the path distance of the salinity profile
+Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the gradient of the salinity profile
 }

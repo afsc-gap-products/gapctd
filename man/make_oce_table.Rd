@@ -7,7 +7,7 @@
 make_oce_table(
   cast_files,
   precision = c(temperature = 4, conductivity = 6, salinity = 4, absolute_salinity = 4,
-    sound_speed = 3, density = 3, pressure = 3, oxygen = 5, ph = 4, velocity = 3),
+    sound_speed = 3, density = 3, pressure = 3, oxygen = 4, ph = 3, velocity = 3),
   output_file
 )
 }

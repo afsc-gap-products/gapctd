@@ -1,3 +1,57 @@
+gapctd 2.0.0 (October 19, 2023)
+----------------------------------------------------------------
+
+This release includes substantial changes to data processing 
+functions in order to process data from SBE43 dissolved oxygen 
+and SBE18 pH sensors.
+
+NEW FEATURES
+
+- Modifications were made to numerous core functions to handle
+  data from dissolved oxygen and pH channels while retaining 
+  functionality when the sensors are not used.
+  
+- derive_oxygen(): Converts SBE43 voltage into oxygen (ml/l)
+  using calibration parameters for the DO sensors. Currently 
+  allows tau correction to voltage but not the hysteresis correct-
+  ion. References:
+    - Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. 
+		    Calibration, response, and hysteresis in deep-sea dissolved 
+		    oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. 
+		    https://doi.org/10.1175/2009JTECHO693.1
+    - Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: 
+		    Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. 
+		    https://doi.org/10.4319/lo.1992.37.6.1307
+		
+- extract_calibration_xmlcon(): Extracts calibration parameters 
+  for temperature, pressure, conductivity, dissolved oxygen, and 
+  pH sensors from a CTD configuration (.xmlcon) file.
+  
+- align_oxygen(): Aligns oxygen channel data using user-specified
+  offset value.
+
+- wrapper_align_oxygen(): Aligns oxygen for multiple user-specified 
+  alignment offset values using align_oxygen().
+  
+- select_best_oxygen_method(): Similar to select_best_method()
+  for temperature/salinity/density, an interface for users to 
+  select the best oxygen alignment value based on visual inspection 
+  of oxygen profiles.
+  
+- review_oxygen_ph_profiles(): Similar to review_profiles() for
+  temperature/salinity/density, an interface for users to select
+  oxygen and pH profiles to include in the final data product.
+
+FUNCTIONALITY CHANGES
+
+- qc_flag_interpolate(): Allows "oxygen" and "ph" as arguments
+  to 'review'
+	
+- .check_duplicates: Internal (AFSC) use. Checks hex files for
+	duplicate casts and multiple serial numbers to avoid processing
+	errors.
+	
+
 gapctd 1.5.1 (September 22, 2023)
 ----------------------------------------------------------------
 

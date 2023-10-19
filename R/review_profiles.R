@@ -101,24 +101,25 @@ select_best_method <- function(rds_dir_path) {
 
 
 
-#' Visually inspect profiles (R workflow)
+#' Visually inspect temperature, salinity, and density profiles (R workflow)
 #' 
-#' Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using manual_flag_review() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
+#' Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using wrapper_flag_interpolate() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
 #' 
 #' @param rds_dir_path Filepath to directory containing rds files to be reviewed.
 #' @param threshold Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses. GTSPP uses a density threshold of 0.05.
-#' @param in_pattern Character vector search pattern for input files.
-#' @return Writes accepted profiles to rds_dir_path with suffix "_final.rds"
+#' @param in_pattern Character vector search pattern for input files. Default = "_qc.rds"
+#' @param out_pattern Character vector to append to filename. Default = "_final.rds" 
+#' @return Writes accepted profiles to rds_dir_path with out_pattern appended.
 #' @export
 
-review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.rds") {
+review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.rds", out_pattern = "_final.rds") {
   
   rds_files <- list.files(rds_dir_path, full.names = TRUE, pattern = in_pattern)
   rds_rm <- gsub(pattern = in_pattern, replacement = "", x = rds_files)
   rds_short <- list.files(rds_dir_path, full.names = FALSE, pattern = in_pattern)
   out_files <- here::here(rds_dir_path, 
                           gsub(pattern = in_pattern, 
-                               replacement = "_final.rds", 
+                               replacement = out_pattern, 
                                x = rds_short))
   
   for(ii in 1:length(rds_files)) {
@@ -130,7 +131,7 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       n_casts <- sum(names(ctd_dat) %in% c("downcast", "upcast"))
       
       if(!any(c("upcast", "downcast") %in% names(ctd_dat))) {
-        message("reviewing_profiles: No casts to review.")
+        message("review_profiles: No casts to review.")
         next
       }
       
@@ -192,14 +193,12 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
       }
       
       if(remove_rds) {
-        message(paste0("manual_review: Not keeping casts from ", rds_short[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
+        message(paste0("review_profiles: No casts selected. Removing ", rds_files[ii], ". Rerun wrapper_flag_interpolate() then review_profiles() to rectify data or casts from the deployment will be exluded from output."))
         
         rm_paths <- list.files(path = rds_dir_path, full.names = TRUE)
         rm_paths <- rm_paths[grepl(pattern = rds_rm[ii], x = rm_paths)]
         
-        if(length(rm_paths) > 0) {
-          file.remove(rm_paths)
-        }
+        file.remove(rds_files[ii])
       }
       
       # Keep only an upcast or a downcast
@@ -223,4 +222,122 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
               ").")
     }
   } 
+}
+
+
+
+#' Review oxygen and pH
+#' 
+#' Run after selecting temperature/salinity/density profiles.
+#' 
+#' @param rds_dir_path Filepath to directory containing rds files to be reviewed.
+#' @param in_pattern Character vector search pattern for input files.
+#' @param out_pattern Character vector to append to filename. Default = "_final.rds" 
+#' @export
+
+review_oxygen_ph_profiles <- function(rds_dir_path, 
+                                      in_pattern = "_final_ts.rds", 
+                                      out_pattern = "_final.rds") {
+  
+  rds_files <- list.files(rds_dir_path, full.names = TRUE, pattern = in_pattern)
+  rds_short <- list.files(rds_dir_path, full.names = FALSE, pattern = in_pattern)
+  out_files <- here::here(rds_dir_path, 
+                          gsub(pattern = in_pattern, 
+                               replacement = out_pattern, 
+                               x = rds_short))
+  
+  
+  for(ii in 1:length(rds_files)) {
+    
+    if(file.exists(out_files[ii])) {
+      message("review_profiles: Skipping ", 
+              rds_files[ii], 
+              " because a final profile already exists for the deployment (", out_files[ii],
+              ").")
+      next
+    }
+    
+    message("review_profiles: Reviewing ", rds_files[ii])
+    
+    ctd_dat <- readRDS(file = rds_files[ii])
+    
+    casts <- c("downcast", "upcast")[c("downcast", "upcast") %in% names(ctd_dat)]
+    cast_abbr <- c("d", "u")[c("downcast", "upcast") %in% casts]
+    
+    if(length(cast_abbr) == 2) {
+      cast_abbr <- c(1, cast_abbr)
+    }
+    
+    valid_responses <- c(0, cast_abbr)
+    
+    profile_data <- data.frame()
+    
+    
+    for(jj in 1:length(casts)) {
+      
+      profile_data <- dplyr::bind_rows(profile_data,
+                                       as.data.frame(ctd_dat[[casts[jj]]]@data) |>
+                                         dplyr::mutate(cast = casts[jj]))
+      
+    }
+    
+    
+    review_channels <- c("pH", "oxygen")[c("pH", "oxygen") %in% names(profile_data)]
+    
+    
+    for(kk in 1:length(review_channels)) {
+      
+      print(
+        plotly::ggplotly(
+          ggplot() +
+            geom_path(data = data.frame(depth = profile_data$depth,
+                                        temperature = profile_data$temperature,
+                                        review_var = profile_data[[review_channels[kk]]],
+                                        cast = profile_data$cast) |>
+                        tidyr::pivot_longer(cols = c("temperature", "review_var")) |>
+                        dplyr::mutate(name = ifelse(name == "review_var", review_channels[kk], name)) |>
+                        dplyr::mutate(name = factor(name, levels = c("temperature", "pH", "oxygen"))) |>
+                        dplyr::arrange(depth),
+                      mapping = aes(x = value,
+                                    y = depth,
+                                    linetype = cast,
+                                    color = name)) +
+            scale_linetype_manual(name = "Profile", 
+                                  values = c("downcast" = 1, "upcast" = 2)) +
+            scale_color_manual(values = c("temperature" = "red",
+                                          "pH" = "deepskyblue3",
+                                          "oxygen" = "purple",
+                                          "salinity" = "darkgreen"), guide = "none") +
+            scale_y_reverse(name = "Depth") +
+            scale_x_continuous(name = review_channels[kk]) +
+            facet_wrap(~name, scales = "free_x") +
+            theme_bw()
+        )
+      )
+      
+      prompt <- paste0("Accept ", review_channels[kk], " from ", paste(c("none (0)", "both (1)", "downcast (d)", "upcast(u)")[match(valid_responses, table = c("0", "1", "d", "u"))], collapse = ", "), "?: ")
+      
+      response <- gapctd:::accept_response(valid_responses = valid_responses,
+                                           prompt = prompt)
+      
+      if(response %in% c("0", "u") & "d" %in% valid_responses) {
+        
+        message("review_oxygen_ph_profiles: Changing downcast ", review_channels[kk], " to NA.")  
+        ctd_dat$downcast@data[[review_channels[kk]]] <- rep(NA, length(ctd_dat$downcast@data[[review_channels[kk]]]))
+        
+      }
+      
+      if(response %in% c("0", "d") & "u" %in% valid_responses) {
+        
+        message("review_oxygen_ph_profiles: Changing upcast ", review_channels[kk], " to NA.") 
+        ctd_dat$upcast@data[[review_channels[kk]]] <- rep(NA, length(ctd_dat$upcast@data[[review_channels[kk]]]))
+        
+      }
+      
+    }
+    
+    saveRDS(ctd_dat, file = out_files[ii])
+    
+  }
+  
 }

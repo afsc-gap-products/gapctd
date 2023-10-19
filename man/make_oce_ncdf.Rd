@@ -10,7 +10,7 @@ make_oce_ncdf(
   metadata_files = c(list.files(path = here::here("metadata"), full.names = TRUE)),
   output_file = "output.nc",
   precision = c(temperature = 4, conductivity = 6, salinity = 4, absolute_salinity = 4,
-    sound_speed = 3, density = 3, pressure = 3, oxygen = 5, ph = 4, velocity = 3),
+    sound_speed = 3, density = 3, pressure = 3, oxygen = 4, ph = 3, velocity = 3),
   global_attributes = list(title = "CTD Data from AFSC 2021 EBS/NBS Bottom Trawl Survey",
     references = "CTD TEAM...", id = "doi", cdm_data_type = "Point", cruise =
     "2021 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Survey",

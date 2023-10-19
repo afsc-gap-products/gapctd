@@ -208,6 +208,11 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
     return(x)
   }
   
+  if(class(offset) == "list") {
+    offset <- gapctd:::offset_list_to_vector(offset_list = offset,
+                                             variables = variables)
+  }
+  
   in_timeS <- x@data$timeS
   
   for(ii in 1:length(variables)) {
@@ -347,6 +352,101 @@ derive_eos <- function(x, precision = NULL) {
                           digits = prec['density'])
   x@data$N2 <- round(oce::swN2(pressure = x),
                      digits = prec['N2'])
+  
+  return(x)
+  
+}
+
+
+
+#' Apply tau correction to oxygen voltage channel
+#' 
+#' Tau correction following Edwards et al. (2010). Should be run after dynamic corrections to temperature and conductivity channels.
+#' 
+#' @param x oce object containing raw oxygen voltage data (rawOxygen).
+#' @param cal_rds_path Optional path to calibration parameter file. 
+#' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
+#' @param aa Calibration parameter A
+#' @param bb Calibration parameter B
+#' @param cc Calibration parameter C
+#' @param ee Calibration parameter E
+#' @param soc Calibration parameter Soc
+#' @param Voffset Calibration parameter voltage offset
+#' @param d0 Tau correction calibration parameter D0.
+#' @param d1 Tau correction calibration parameter D1.
+#' @param d2 Tau correction calibration parameter D2.
+#' @param tau20 Tau correction calibration parameter Tau20.
+#' @param sig_digits Significant digits for oxygen (ml/l).
+#' @return oce object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
+#' @export
+#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+#' Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+
+derive_oxygen <- function(x, cal_rds_path = NULL, tau_correction = TRUE, aa = NA, bb = NA, cc = NA, ee = NA, soc = NA,
+                          Voffset = NA, tau20 = NA, d0 = NA, d1 = NA, d2 = NA, sig_digits = 4) {
+  
+  if(is.null(x)) {
+    return(x)
+  }
+  
+  if(!("oxygenRaw" %in% names(x@data))) {
+    warning("tau_correction: Tau correction not applied. No oxygen voltage channel found in 'x'.")
+    return(x)
+  }
+  
+  if(!is.null(cal_rds_path)) {
+    
+    cal_pars <- readRDS(cal_rds_path)
+    
+    message(paste0("tau_correction: Retrieving oxygen calibration parameters from ", cal_rds_path))
+    
+    aa <- cal_pars[['oxygen']]['A']
+    bb <- cal_pars[['oxygen']]['B']
+    cc <- cal_pars[['oxygen']]['C']
+    ee <- cal_pars[['oxygen']]['E']
+    soc <- cal_pars[['oxygen']]['Soc']
+    Voffset <- cal_pars[['oxygen']]['offset']
+    tau20 <- cal_pars[['oxygen']]['Tau20']
+    d0 <- cal_pars[['oxygen']]['D0']
+    d1 <- cal_pars[['oxygen']]['D1']
+    d2 <- cal_pars[['oxygen']]['D2']
+    
+  }
+  
+  stopifnot("derive_oxygen: Error: one or more calibration coefficients has an NA value. Check the calibration file or argument for NA values" = !anyNA(c(aa,bb,cc,ee,soc,Voffset,tau20,d0,d1,d2)))
+  
+  # Recalculate salinity
+  if("salinity" %in% names(x@data)) {
+    x@data[['salinity']] <- NULL
+  }
+  
+  x@data$salinity <- oce::swSCTp(x)
+  
+  dVdt <- c(0, diff(x@data$oxygenRaw)/diff(x@data$timeS))
+  tau <- 0
+  
+  if(tau_correction) {
+    tau <- gapctd::tau_par(temperature = x@data$temperature, 
+                           pressure = x@data$pressure, 
+                           tau20 = tau20, 
+                           d0 = d0, 
+                           d1 = d1, 
+                           d2 = d2)
+  }
+  
+  temperature_K <- x@data$temperature + 273.15
+  
+  # Oxygen solubility based on Garcia and Gordon (1992)
+  oxsol <- gapctd:::oxygen_saturation(temperature = x@data$temperature,
+                                      salinity = x@data$salinity)
+  
+  x@data$oxygen <- soc * (x@data$oxygenRaw + Voffset + tau * dVdt) * 
+    (1 + aa * x@data$temperature + bb * x@data$temperature^2 + cc * x@data$temperature^3) * oxsol * exp(ee*x@data$pressure/temperature_K)
+  
+  x@data$oxygen <- round(x@data$oxygen, sig_digits)
+  
+  x@processingLog$time <- c(x@processingLog$time, Sys.time())
+  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
   
   return(x)
   
