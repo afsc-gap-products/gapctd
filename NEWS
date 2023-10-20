@@ -1,3 +1,18 @@
+gapctd 2.0.1 (October 20, 2023)
+----------------------------------------------------------------
+
+BUG FIX
+
+- Change filepath handling in align_oxygen() to use relative path
+  naming. This change allows the user to move the data processing 
+  directory between setup and oxygen alignment steps.
+  
+IMPROVEMENTS
+
+- Make qc_flag_interpolate() display oxygen units during flag/
+  interpolate step.
+  
+
 gapctd 2.0.0 (October 19, 2023)
 ----------------------------------------------------------------
 

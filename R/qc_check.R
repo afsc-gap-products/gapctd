@@ -219,7 +219,7 @@ qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
       
       par(mfrow = c(1,1))
       plot(x@data$oxygen, -1*x@data$pressure,
-           xlab = "Oxygen",
+           xlab = "Oxygen (ml/l)",
            ylab = "Pressure",
            col = "purple3",
            main = "Left-click on points to be removed then press 'Esc'")

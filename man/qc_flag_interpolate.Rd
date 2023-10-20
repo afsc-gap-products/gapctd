@@ -9,7 +9,7 @@ qc_flag_interpolate(x, review = c("density"), bin_var = "depth")
 \arguments{
 \item{x}{oce object}
 
-\item{review}{variable to review ("density", "temperature" or "salinity"). Default = "density"}
+\item{review}{variable to review ("density", "temperature", "salinity", "oxygen", "ph"). Default = "density"}
 }
 \value{
 An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.

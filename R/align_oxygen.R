@@ -64,7 +64,7 @@ align_oxygen <- function(x,
   
   suppressWarnings(
     dir.create(path = here::here("output", "align_oxygen"))
-    )
+  )
   
   stopifnot("align_oxygen: mode argument must be either 'test' or 'align'" = mode %in% c("test", "align"))
   
@@ -86,7 +86,7 @@ align_oxygen <- function(x,
   }
   
   if(class(x) == "list" & mode == "test") {
-      stopifnot("align_oxygen: x does not contain downcast or upcast oce objects." = any(names(x) %in% c("downcast", "upcast")))
+    stopifnot("align_oxygen: x does not contain downcast or upcast oce objects." = any(names(x) %in% c("downcast", "upcast")))
   }
   
   if(class(x) == "list" & mode == "align") {
@@ -113,7 +113,9 @@ align_oxygen <- function(x,
     
   }
   
-  message("align_oxygen: Processing ", deploy_id, ". From file ", dat[[1]]@metadata$filename)
+  
+  
+  message("align_oxygen: Processing ", deploy_id, ". From file ", here::here("cnv", basename(dat[[1]]@metadata$filename)))
   
   if(is.null(haul_df)) {
     if(is.null(channel)) {
@@ -138,7 +140,7 @@ align_oxygen <- function(x,
       
       cast <- valid_casts[ii]
       
-      filename <- dat[[cast]]@metadata$filename
+      filename <-  here::here("cnv", basename(dat[[cast]]@metadata$filename))
       
       if(("both" %in% names(dat[[cast]]@metadata$ctm))) {
         
@@ -150,7 +152,7 @@ align_oxygen <- function(x,
         
       }
       
-      oce_obj <- suppressWarnings(read.oce(file = dat[[cast]]@metadata$filename))
+      oce_obj <- suppressWarnings(oce::read.oce(file = filename))
       
       new_obj[[cast]] <- suppressWarnings(gapctd:::run_gapctd(x = oce_obj,
                                                               haul_df = haul_df,
