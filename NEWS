@@ -1,3 +1,13 @@
+gapctd 2.0.2 (November 10, 2023)
+----------------------------------------------------------------
+
+IMPROVEMENTS
+
+- Change section_oce() to allow sectioning when there are no 
+  pressure data.
+- Add error check to bin_average() for cases when there are no 
+  data quality flags.
+
 gapctd 2.0.1 (October 20, 2023)
 ----------------------------------------------------------------
 

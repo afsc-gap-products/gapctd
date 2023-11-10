@@ -475,7 +475,11 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
   }
   
   by <- tolower(by)
+  
   stopifnot("bin_average: Argument 'by' must be \"pressure\" or \"depth\"" = by %in% c("pressure", "depth"))
+  
+  # Error if there is not 'flag' data and exclude_bag_flag is TRUE
+  stopifnot("bin_average: No 'flag' variable found in x@data. Must include a flag or set argument exclude_bad_flag = TRUE." = !(exclude_bad_flag & !("flag" %in% names(x@data))))
   
   var_names <- names(x@data)
   
@@ -624,17 +628,38 @@ section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_directio
     bad_profile <- TRUE
   } else {
     if(cast_direction != "bottom") {
-      if(diff(range(x@data$pressure)) < 5) {
-        # Total pressure range less than 5 dbar
-        warning(paste0("Insufficient pressure range in ", cast_direction))
-        bad_profile <- TRUE
+      
+      if("pressure" %in% names(x@data)) {
+        if(diff(range(x@data$pressure)) < 5) {
+          # Total pressure range less than 5 dbar
+          warning(paste0("Insufficient pressure range in ", cast_direction))
+          bad_profile <- TRUE
+        }
+        
+        if(min(x@data$pressure) > 5) {
+          # Minimum pressure greater than 5 dbar
+          warning(paste0("Insufficient pressure range in ", cast_direction))
+          bad_profile <- TRUE
+        }
+      } else {
+        
+        if("depth" %in% names(x@data)) {
+          if(diff(range(x@data$depth)) < 5) {
+            # Total pressure range less than 5 m
+            warning(paste0("Insufficient depth range in ", cast_direction))
+            bad_profile <- TRUE
+          }
+          
+          if(min(x@data$depth) > 5) {
+            # Minimum pressure greater than 5 m
+            warning(paste0("Insufficient depth range in ", cast_direction))
+            bad_profile <- TRUE
+          }
+        }
+        
+        
       }
       
-      if(min(x@data$pressure) > 5) {
-        # Minimum pressure greater than 5 dbar
-        warning(paste0("Insufficient pressure range in ", cast_direction))
-        bad_profile <- TRUE
-      }
     }
   }
   
