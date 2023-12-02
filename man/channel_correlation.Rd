@@ -23,6 +23,8 @@ channel_correlation(
 \item{c2}{Name of second channel as a character vector. Default = "conductivity"}
 
 \item{min_pressure}{Minimum pressure to use for correlations}
+
+\item{cor_method}{Correlation method to use as a character vector (see ?cor)}
 }
 \value{
 Correlation coefficient (1L numeric)

@@ -19,7 +19,7 @@ df_to_ncdf(
   dim_long_names_3d = NULL,
   dim_positive_3d = NULL,
   dim_units_3d = NULL,
-  dim_sort_3d,
+  dim_sort_3d = TRUE,
   var_names_3d = NULL,
   var_long_names_3d = NULL,
   var_units_3d = NULL,
@@ -33,7 +33,11 @@ df_to_ncdf(
 \arguments{
 \item{x}{A data frame containing data and metadata to add to write to a netCDF file.}
 
+\item{output_filename}{Name of the output file name as a character vector.}
+
 \item{dim_names_2d}{A vector of names of 2D spatial and time dimensions (e.g., LATITUDE, LONGITUDE, DATETIME).}
+
+\item{dim_long_names_2d}{A vector of long_names for spatial and time dimensions.}
 
 \item{dim_units_2d}{A vector of unit quantities for 2D dimensions.}
 
@@ -51,9 +55,15 @@ df_to_ncdf(
 
 \item{dim_long_names_3d}{A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").}
 
+\item{dim_positive_3d}{A named list indicating which direction is down for 3D variable, i.e., list("depth" = "down")}
+
 \item{dim_units_3d}{A vector of unit quantities for 3D dimensions.}
 
+\item{dim_sort_3d}{Logical vector indicating whether 3D variable should be sorted prior to including in output.}
+
 \item{var_names_3d}{A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).}
+
+\item{var_long_names_3d}{A vector of long_names for the 3D variable.}
 
 \item{var_units_3d}{A vector of unit quantities for the 3D variables (e.g., 'degrees Celsius', 'Practical Salinity').}
 

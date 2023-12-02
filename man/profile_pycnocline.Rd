@@ -4,7 +4,7 @@
 \alias{profile_pycnocline}
 \title{Calculate pycnocline depth as the maximum rate of increase in density at depths below the pycnocline and below the reference depth}
 \usage{
-profile_pycnocline(rho, z, mld = NULL, ref.depth = 5)
+profile_pycnocline(rho, z, mld = NULL, ref_depth = 5)
 }
 \arguments{
 \item{rho}{Numeric vector of density}
@@ -13,7 +13,7 @@ profile_pycnocline(rho, z, mld = NULL, ref.depth = 5)
 
 \item{mld}{Mixed layer depth}
 
-\item{ref.depth}{Reference depth for upper layer density}
+\item{ref_depth}{Reference depth for upper layer density}
 }
 \description{
 Find the depth of the pycnocline as the depth where density is changing the fastest

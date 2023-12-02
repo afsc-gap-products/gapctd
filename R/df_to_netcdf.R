@@ -3,8 +3,10 @@
 #' Write 2D and/or 3D data from a data frame to a netCDF version-4 file using the RNetCDF package.
 #' 
 #' @param x A data frame containing data and metadata to add to write to a netCDF file.
+#' @param output_filename Name of the output file name as a character vector.
 #' @param dim_names_2d A vector of names of 2D spatial and time dimensions (e.g., LATITUDE, LONGITUDE, DATETIME).
 #' @param dim_units_2d A vector of unit quantities for 2D dimensions.
+#' @param dim_long_names_2d A vector of long_names for spatial and time dimensions.
 #' @param var_names_2d A vector of variable names that for 2D variables (e.g., VESSEL, CRUISE, HAUL, CAST, STATIONID).
 #' @param var_long_names_2d A vector of long_names for the 2D variable.
 #' @param var_units_2d A vector of unit quantities for the 2D variables.
@@ -12,9 +14,12 @@
 #' @param var_flag_meanings_2d Optional. A list of containing vectors of flag_meaning definitions for 2D flag variables where list item names correspond with variables in var_names_2d.
 #' @param dim_names_3d A vector of names of 3D dimension (e.g., depth).
 #' @param dim_long_names_3d A Vector of long_names of 3D dimension (e.g., "Depth in meters (positive down)").
+#' @param dim_positive_3d A named list indicating which direction is down for 3D variable, i.e., list("depth" = "down")
 #' @param dim_units_3d A vector of unit quantities for 3D dimensions.
+#' @param dim_sort_3d Logical vector indicating whether 3D variable should be sorted prior to including in output.
 #' @param var_names_3d A vector of variable names for 3D variables (e.g., TEMPERATURE, SALINITY).
 #' @param var_units_3d A vector of unit quantities for the 3D variables (e.g., 'degrees Celsius', 'Practical Salinity').
+#' @param var_long_names_3d A vector of long_names for the 3D variable.
 #' @param var_flag_values_3d Optional. A list of containing vectors of flag values for 3D flag variables where list item names correspond with variables in var_names_3d.
 #' @param var_flag_meanings_3d Optional. A list of containing vectors of flag_meaning definitions for 3D flag variables where list item names correspond with variables in var_names_3d.
 #' @param instrument_attributes Optional. A vector of attribute names for the instrument variable.
@@ -36,7 +41,7 @@ df_to_ncdf <- function(x,
                        dim_long_names_3d = NULL,
                        dim_positive_3d = NULL,
                        dim_units_3d = NULL,
-                       dim_sort_3d,
+                       dim_sort_3d = TRUE,
                        var_names_3d = NULL,
                        var_long_names_3d = NULL,
                        var_units_3d = NULL,
@@ -364,9 +369,13 @@ df_to_ncdf <- function(x,
 #' Supports numeric, integer, and character classes.
 #' 
 #' @param vec A vector of any type.
+#' @param pkg Package to format output for, either RNetCDF or ncdf4
 #' @export
 
 vec_to_nc_class <- function(vec, pkg = "RNetCDF") {
+  
+  stopifnot("vec_to_nc_class: pkg must be either 'RNetCDF' or 'ncdf4'" = pkg %in% c("RNetCDF", "ncdf4"))
+  
   vec_class <- class(vec)
   if(pkg == "RNetCDF") {
     if(vec_class == "numeric") {
@@ -712,7 +721,8 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                        source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))
   
   # Convert POSIXct to character
-  convert_index <- which(!(unlist(sapply(all_profiles, FUN = function(x) class(x)[1])) %in% c("numeric", "integer", "character", "logical", "matrix", "factor")))
+  convert_index <- which(!(unlist(sapply(all_profiles, 
+                                         FUN = function(x) class(x)[1])) %in% c("numeric", "integer", "character", "logical", "matrix", "factor")))
   
   message(paste0("make_oce_ncdf: Converting ", paste(names(all_profiles)[convert_index], sep = ", ") ," to character." ))
   for(ii in convert_index) {
@@ -725,7 +735,8 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                      output_filename = output_file,
                      dim_names_2d = c("latitude", "longitude", "time"),
                      dim_units_2d = c("degree_north", "degree_east", "time"),
-                     dim_long_names_2d = c("Latitude (decimal degrees)", "Longitude (decimal degrees)", "Time in Coordinated Universal Time (UTC)"),
+                     dim_long_names_2d = c("Latitude (decimal degrees)", "Longitude (decimal degrees)", 
+                                           "Time in Coordinated Universal Time (UTC)"),
                      var_names_2d = c("stationid", "profile", "vessel", "cruise", "haul", "haul_depth", "sea_floor_temperature", "sea_floor_practical_salinity", "sea_floor_salinity", "sea_floor_sound_speed_in_sea_water", "sea_floor_ph_reported_on_total_scale", "sea_floor_dissolved_oxygen"),
                      var_long_names_2d = c("AFSC/RACE/GAP Survey Station Name", "Profile Number and Direction", "AFSC/RACE/GAP Vessel Code", "AFSC/RACE/GAP Cruise Code", "Haul Number", "Mean towed depth of CTD during haul", "Mean bottom temperature (ITS-90) at towed depth", "Mean Practical Salinity (PSS-78) at towed depth", "Mean Absolute Salinity (TEOS-10 GSW) at towed depth", "Mean speed of sound during haul (Chen-Millero)", "Acidity (pH scale) at the towed depth",  "Dissolved oxygen concentration at towed depth (SBE 43)"),
                      var_units_2d = c("1", "1", "1", "1", "1", "m", "degree_C", "1", "g kg-1", "m s-1", "1", "ml l-1"),

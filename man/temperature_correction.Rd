@@ -11,9 +11,9 @@ temperature_correction(x, alpha_T, beta_T, freq_n)
 
 \item{alpha_T}{Alpha parameter for temperature correction (1L numeric)}
 
-\item{freq_n}{Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.}
+\item{beta_T}{Beta parameter for conductivity correction (1L numeric)}
 
-\item{beta_C}{Beta parameter for conductivity correction (1L numeric)}
+\item{freq_n}{Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.}
 }
 \value{
 oce object with correction applied to temperature.

@@ -7,10 +7,16 @@
 #' @param c1 Name of first channel as a character vector. Default = "temperature"
 #' @param c2 Name of second channel as a character vector. Default = "conductivity"
 #' @param min_pressure Minimum pressure to use for correlations
+#' @param cor_method Correlation method to use as a character vector (see ?cor)
 #' @return Correlation coefficient (1L numeric)
 #' @export
 
-channel_correlation <- function(x, exclude_flag = TRUE, c1 = "temperature", c2 = "conductivity", min_pressure = 4, cor_method = "pearson") {
+channel_correlation <- function(x, 
+                                exclude_flag = TRUE, 
+                                c1 = "temperature", 
+                                c2 = "conductivity", 
+                                min_pressure = 4, 
+                                cor_method = "pearson") {
   
   if(exclude_flag) {
     T_vec <- x@data[[c1]][x@data$flag >= 0 & x@data$pressure >= min_pressure]

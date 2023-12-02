@@ -4,12 +4,14 @@
 \alias{qc_flag_interpolate}
 \title{Manually flag and interpolate bad data (R workflow)}
 \usage{
-qc_flag_interpolate(x, review = c("density"), bin_var = "depth")
+qc_flag_interpolate(x, review = "density", bin_var = "depth")
 }
 \arguments{
 \item{x}{oce object}
 
 \item{review}{variable to review ("density", "temperature", "salinity", "oxygen", "ph"). Default = "density"}
+
+\item{bin_var}{Which channel to use for binning measurements for plotting ("depth" or "pressure").}
 }
 \value{
 An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.

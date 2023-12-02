@@ -11,8 +11,7 @@ optim_ctm_pars(
   start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
   start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
   default_parameters = c(alpha_C = 0.04, beta_C = 0.125),
-  area_method = "ts",
-  ...
+  area_method = "ts"
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ optim_ctm_pars(
 \item{default_parameters}{Named numeric vector of default parameters. Defaults is c(alpha_C = 0.04, beta_C = 0.125).}
 
 \item{area_method}{Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")}
-
-\item{optim_maxit}{Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.}
 }
 \value{
 A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.

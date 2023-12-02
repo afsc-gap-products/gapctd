@@ -11,6 +11,8 @@ ts_area(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts")
 
 \item{uc}{upcast oce object}
 
+\item{by}{Which Z dimension variable should be used ("depth" or "pressure")?}
+
 \item{return_sf}{Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.}
 
 \item{area_method}{Area between temperature-salinity ("ts") curves or oxygen-pressure ("op") curves.}

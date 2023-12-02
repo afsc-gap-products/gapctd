@@ -20,6 +20,8 @@ slowdown(
 \item{window}{Numeric vector (1L). Number of samples to use to calculate speeds for each observation.}
 
 \item{cast_direction}{Character vector ("downcast", "upcast") denoting the cast direction.}
+
+\item{exclude_bottom}{Pressure width to exclude near-bottom. This is used because it can takes awhile for the CTD to start ascending when the net approaches or leaves the seafloor, but the contact between the net and the seafloor generally does not cause influential flow reversals.}
 }
 \value{
 oce object with flags updated to denote scans for which speeds were below the threshold.

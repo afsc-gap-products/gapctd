@@ -29,6 +29,8 @@ run_gapctd(
 \item{align_pars}{A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)}
 
 \item{cal_rds_path}{Filepath to RDS containing calibration parameters. Required for oxygen data processing.}
+
+\item{cor_var}{Channel to use for optimizing temperature alignment. For exploratory purposes only.}
 }
 \value{
 A list of oce objects at stages of processing specified in return_stage.

@@ -18,13 +18,13 @@ profile_bld_from_t(
 
 \item{z}{Numeric vector of depths for each of the temperatures}
 
+\item{ref_dist_from_max}{Numeric vector of distances from the maximum depth to use for the reference temperature.}
+
 \item{min_temperature_diff}{Minimum temperature difference. If the difference in temperatures between the reference depths and shallow depths. If the difference is below this threshold, the function returns the minimum depth (i.e. column is considered fully mixed).}
 
 \item{temp_threshold}{Threshold temperature difference.}
 
-\item{ref_distance_from_max}{Numeric vector of distances from the maximum depth to use for the reference temperature.}
-
-\item{na.rm}{Should NA values be omitted?}
+\item{na_rm}{Should NA values be omitted?}
 }
 \description{
 Based on the temperature recorded at a specified difference from the maximum depth for a profile.

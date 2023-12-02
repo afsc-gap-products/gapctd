@@ -9,7 +9,7 @@ profile_bld(
   z,
   totdepth = NULL,
   threshold = 0.1,
-  ref.depth = 5,
+  ref_depth = 5,
   na_rm = TRUE
 )
 }
@@ -22,7 +22,7 @@ profile_bld(
 
 \item{threshold}{Density threshold}
 
-\item{ref.depth}{Thickness of bottom layer to use for calculating bottom layer density}
+\item{ref_depth}{Thickness of bottom layer to use for calculating bottom layer density}
 
 \item{na_rm}{Should NA values be omitted?}
 }

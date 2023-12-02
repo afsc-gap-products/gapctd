@@ -6,6 +6,7 @@
 #' @param min_speed Numeric vector (1L). Threshold below which observations should be flagged.
 #' @param window Numeric vector (1L). Number of samples to use to calculate speeds for each observation.
 #' @param cast_direction Character vector ("downcast", "upcast") denoting the cast direction.
+#' @param exclude_bottom Pressure width to exclude near-bottom. This is used because it can takes awhile for the CTD to start ascending when the net approaches or leaves the seafloor, but the contact between the net and the seafloor generally does not cause influential flow reversals.
 #' @return oce object with flags updated to denote scans for which speeds were below the threshold.
 #' @export
 
@@ -103,7 +104,7 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 #'
 #' @param x oce object that includes timeS, temperature, and conductivity channels.
 #' @param alpha_T Alpha parameter for temperature correction (1L numeric)
-#' @param beta_C Beta parameter for conductivity correction (1L numeric)
+#' @param beta_T Beta parameter for conductivity correction (1L numeric)
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @return oce object with correction applied to temperature.
 #' @export
@@ -198,6 +199,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param variables Character vector of data variable names to offset.
 #' @param offset Numeric vector of offsets (in seconds) to add.
 #' @param method Interpolation method for the approx function to use.
+#' @param interp_method Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval)
 #' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
 #' @export
@@ -251,6 +253,7 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
 #' @param x oce object
 #' @param variables Character vector of data variable names to filter.
 #' @param time_constant Numeric vector of time constants for filters (in seconds).
+#' @param precision Numeric vector indicating how many significant digits to use for each channel.
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @export
 
@@ -258,7 +261,7 @@ lowpass_filter <- function(x,
                            variables = c("temperature", "conductivity", "pressure"),
                            time_constant = c(0.5, 0.5, 1),
                            precision = c(4, 6, 3),
-                           freq_n = 0.25) {
+                           freq_n = NULL) {
   
   if(is.null(x)) {
     return(x)

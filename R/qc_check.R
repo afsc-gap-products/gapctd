@@ -39,10 +39,11 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
 #' 
 #' @param x oce object
 #' @param review variable to review ("density", "temperature", "salinity", "oxygen", "ph"). Default = "density"
+#' @param bin_var Which channel to use for binning measurements for plotting ("depth" or "pressure").
 #' @return An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.
 #' @export
 
-qc_flag_interpolate <- function(x, review = c("density"), bin_var = "depth") {
+qc_flag_interpolate <- function(x, review = "density", bin_var = "depth") {
   
   interp_flags <- function(x_oce, bin_var) {
     

@@ -4,10 +4,10 @@
 #' 
 #' @param temperature Numeric vector of temperatures
 #' @param z Numeric vector of depths for each of the temperatures
-#' @param ref_distance_from_max Numeric vector of distances from the maximum depth to use for the reference temperature.
+#' @param ref_dist_from_max Numeric vector of distances from the maximum depth to use for the reference temperature.
 #' @param min_temperature_diff Minimum temperature difference. If the difference in temperatures between the reference depths and shallow depths. If the difference is below this threshold, the function returns the minimum depth (i.e. column is considered fully mixed).
 #' @param temp_threshold Threshold temperature difference.
-#' @param na.rm Should NA values be omitted?
+#' @param na_rm Should NA values be omitted?
 #' @export
 
 profile_bld_from_t <- function(temperature,
@@ -61,13 +61,13 @@ profile_bld_from_t <- function(temperature,
 #'
 #' @param rho Numeric vector of densities
 #' @param z Numeric vector of depths. Depths are positive.
-#' @param ref.depth Thickness of bottom layer to use for calculating bottom layer density
+#' @param ref_depth Thickness of bottom layer to use for calculating bottom layer density
 #' @param totdepth Maximum depth sampled by the cast. If NULL, estimated from profile data.
 #' @param threshold Density threshold
 #' @param na_rm Should NA values be omitted?
 #' @export 
 
-profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref.depth = 5, na_rm = TRUE) {
+profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref_depth = 5, na_rm = TRUE) {
   
   if(na_rm) {
     keep <- which(!is.na(rho) & !is.na(z))
@@ -82,8 +82,8 @@ profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref.depth = 5,
   rho <- rho[order(z)]
   z <- z[order(z)]
   z.max <- max(z)
-  bottom.rho <- mean(rho[z >= (z.max - ref.depth)])
-  bld.bin <- which(rho < (bottom.rho - threshold) & z < (z.max - ref.depth))
+  bottom.rho <- mean(rho[z >= (z.max - ref_depth)])
+  bld.bin <- which(rho < (bottom.rho - threshold) & z < (z.max - ref_depth))
   
   if(length(bld.bin) > 0) {
     bld <- z[max(bld.bin)]
@@ -102,16 +102,16 @@ profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref.depth = 5,
 #' @param rho Density vector
 #' @param z Depth vector (positive depths)
 #' @param mld Vector of mixed layer depth
-#' @param ref.depth Reference depth for calculating mixed layer density.
+#' @param ref_depth Reference depth for calculating mixed layer density.
 #' @param mld.buffer Depth difference between upper and lower
 #' @export 
 
 # Calculate density difference between the reference depth (5 m) and MLD + buffer (30 m below mld), following Cokelet (2016)
-profile_cokelet_density_diff <- function(rho, z, mld, ref.depth = 5, mld.buffer = 30) {
+profile_cokelet_density_diff <- function(rho, z, mld, ref_depth = 5, mld.buffer = 30) {
   rho.upper <- NA
   rho.lower <- NA
-  if(min(abs(z-ref.depth)) < 3){
-    rho.upper <- mean(rho[z <= ref.depth])
+  if(min(abs(z-ref_depth)) < 3){
+    rho.upper <- mean(rho[z <= ref_depth])
   }
   lower.ref <- mld + 30
   if(lower.ref < max(z)) {
@@ -177,10 +177,10 @@ profile_mld_from_t <- function(temperature,
 #' @param rho Numeric vector of density
 #' @param z Numeric vector of depths
 #' @param mld Mixed layer depth
-#' @param ref.depth Reference depth for upper layer density
+#' @param ref_depth Reference depth for upper layer density
 #' @export 
 
-profile_pycnocline <- function(rho, z, mld = NULL, ref.depth = 5) {
+profile_pycnocline <- function(rho, z, mld = NULL, ref_depth = 5) {
   
   # Don't calculate pycnocline if MLD goes to the bottom
   if(mld < max(z)) {
@@ -188,8 +188,8 @@ profile_pycnocline <- function(rho, z, mld = NULL, ref.depth = 5) {
     z <- z[order(z)]
     
     # Filter by reference depth
-    rho <- rho[z > ref.depth]
-    z <- z[z > ref.depth]
+    rho <- rho[z > ref_depth]
+    z <- z[z > ref_depth]
     
     if(!is.null(mld)) {
       rho <- rho[z > mld]
@@ -222,7 +222,7 @@ profile_pycnocline <- function(rho, z, mld = NULL, ref.depth = 5) {
 #' @param mld Mixed layer depth
 #' @export 
 
-profile_tsrho_by_layer <- function(t, s, rho, z, mld, mld.buffer) {
+profile_tsrho_by_layer <- function(t, s, rho, z, mld) {
   if(mld >= max(z)){
     t_above <- mean(t, na.rm = TRUE)
     t_below <- NA

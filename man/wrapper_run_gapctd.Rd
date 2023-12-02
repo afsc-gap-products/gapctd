@@ -27,7 +27,7 @@ wrapper_run_gapctd(
 
 \item{channel}{Optional. RODBC channel; only used when haul_df = NULL.}
 
-\item{tzone}{Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()}
+\item{racebase_tzone}{Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()}
 }
 \value{
 Writes rds files with cast data to /output/[processing_method]

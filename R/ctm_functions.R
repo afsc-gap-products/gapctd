@@ -5,7 +5,6 @@
 #' @param dc downcast oce object
 #' @param uc upcast oce object
 #' @param optim_method Optimization method for optim(). Default is the Broyden-Fletcher-Goldfarb-Shanno with constraints algorithm ("L-BFGS-B")
-#' @param optim_maxit Number of optim iterations or maximum number of iterations, depending on the optim method. Default = 500.
 #' @param start_alpha_C Starting value for alpha in cell thermal mass optimization (default = 0.04, typical value for SBE19plus).
 #' @param start_beta_C Starting value for beta in cell thermal mass optimization (default = 1/8, typical value for SBE19plus).
 #' @param area_method Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")
@@ -19,8 +18,7 @@ optim_ctm_pars <- function(dc = NULL,
                            start_alpha_C = c(0.001, 0.01, 0.02, 0.04, 0.08, 0.12),
                            start_beta_C = c(1, 1/2, 1/4, 1/8, 1/12, 1/24),
                            default_parameters = c(alpha_C = 0.04, beta_C = 0.125),
-                           area_method = "ts",
-                           ...) {
+                           area_method = "ts") {
   
   both_casts <- !any(is.null(dc), is.null(uc))
   
@@ -266,6 +264,7 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 #' 
 #' @param dc downcast oce object
 #' @param uc upcast oce object
+#' @param by Which Z dimension variable should be used ("depth" or "pressure")?
 #' @param area_method Area between temperature-salinity ("ts") curves or oxygen-pressure ("op") curves.
 #' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.

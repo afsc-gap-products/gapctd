@@ -9,7 +9,7 @@ lowpass_filter(
   variables = c("temperature", "conductivity", "pressure"),
   time_constant = c(0.5, 0.5, 1),
   precision = c(4, 6, 3),
-  freq_n = 0.25
+  freq_n = NULL
 )
 }
 \arguments{
@@ -18,6 +18,8 @@ lowpass_filter(
 \item{variables}{Character vector of data variable names to filter.}
 
 \item{time_constant}{Numeric vector of time constants for filters (in seconds).}
+
+\item{precision}{Numeric vector indicating how many significant digits to use for each channel.}
 
 \item{freq_n}{Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.}
 }

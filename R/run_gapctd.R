@@ -8,7 +8,7 @@
 #' @param vessel Optional. Vessel code as a 1L numeric vector.
 #' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
 #' @param channel Optional. RODBC channel; only used when haul_df = NULL.
-#' @param tzone Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()
+#' @param racebase_tzone Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()
 #' @return Writes rds files with cast data to /output/[processing_method]
 #' @export
 
@@ -309,6 +309,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 #' @param ctm_pars Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
 #' @param align_pars A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
 #' @param cal_rds_path Filepath to RDS containing calibration parameters. Required for oxygen data processing.
+#' @param cor_var Channel to use for optimizing temperature alignment. For exploratory purposes only.
 #' @return A list of oce objects at stages of processing specified in return_stage.
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1

@@ -4,7 +4,7 @@
 \alias{profile_cokelet_density_diff}
 \title{Calculate density difference between reference depth and 30 m below mixed-layer depth (or bottom)}
 \usage{
-profile_cokelet_density_diff(rho, z, mld, ref.depth = 5, mld.buffer = 30)
+profile_cokelet_density_diff(rho, z, mld, ref_depth = 5, mld.buffer = 30)
 }
 \arguments{
 \item{rho}{Density vector}
@@ -13,7 +13,7 @@ profile_cokelet_density_diff(rho, z, mld, ref.depth = 5, mld.buffer = 30)
 
 \item{mld}{Vector of mixed layer depth}
 
-\item{ref.depth}{Reference depth for calculating mixed layer density.}
+\item{ref_depth}{Reference depth for calculating mixed layer density.}
 
 \item{mld.buffer}{Depth difference between upper and lower}
 }
