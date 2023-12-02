@@ -1,3 +1,13 @@
+gapctd 2.1.0 (December 2, 2023)
+----------------------------------------------------------------
+
+FUNCTIONALITY CHANGES
+
+- Removed SBE Data Processing workflow functions from the package
+  due to lack of capacity to support parallel development. However,
+  processing methods will be implemented 
+
+
 gapctd 2.0.2 (November 10, 2023)
 ----------------------------------------------------------------
 
@@ -7,6 +17,7 @@ IMPROVEMENTS
   pressure data.
 - Add error check to bin_average() for cases when there are no 
   data quality flags.
+
 
 gapctd 2.0.1 (October 20, 2023)
 ----------------------------------------------------------------
@@ -82,9 +93,10 @@ gapctd 1.5.1 (September 22, 2023)
 
 FUNCTIONALITY CHANGES
 
-- New error check for the Temperature-Salinity Error method in run_gapctd() to handle 
-  cases where the temperature-salinity area method doesn't converge because 
-  temperature-salinity curves from upcasts and downcasts produce identical values.
+- New error check for the Temperature-Salinity Error method in 
+  run_gapctd() to handle cases where the temperature-salinity 
+  area method doesn't converge because temperature-salinity curves 
+  from upcasts and downcasts produce identical values.
   
-- Added internal function to gapctd workflow to check for duplicate casts and multiple CTDs in 
-  /data/ to avoid data processing errors.
+- Added internal function to gapctd workflow to check for duplicate 
+  casts and multiple CTDs in /data/ to avoid data processing errors.

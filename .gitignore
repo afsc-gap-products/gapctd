@@ -56,5 +56,5 @@ doc/*.html
 /analysis/DO_pH_project/
 /inst/extdata/py/
 
-*.nc
+/inst/extdata/*.nc
 /*.rds
