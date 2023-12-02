@@ -58,6 +58,8 @@ align_oxygen <- function(x,
                          alignment = c(-2:-7),
                          mode = "test",
                          channel = NULL,
+                         vessel = NULL,
+                         cruise = NULL,
                          haul_df = NULL,
                          racebase_tzone = "America/Anchorage",
                          output_path = NULL) {
