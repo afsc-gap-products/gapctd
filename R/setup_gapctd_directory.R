@@ -68,9 +68,9 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   # Verify that ctd unit is correct ----
   processing_method <- tolower(processing_method)
   
-  if(!(processing_method %in% tolower(list.files(system.file("extdata", package = "gapctd"))))) {
-    stop(paste0("processing_method must be one of: ", paste0(paste0("\'", list.files(system.file("extdata", package = "gapctd")), collapse = "\', "),"\'")))
-  }
+  # if(!(processing_method %in% tolower(list.files(system.file("extdata", package = "gapctd"))))) {
+  #   stop(paste0("processing_method must be one of: ", paste0(paste0("\'", list.files(system.file("extdata", package = "gapctd")), collapse = "\', "),"\'")))
+  # }
   
   # Setup processing directory structure ----
   
@@ -120,38 +120,38 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   file.copy(xmlcon_file, "./psa_xmlcon")
   
   # Copy psa files to pas_xmlcon subdirectory ----
-  psa_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
-                          full.names = TRUE,
-                          pattern = "*.psa")
-  print(paste0("Copying ", length(psa_files), " .psa files."))
-  file.copy(psa_files, "./psa_xmlcon")
+  # psa_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
+  #                         full.names = TRUE,
+  #                         pattern = "*.psa")
+  # print(paste0("Copying ", length(psa_files), " .psa files."))
+  # file.copy(psa_files, "./psa_xmlcon")
   
-  bat_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
-                          full.names = TRUE,
-                          pattern = "*.bat")
-  print(paste0("Copying ", length(bat_files), " .bat files."))
-  file.copy(bat_files, "./")
+  # bat_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
+  #                         full.names = TRUE,
+  #                         pattern = "*.bat")
+  # print(paste0("Copying ", length(bat_files), " .bat files."))
+  # file.copy(bat_files, "./")
   
   # Get data directories ----
-  if(is.null(bat_file)) {
-    message("setup_gapctd_directory: Automatically selecting getdata.bat file (no user-specified argument to bat_file)")
-    bat_file <- list.files(pattern = "getdata.bat")
-    
-    if(length(xmlcon_file) < 1) {
-      stop(paste0("setup_gapctd_directory: No .bat file found in ", getwd(), ". Must have a valid .bat file."))
-    } 
-  } else {
-    if(!file.exists(paste0(getwd(), "/", bat_file))) {
-      stop(paste0("setup_gapctd_directory: ", bat_file, " file not found in ", getwd(), ". Must have a valid .bat file."))
-    }
-  }
+  # if(is.null(bat_file)) {
+  #   message("setup_gapctd_directory: Automatically selecting getdata.bat file (no user-specified argument to bat_file)")
+  #   bat_file <- list.files(pattern = "getdata.bat")
+  #   
+  #   if(length(xmlcon_file) < 1) {
+  #     stop(paste0("setup_gapctd_directory: No .bat file found in ", getwd(), ". Must have a valid .bat file."))
+  #   } 
+  # } else {
+  #   if(!file.exists(paste0(getwd(), "/", bat_file))) {
+  #     stop(paste0("setup_gapctd_directory: ", bat_file, " file not found in ", getwd(), ". Must have a valid .bat file."))
+  #   }
+  # }
   
-  if(use_sbedp_to_convert) {
-    xmlcon_local <- list.files(path = "./psa_xmlcon", pattern = "xmlcon")
-    
-    message("setup_gapctd_directory: Starting sbebatch")
-    system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_local))
-  } else {
+  # if(use_sbedp_to_convert) {
+  #   xmlcon_local <- list.files(path = "./psa_xmlcon", pattern = "xmlcon")
+  #   
+  #   message("setup_gapctd_directory: Starting sbebatch")
+  #   system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_local))
+  # } else {
     
     hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
     cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
@@ -178,7 +178,7 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
     message("setup_gapctd_directory: Saving calibration parameters to ", calibration_file)
     saveRDS(calibration_parameters, file = calibration_file)
     
-  }
+  # }
   
   gapctd:::.check_duplicates()
   
