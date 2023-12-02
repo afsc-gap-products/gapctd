@@ -478,7 +478,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
   
   stopifnot("bin_average: Argument 'by' must be \"pressure\" or \"depth\"" = by %in% c("pressure", "depth"))
   
-  # Error if there is not 'flag' data and exclude_bag_flag is TRUE
+  # Error if exclude_bag_flag is TRUE and there are no 'flag' data
   stopifnot("bin_average: No 'flag' variable found in x@data. Must include a flag or set argument exclude_bad_flag = TRUE." = !(exclude_bad_flag & !("flag" %in% names(x@data))))
   
   var_names <- names(x@data)

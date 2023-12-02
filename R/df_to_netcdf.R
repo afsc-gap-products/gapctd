@@ -688,8 +688,6 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                   buoyancy_frequency = n2,
                   quality_flag = flag)
   
-  print(names(all_profiles))
-  
   if("ph" %in% names(all_profiles)) {
     all_profiles <- all_profiles |>
       dplyr::rename(sea_water_ph_reported_on_total_scale = ph,
@@ -701,6 +699,8 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
       dplyr::rename(sea_water_dissolved_oxygen = oxygen,
                     sea_floor_dissolved_oxygen = mean_bottom_oxygen)
   }
+  
+  message("make_oce_ncdf: Profile columns found: ", names(all_profiles))
   
   # Define spatial extent of data set using WKT polygon
   geospatial_bounds <- cbind(
