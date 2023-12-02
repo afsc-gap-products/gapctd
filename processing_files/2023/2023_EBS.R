@@ -7,9 +7,10 @@ cast_files <- c(
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg1/final_cnv/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg2/final_cnv/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/final_cnv/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/final_cnv/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8101/final_cnv/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/final_cnv/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/final_cnv/", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/final_cnv/", full.names = TRUE)#,
+  # list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/final_cnv/", full.names = TRUE)
 )
 
 # Replace this with paths to metadata rds files that should be included in the data product.
@@ -17,9 +18,10 @@ metadata_files <- c(
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg1/metadata/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg2/metadata/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/metadata/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/metadata/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8101/metadata/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/metadata/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/metadata/", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/metadata/", full.names = TRUE)#,
+  # list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/metadata/", full.names = TRUE)
 )
 
 
@@ -28,7 +30,7 @@ year <- 2023
 region <- "EBS" # Only use EBS if the region is EBS and NBS.
 data_set_name <- "CTD Data from AFSC 2023 EBS Shelf and NBS Bottom Trawl Surveys"
 cruise_name <- "2023 Eastern Bering Sea Continental Shelf and Northern Bering Sea Bottom-Trawl Surveys"
-ctd_team <- "Nicole Charriere, Cecilia O'Leary, Nate Raring, Bethany Riggle" # Do not list yourself!
+ctd_team <- "Nicole Charriere, Bethany Riggle, Cecilia O'Leary, Nate Raring" # Do not list yourself!
 creator_name <- "Sean Rohan" # your name
 creator_email <- "sean.rohan@noaa.gov" # your email
 dataset_doi <- ""
@@ -74,6 +76,6 @@ make_oce_table(cast_files = cast_files,
                              sound_speed = 3,
                              density = 3,
                              pressure = 3,
-                             oxygen = 5,
-                             ph = 4,
+                             oxygen = 4,
+                             ph = 3,
                              velocity = 3))

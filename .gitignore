@@ -53,6 +53,8 @@ doc/*.html
 /Presentation/
 /plots/
 /output/
+/analysis/DO_pH_project/
+/inst/extdata/py/
 
 *.nc
 /*.rds
