@@ -1,15 +1,26 @@
+  <!-- badges: start -->
+  [![R-CMD-check](https://github.com/sean-rohan-NOAA/gapctd/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/sean-rohan-NOAA/gapctd/actions/workflows/R-CMD-check.yaml)
+  <!-- badges: end -->
+
 # gapctd R Package
 
-This package is used to process CTD data that are collected during AFSC bottom trawl surveys using trawl-mounted SBE 19plus V2 SeaCAT Profiler CTDs.
+This package contains functions to process CTD data that are collected during Alaska Fisheries Science Center bottom trawl surveys using trawl-mounted SBE 19plus V2 SeaCAT Profiler CTDs. Data processing methods are described in a NOAA Technical Memorandum [(Rohan et al., 2023)](https://doi.org/10.25923/8ape-q461) The package includes functions to:
 
+- Convert hexadecimal (.hex) files from select SBE CTDs to .cnv.
+- Use select SBE Data Processing modules for data processing.
+- Implement optimization methods from Rohan et al. (2023)
+- Inspect and flag CTD data using R's plot interface.
+- Prepare data products in NetCDF (.nc), plain-text (.csv), and R data (.rds) formats.
+
+Functions in this package extensively leverage functionality from the [_oce_ R package for Oceanographic Analysis](https://dankelley.github.io/oce/).
 
 # Installation 
 
-To install this package:
+This package is not hosted on CRAN and should be installed through GitHub. To install this package:
 
 ```
-remotes::install_github("afsc-gap-products/gapctd")
-library(gapctd)
+library(remotes)
+install_github("afsc-gap-products/gapctd")
 ```
 
 # Documentation and usage
@@ -18,6 +29,10 @@ library(gapctd)
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
 - [Data file structure](./doc/ctd_data_files.md)
+
+#  Data products
+
+Data products from 2021-2023 NOAA/AFSC/RACE Groundfish Assessment Program bottom trawl surveys of the Bering Sea, Gulf of Alaska, and Aleutian Islands will be uploaded to the National Centers for Environmental Information for download by early 2024. Links to the data product, including download links, will be updated here when the data products are available.
 
 # References
 
