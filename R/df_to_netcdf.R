@@ -917,8 +917,11 @@ make_oce_table <- function(cast_files,
 
 #' Write CTD data to a text file
 #' 
-#' @param x A data.frame twith column names that correspond with names in column_descriptions
-#' @param column_description A named character vector with descriptions of the values in each output column.
+#' Writes data to a csv file with metadata in a header.
+#' 
+#' @param x A data.frame with column names that correspond with names in column_descriptions
+#' @param output_file Output filepath for text file.
+#' @param column_descriptions A named character vector with descriptions of the values in each output column.
 #' @param ctd_unit CTD instrument model (character vector)
 #' @param auxiliary_sensors Names of auxiliary sensors, such as dissolved oxygen and pH sensors (character vector)
 #' @param dataset_name Name of the data set (character vector)
