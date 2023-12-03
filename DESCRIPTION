@@ -24,14 +24,11 @@ Depends: R(>= 4.1),
          bbmle,
          interp,
          sf,
-         purrr,
-         tibble,
          plotly,
          lubridate
 Imports: RODBC,
          getPass,
-         RNetCDF,
-         stringr
+         RNetCDF, ncdf4
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

@@ -269,6 +269,7 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 #' @param return_sf Logical. If TRUE, returns sf object with polygons. Otherwise returns the sum of polygon areas as a 1L numeric vector.
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
 #' @export
+#' @import sf
 
 ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts") {
   

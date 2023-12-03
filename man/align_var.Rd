@@ -19,11 +19,9 @@ align_var(
 
 \item{offset}{Numeric vector of offsets (in seconds) to add.}
 
-\item{interp_method}{Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval)}
+\item{interp_method}{Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval). See ?approx}
 
 \item{na_rm}{Remove scans with NAs in variable channel(s) after alignment.}
-
-\item{method}{Interpolation method for the approx function to use.}
 }
 \value{
 Returns an oce object with offsets applied.

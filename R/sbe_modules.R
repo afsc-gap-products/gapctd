@@ -98,59 +98,6 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 
 
 
-#' Temperature sensor thermal inertia correction (R workflow)
-#' 
-#' Discrete time filter to correct thermal inertia errors in temperature sensor measurements.
-#'
-#' @param x oce object that includes timeS, temperature, and conductivity channels.
-#' @param alpha_T Alpha parameter for temperature correction (1L numeric)
-#' @param beta_T Beta parameter for conductivity correction (1L numeric)
-#' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
-#' @return oce object with correction applied to temperature.
-#' @export
-
-temperature_correction <- function(x, alpha_T, beta_T, freq_n) {
-  
-  if(is.null(x)) {
-    return(x)
-  }
-  
-  in_T <- x@data$temperature
-  freq_n <- ifelse(is.numeric(freq_n), freq_n, mode(diff(x@data$timeS)))
-  
-  # Discrete time filter functions for temperature
-  temp_par_a <- function(tau, alpha, beta, f_n) {
-    return(2 * f_n * alpha * tau * (1 + 2 * f_n * tau)^-1)
-  }
-  
-  temp_par_b <- function(a, alpha) {
-    return(1 - 2 * a * alpha^-1)
-  }
-  
-  temp_correct_t_t <- function(a, b, temperature, precision = 4) {
-    t_t <- numeric(length = length(temperature))
-    t_t[1] <- 0
-    for(ii in 2:length(temperature)) {
-      t_t[ii] <- -1 * b * t_t[ii-1] + a * (t_t[ii] - t_t[ii-1])
-    }
-    return(t_t)
-  }
-  
-  T_a <- gapctd::ctm_par_a(alpha = alpha_T, beta = beta_T, f_n = freq_n)
-  T_b <- gapctd::ctm_par_b(alpha = alpha_T, a = T_a)
-
-  x@data$T_corr <- gapctd::ctm_correct_t_t(a = T_a, b = T_b, temperature = x@data$temperature)
-  x@data$temperature <- in_T + x@data$T_corr
-  
-  x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
-  
-  return(x)
-
-}
-
-
-
 #' Conductivity cell thermal inertia correction (R workflow)
 #' 
 #' Discrete time filter to correct thermal inertia errors in conductivity cell measurements.
@@ -198,8 +145,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param x oce object
 #' @param variables Character vector of data variable names to offset.
 #' @param offset Numeric vector of offsets (in seconds) to add.
-#' @param method Interpolation method for the approx function to use.
-#' @param interp_method Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval)
+#' @param interp_method Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval). See ?approx
 #' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
 #' @export

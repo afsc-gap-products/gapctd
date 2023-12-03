@@ -18,8 +18,6 @@ tau_par(temperature, pressure, tau20, d0, d1, d2)
 \item{d1}{Tau correction calibration parameter D1.}
 
 \item{d2}{Tau correction calibration parameter D2.}
-
-\item{sample_interval}{Sample interval in seconds (default = 0.25).}
 }
 \description{
 Tau correction following Edwards et al. (2010).
