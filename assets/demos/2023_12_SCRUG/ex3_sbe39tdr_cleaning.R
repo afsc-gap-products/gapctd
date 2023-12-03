@@ -106,7 +106,7 @@ downcast_binned <- downcast|>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", 
                       bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,
@@ -119,7 +119,7 @@ upcast_binned <- upcast |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", 
                       bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,

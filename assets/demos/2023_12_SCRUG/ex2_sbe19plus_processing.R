@@ -25,12 +25,11 @@
 
 # Load gapctd
 library(gapctd)
-library(here)
 
 # 1. Convert CTD data to SI units and write output to a cnv file -----------------------------------
-config_path <- here::here("assets", "demos", "2023-12 SCRUG", "data", "19-8102_Deploy2021.xmlcon")
-raw_cnv_path <- here::here("assets", "demos", "2023-12 SCRUG","data", "2021_07_08_0001_raw.cnv")
-hex_path <- here::here("assets", "demos", "2023-12 SCRUG","data", "2021_07_08_0001.hex")
+config_path <- here::here("data", "19-8102_Deploy2021.xmlcon")
+raw_cnv_path <- here::here("data", "2021_07_08_0001_raw.cnv")
+hex_path <- here::here("data", "2021_07_08_0001.hex")
 downcast_start <- as.POSIXct(x = "2021-07-08 06:51:53", tz = "America/Anchorage")
 downcast_end <- as.POSIXct(x = "2021-07-08 07:01:51", tz = "America/Anchorage")
 upcast_start <- as.POSIXct(x = "2021-07-08 07:29:47", tz = "America/Anchorage")
@@ -53,7 +52,10 @@ head(as.data.frame(cast_data@data))
 cast_data@metadata
 cast_data@processingLog
 
-# oce assumes instrument time is UTC but it's actually AKDT
+
+# 3. Add metadata ----------------------------------------------------------------------------------
+
+# oce assumes instrument time is UTC but the instrument is set to 'survey time' (AKDT)
 cast_data@metadata$startTime <- lubridate::force_tz(cast_data@metadata$startTime, "America/Anchorage")
 cast_data@metadata$ship <- "Alaska Knight"
 cast_data@metadata$cruise <- "2021 Eastern Bering Sea Shelf Bottom Trawl Survey"
@@ -66,9 +68,6 @@ cast_data@metadata$stationid <- "ON2524"
 # - There are big salinity spikes around the pycnocline
 # - Multiple density inversions (i.e., density increases with depth)
 plot(cast_data)
-
-
-# 3. Add metadata
 
 
 # 4. Split upcast, downcast, and bottom data -------------------------------------------------------
@@ -90,7 +89,7 @@ bottom <- cast_data |>
                       by = "datetime",
                       cast_direction = "bottom")
 
-# 5. Add cast locations ---------------------------------------------------------------------------- 
+# 5. Add cast location metadata  ------------------------------------------------------------------- 
 
 downcast@metadata$longitude <- start_longitude
 downcast@metadata$latitude <- start_latitude
@@ -103,7 +102,7 @@ plot(downcast, main = "Downcast")
 plot(upcast, main = "Upcast")
 plot(bottom, main = "Bottom")
 
-par(mfrow = c(2,1))
+par(mfrow = c(3,1))
 plot(x = bottom@data$timeS, 
      y = bottom@data$temperature, 
      main = "Bottom", 
@@ -111,6 +110,13 @@ plot(x = bottom@data$timeS,
      ylab = expression(Temperature~(degree*C)),
      type = "l",
      col = "red")
+plot(x = bottom@data$timeS, 
+     y = bottom@data$salinity, 
+     main = "Bottom", 
+     xlab = "Time (s)", 
+     ylab = "Salinity (PSS-78)",
+     type = "l",
+     col = "darkgreen")
 plot(x = bottom@data$timeS, 
      y = bottom@data$pressure, main = "Bottom", 
      xlab = "Time (s)", 
@@ -147,7 +153,7 @@ downcast_binned <- downcast |>
                    cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,
@@ -170,14 +176,14 @@ upcast_binned <- upcast |>
                    cast_direction = "upcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,
                     prop_min_bin = 0.9)
 
 # 7. Filter bottom data ----------------------------------------------------------------------------
-
+# Try changing filter settings
 
 bottom_filtered <- bottom |>
   gapctd:::median_filter(variables = c("temperature", "conductivity"),
@@ -186,15 +192,24 @@ bottom_filtered <- bottom |>
                           time_constant = c(0.5, 0.5, 1),
                           precision = c(4, 6, 3),
                           freq_n = 0.25) |>
+  gapctd::align_var(variables = "temperature", 
+                    offset = -0.5) |>
   gapctd:::derive_eos()
 
-par(mfrow = c(2,1))
+par(mfrow = c(3,1))
 plot(x = bottom_filtered@data$timeS, 
      y = bottom_filtered@data$temperature, 
      xlab = "Time (s)", 
      ylab = expression(Temperature~(degree*C)),
      type = "l",
      col = "red")
+plot(x = bottom_filtered@data$timeS, 
+     y = bottom_filtered@data$salinity, 
+     main = "Bottom", 
+     xlab = "Time (s)", 
+     ylab = "Salinity (PSS-78)",
+     type = "l",
+     col = "darkgreen")
 plot(x = bottom_filtered@data$timeS, 
      y = bottom_filtered@data$pressure, 
      xlab = "Time (s)", 
@@ -240,7 +255,7 @@ downcast_aligned <- downcast |>
                           precision = c(4, 6, 3),
                           freq_n = 0.25) |>
   gapctd::align_var(variables = "temperature", 
-                    offset = downcast_align_par[['temperature']][['offset']], # Optimal temperature offset from #9
+                    offset = downcast_align_par[['temperature']][['offset']],
                     interp_method = "linear")
 
 upcast_aligned <- upcast |>
@@ -251,7 +266,7 @@ upcast_aligned <- upcast |>
                           precision = c(4, 6, 3),
                           freq_n = 0.25) |>
   gapctd::align_var(variables = "temperature", 
-                    offset = upcast_align_par[['temperature']][['offset']], # Optimal temperature offset from #9
+                    offset = upcast_align_par[['temperature']][['offset']],
                     interp_method = "linear")
 
 # 10. Estimate conductivity correction -------------------------------------------------------------
@@ -294,7 +309,7 @@ downcast_optim_binned <- downcast_aligned |>
                    cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,
@@ -308,18 +323,15 @@ upcast_optim_binned <- upcast_aligned |>
                    cast_direction = "upcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1) |>
-  gapctd:::check_density_inversion(threshold  = -1e-4, 
+  gapctd:::check_density_inversion(threshold  = -1e-5, 
                                    threshold_method = "bv", 
                                    correct_inversion = TRUE) |>
   gapctd:::qc_check(prop_max_flag = 0.1,
                     prop_min_bin = 0.9)
 
 
-# Comparing typical method profiles to 'optimized' profiles, there are still some dynamic errors
-# in profiles but salinity spikes are a bit smaller, especially in the upcast. In the downcast, 
-# it looks like salinity may overshoot at ~47 dbar and it takes awhile for the overshoot to decay.
-# Still, we would include profiles from this deployment in the data product; users could apply 
-# additional filtering if desired.
+# Comparing typical method profiles to 'optimized' profiles, there are still some salinity spikes, 
+# especially in the upcast. In the downcast, it looks like salinity may overshoot at ~47 dbar.
 plot(downcast_binned, main = "Downcast")
 plot(downcast_optim_binned, main = "Downcast")
 

@@ -75,31 +75,31 @@ plot(downcast,
      which = 2, 
      type = 'l',
      main = "Downcast, Unfiltered")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(downcast, variables = "salinity", 
                            window = 3), 
      which = 2, 
      type = 'l',
      main = "Downcast, Window = 3")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(downcast, variables = "salinity", 
                            window = 5), 
      which = 2, 
      type = 'l',
      main = "Downcast, Window = 5")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(downcast, variables = "salinity", 
                            window = 7), 
      which = 2, 
      type = 'l',
      main = "Downcast, Window = 7")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(downcast, variables = "salinity", 
                            window = 9), 
      which = 2, 
      type = 'l',
      main = "Downcast, Window = 9")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 
 plot(gapctd::median_filter(downcast, variables = "salinity", 
                            window = 11), 
@@ -113,25 +113,25 @@ plot(upcast,
      which = 2, 
      type = 'l',
      main = "Upcast, Unfiltered")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(upcast, variables = "salinity", 
                            window = 3), 
      which = 2, 
      type = 'l',
      main = "Upcast, Window = 3")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(upcast, variables = "salinity", 
                            window = 5), 
      which = 2, 
      type = 'l',
      main = "Upcast, Window = 5")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(upcast, variables = "salinity", 
                            window = 7), 
      which = 2, 
      type = 'l',
      main = "Upcast, Window = 7")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
 plot(gapctd::median_filter(upcast, variables = "salinity", 
                            window = 9), 
      which = 2, 
@@ -142,4 +142,4 @@ plot(gapctd::median_filter(upcast, variables = "salinity",
      which = 2, 
      type = 'l',
      main = "Upcast, Window = 11")
-abline(v = -1e-4, col = "brown", lty = 2)
+abline(v = -1e-5, col = "brown", lty = 2)
