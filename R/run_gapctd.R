@@ -312,8 +312,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 #' @param cor_var Channel to use for optimizing temperature alignment. For exploratory purposes only.
 #' @return A list of oce objects at stages of processing specified in return_stage.
 #' @export
-#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
-#' Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
+#' @references Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
+#' @author Sean Rohan
 
 run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anchorage", ctm_pars = list(), align_pars = c(),
                        cal_rds_path = NULL, cor_var = "conductivity") {
@@ -547,14 +547,14 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
   # Check/correct density inversion; check if data are complete  -----------------------------------
   
     downcast <- downcast |>
-      gapctd:::check_density_inversion(threshold  = -1e-4, 
+      gapctd:::check_density_inversion(threshold  = -1e-5, 
                                        threshold_method = "bv", 
                                        correct_inversion = TRUE) |>
       gapctd:::qc_check(prop_max_flag = 0.1,
                         prop_min_bin = 0.9)
     
     upcast <- upcast |>
-      gapctd:::check_density_inversion(threshold  = -1e-4, 
+      gapctd:::check_density_inversion(threshold  = -1e-5, 
                                        threshold_method = "bv", 
                                        correct_inversion = TRUE) |>
       gapctd:::qc_check(prop_max_flag = 0.1,
@@ -580,6 +580,7 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
 #' @param out_path Optional. Filepath for the output R data file (.rds).
 #' @param tzone Time zone for events and start_time in racebase/race_data tables.
 #' @return Returns a data.frame containing haul data. Also saves haul data to an rds file.
+#' @author Sean Rohan and Cecilia O'Leary
 
 get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "America/Anchorage") {
   
@@ -625,6 +626,7 @@ where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), 
 #' @param ctd_tz timezone for the ctd as a character vector or numeric
 #' @return A data.frame with haul metadata and cast times.
 #' @export
+#' @author Sean Rohan
 
 append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
   # Assign CTD timezone in oce metadata
@@ -680,6 +682,7 @@ append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
 #' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
 #' @return oce object with metadata fields updated with latitude, longitude, ship, bottom depth, deployment type, cruise, date, institute, scientist.
 #' @export
+#' @author Sean Rohan
 
 assign_metadata_fields <- function(x, cast_direction) {
   
