@@ -6,8 +6,9 @@
 #' @param correct_inversion Logical. Should density inversions be removed and interpolated?
 #' @return oce object with density inversions flaggd and/or interpolated
 #' @export
+#' @author Sean Rohan
 
-check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "bv", correct_inversion = TRUE) {
+check_density_inversion <- function(x, threshold  = -1e-5, threshold_method = "bv", correct_inversion = TRUE) {
   
   interp_flags <- function(x_oce, bin_var) {
     
@@ -53,7 +54,7 @@ check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "b
     stop("correct_density_inversion: Max inversion must be positive but is set to ", threshold, "!")
   }
   
-  if(threshold_method == "bv" & threshold < -1e-4) {
+  if(threshold_method == "bv" & threshold < -1e-5) {
     warning(paste0("correct_density_inversion: Brunt-Vaisala (N^2) threshold, (", threshold, ") is unusually low. Consider using a higher value (e.g. -1e-5)."))
   }
   
@@ -86,18 +87,6 @@ check_density_inversion <- function(x, threshold  = -1e-4, threshold_method = "b
     if(correct_inversion & length(flags) > 0) {
       
       interp_flags(x_oce = x, bin_var = "depth")
-      
-      # x@data$temperature[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
-      #                                              y = x@data$temperature[-flags], 
-      #                                              xout = x@data$depth[flags], 
-      #                                              method = "unesco")
-      # x@data$conductivity[flags] <- oce::oce.approx(x = x@data$depth[-flags], 
-      #                                               y = x@data$conductivity[-flags], 
-      #                                               xout = x@data$depth[flags], 
-      #                                               method = "unesco")
-      
-      # Re-calculate N2
-      # x <- gapctd:::derive_eos(x = x)
       
       # Re-flag
       flag_density <- switch(threshold_method,
