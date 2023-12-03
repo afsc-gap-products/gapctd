@@ -6,6 +6,7 @@
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
 #' @return An upcast and downcast rds file if both casts were found in the rds file. Moves the original rds file to bad_cnv.
 #' @export
+#' @author Sean Rohan
 
 split_ctm <- function(rds_path, haul_df) {
   
@@ -90,6 +91,7 @@ split_ctm <- function(rds_path, haul_df) {
 #' @param threshold Numerical. Threshold for flagging a density inversion. Must be negative. Default (-1e-5) is the buoyancy frequency threshold PMEL uses.
 #' @return Profiles (in "_full.rds" files) processed using CTM parameters estimated for individual casts if cell thermal mass correction parameter estimation converged for the individual casts.
 #' @export
+#' @author Sean Rohan
 
 remedial_ctm <- function(rds_path = here::here("output", "gapctd"), haul_df, threshold = -1e-5) {
   

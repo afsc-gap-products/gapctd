@@ -8,6 +8,7 @@
 #' @param bat_file Optional. Filepath to a batch (.bat) file for batch processign using SBE data processing.
 #' @return Files to working directory.
 #' @noRd
+#' @author Sean Rohan
 
 setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sbedp_to_convert = TRUE, bat_file = NULL) {
   
@@ -68,10 +69,6 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   # Verify that ctd unit is correct ----
   processing_method <- tolower(processing_method)
   
-  # if(!(processing_method %in% tolower(list.files(system.file("extdata", package = "gapctd"))))) {
-  #   stop(paste0("processing_method must be one of: ", paste0(paste0("\'", list.files(system.file("extdata", package = "gapctd")), collapse = "\', "),"\'")))
-  # }
-  
   # Setup processing directory structure ----
   
   output_dir <- setwd(here::here())
@@ -119,66 +116,30 @@ setup_gapctd_directory <- function(processing_method = "gapctd", ctd_dir, use_sb
   # Copy xmlcon files to xmlcon subdirectory ----
   file.copy(xmlcon_file, "./psa_xmlcon")
   
-  # Copy psa files to pas_xmlcon subdirectory ----
-  # psa_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
-  #                         full.names = TRUE,
-  #                         pattern = "*.psa")
-  # print(paste0("Copying ", length(psa_files), " .psa files."))
-  # file.copy(psa_files, "./psa_xmlcon")
+  hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
+  cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
+  cnv_output <- gsub(x = cnv_output, pattern = "/data/", replacement = "/cnv/")
+  xmlcon_path <- list.files(path = here::here("psa_xmlcon"), 
+                            pattern = "xmlcon", 
+                            full.names = TRUE)
   
-  # bat_files <- list.files(system.file(package = "gapctd", paste0("extdata/", processing_method)), 
-  #                         full.names = TRUE,
-  #                         pattern = "*.bat")
-  # print(paste0("Copying ", length(bat_files), " .bat files."))
-  # file.copy(bat_files, "./")
+  for(II in 1:length(hex_files)) {
+    message("setup_gapctd_directory: Converting ", hex_files[II])
+    hex_to_cnv(hex_path = hex_files[II], 
+               output_path = cnv_output[II],
+               xmlcon_path = xmlcon_path,
+               sample_interval = 0.25,
+               output_channels = NULL,
+               output_sig_digits = NULL
+    )
+  }
   
-  # Get data directories ----
-  # if(is.null(bat_file)) {
-  #   message("setup_gapctd_directory: Automatically selecting getdata.bat file (no user-specified argument to bat_file)")
-  #   bat_file <- list.files(pattern = "getdata.bat")
-  #   
-  #   if(length(xmlcon_file) < 1) {
-  #     stop(paste0("setup_gapctd_directory: No .bat file found in ", getwd(), ". Must have a valid .bat file."))
-  #   } 
-  # } else {
-  #   if(!file.exists(paste0(getwd(), "/", bat_file))) {
-  #     stop(paste0("setup_gapctd_directory: ", bat_file, " file not found in ", getwd(), ". Must have a valid .bat file."))
-  #   }
-  # }
+  # Save calibration parameters to RDS
+  calibration_parameters <- gapctd::extract_calibration_xmlcon(xmlcon_path = xmlcon_path)
   
-  # if(use_sbedp_to_convert) {
-  #   xmlcon_local <- list.files(path = "./psa_xmlcon", pattern = "xmlcon")
-  #   
-  #   message("setup_gapctd_directory: Starting sbebatch")
-  #   system(command = paste0("sbebatch ", getwd(), "/", bat_file, " ", getwd(), " ", xmlcon_local))
-  # } else {
-    
-    hex_files <- list.files(here::here("data"), pattern = ".hex", full.names = TRUE)
-    cnv_output <- gsub(x = hex_files, pattern = ".hex", replacement = "_raw.cnv")
-    cnv_output <- gsub(x = cnv_output, pattern = "/data/", replacement = "/cnv/")
-    xmlcon_path <- list.files(path = here::here("psa_xmlcon"), 
-                              pattern = "xmlcon", 
-                              full.names = TRUE)
-    
-    for(II in 1:length(hex_files)) {
-      message("setup_gapctd_directory: Converting ", hex_files[II])
-      hex_to_cnv(hex_path = hex_files[II], 
-                 output_path = cnv_output[II],
-                 xmlcon_path = xmlcon_path,
-                 sample_interval = 0.25,
-                 output_channels = NULL,
-                 output_sig_digits = NULL
-                 )
-    }
-    
-    # Save calibration parameters to RDS
-    calibration_parameters <- gapctd::extract_calibration_xmlcon(xmlcon_path = xmlcon_path)
-    
-    calibration_file <- here::here("psa_xmlcon", "calibration_parameters.rds")
-    message("setup_gapctd_directory: Saving calibration parameters to ", calibration_file)
-    saveRDS(calibration_parameters, file = calibration_file)
-    
-  # }
+  calibration_file <- here::here("psa_xmlcon", "calibration_parameters.rds")
+  message("setup_gapctd_directory: Saving calibration parameters to ", calibration_file)
+  saveRDS(calibration_parameters, file = calibration_file)
   
   gapctd:::.check_duplicates()
   

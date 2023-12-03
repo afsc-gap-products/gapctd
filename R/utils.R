@@ -5,6 +5,7 @@
 #' @param schema Data source name (DSN) as a character vector.
 #' @return An RODBC class ODBC connection.
 #' @export
+#' @author Sean Rohan
 
 get_connected <- function(schema = NA){
   (echo = FALSE)
@@ -25,6 +26,7 @@ get_connected <- function(schema = NA){
 #' 
 #' @param x Numeric decimal degrees
 #' @noRd
+#' @author Sean Rohan
 
 ddlat_to_nmea <- function(x) {
   paste0(format(floor(abs(x)), 2), " ", 
@@ -38,6 +40,7 @@ ddlat_to_nmea <- function(x) {
 #' 
 #' @param x Numeric decimal degrees
 #' @noRd
+#' @author Sean Rohan
 
 ddlon_to_nmea <- function(x) {
   paste0(format(floor(abs(x)), 2), " ", 
@@ -52,6 +55,7 @@ ddlon_to_nmea <- function(x) {
 #' @param valid_responses Vector of valid response for readline.
 #' @param prompt readline prompt to display. See ?readline
 #' @noRd
+#' @author Sean Rohan
 
 accept_response <- function(valid_responses, prompt) {
   
@@ -79,6 +83,7 @@ accept_response <- function(valid_responses, prompt) {
 #' @param in_pattern Character vector search pattern for input files.
 #' @return Bad files moved to /bad_cnv/
 #' @export
+#' @author Sean Rohan
 
 move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd"),
                          in_pattern = "_typical.rds") {
@@ -143,6 +148,7 @@ move_bad_rds <- function(rds_dir_path = here::here("output", "gapctd"),
 #' 
 #' @param rds_dir_path Path to directory containing rds files
 #' @export
+#' @author Sean Rohan
 
 finalize_data <- function(rds_dir_path = here::here("output", processing_method)) {
   
@@ -180,6 +186,7 @@ finalize_data <- function(rds_dir_path = here::here("output", processing_method)
 #' Internal function for analysis
 #' 
 #' @noRd
+#' @author Sean Rohan
 
 derive_and_bin <- function(x, bin_width = NULL) {
   x$downcast <- gapctd::derive_eos(x$downcast)
@@ -205,6 +212,7 @@ derive_and_bin <- function(x, bin_width = NULL) {
 #' Internal function for analysis
 #' 
 #' @noRd
+#' @author Sean Rohan
 
 make_stage_df <- function(x, stage, method) {
   
@@ -245,6 +253,7 @@ make_stage_df <- function(x, stage, method) {
 #' Check /data/ directory for .hex files for multiple files from the same deployment and deployments from multiple CTDs. Either of these cases results in an error.
 #' 
 #' @noRd
+#' @author Sean Rohan
 
 .check_duplicates <- function() {
   
@@ -300,6 +309,7 @@ make_stage_df <- function(x, stage, method) {
 #' 
 #' @param xmlcon_path Path to an xmlcon file.
 #' @export
+#' @author Sean Rohan
 
 extract_calibration_xmlcon <- function(xmlcon_path) {
   
@@ -374,6 +384,7 @@ extract_calibration_xmlcon <- function(xmlcon_path) {
 #' @param offset_list List of named vectors one element is named 'offset'
 #' @param variable Character vector of data variable names to offset.
 #' @noRd
+#' @author Sean Rohan
 
 offset_list_to_vector <- function(offset_list, variables) {
   

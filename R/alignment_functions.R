@@ -10,6 +10,7 @@
 #' @param cor_method Correlation method to use as a character vector (see ?cor)
 #' @return Correlation coefficient (1L numeric)
 #' @export
+#' @author Sean Rohan
 
 channel_correlation <- function(x, 
                                 exclude_flag = TRUE, 
@@ -53,6 +54,7 @@ channel_correlation <- function(x,
 #' @param ... Additional arguments passed to gapctd::channel_correlation()
 #' @return A named numeric vector containing the estimated optimal offset ("best_offset") and correlation for the offset ("best_corr")
 #' @export
+#' @author Sean Rohan
 
 optim_align_par <- function(x, cast_direction, variable = "temperature", offsets = seq(-1,1, 0.01), cor_method = "pearson", ...) {
 
@@ -94,6 +96,7 @@ optim_align_par <- function(x, cast_direction, variable = "temperature", offsets
 #' @param cor_method Correlation method, passed to gapctd::channel_correlation().
 #' @param cast_direction Cast direction as a character vector ("downcast" or "upcast"). Passed to gapctd::slowdown()
 #' @export
+#' @author Sean Rohan
 
 fixed_alignment <- function(x, align_pars, cor_var = "conductivity", cor_method = "pearson", cast_direction) {
   align_list <- list()

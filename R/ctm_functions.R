@@ -11,6 +11,7 @@
 #' @param default_parameters Named numeric vector of default parameters. Defaults is c(alpha_C = 0.04, beta_C = 0.125).
 #' @return A named numerical vector of the optimal alpha_C or beta_C. The input values are returned if the optimization does not converge.
 #' @export
+#' @author Sean Rohan
 
 optim_ctm_pars <- function(dc = NULL, 
                            uc = NULL,
@@ -155,6 +156,7 @@ optim_ctm_pars <- function(dc = NULL,
 #' @param area_method Area between temperature-salinity ("ts") curves, depth-salinity curves ("zs"), or pressure-salinity curves ("ps")
 #' @return Area between T-S curves, Z-S curves, or path distance of salinity curve as a 1L numeric vector 
 #' @export
+#' @author Sean Rohan
 
 ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
   
@@ -213,6 +215,7 @@ ctm_obj <- function(dc = NULL, uc = NULL, alpha_C, beta_C, area_method = "ts") {
 #' @param beta Numeric vector (1L). 1/beta parameter in thermal mass correction formula. Default = 1/8 for SBE19plus.
 #' @param f_n Numeric vector (1L). Scan interval in seconds. Default = 0.25 for SBE19plus default 4 Hz scan interval.
 #' @export
+#' @author Sean Rohan
 
 ctm_par_a <- function(alpha = 0.04, beta = 1/8, f_n = 0.25) {
   return(2 * alpha / (f_n * beta + 2))
@@ -243,6 +246,7 @@ ctm_par_b <- function(alpha, a) {
 #' @param temperature Numeric vector of temperatures in degC (ITS-90 scale).
 #' @param precision Precision (significant digits) for conductivity (default = 6).
 #' @export
+#' @author Sean Rohan
 
 ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
   c_t <- numeric(length = length(temperature))
@@ -270,6 +274,7 @@ ctm_correct_c_t <- function(a, b, temperature, precision = 6) {
 #' @return When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. When return_sf = FALSE, a 1L numeric vector with the sum of polygon areas.
 #' @export
 #' @import sf
+#' @author Sean Rohan
 
 ts_area <- function(dc, uc, by = "pressure", return_sf = FALSE, area_method = "ts") {
   

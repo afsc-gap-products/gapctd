@@ -9,6 +9,7 @@
 #' @param output_channels Named vector of output channels and their names. Do not change from default unless additional channels of data are added.
 #' @param output_sig_digits Significant digits after the decimal place for output channels. Do not change from default unless additional channels of data are added or sensor precision changes.
 #' @export
+#' @author Sean Rohan
 
 hex_to_cnv <- function(hex_path,
                        output_path,
@@ -279,6 +280,7 @@ hex_to_cnv <- function(hex_path,
 #' @param par4 Temperature calibration parameter par4
 #' @param par5 Temperature calibration parameter par5
 #' @export
+#' @author Sean Rohan
 
 integer_to_temperature <- function(temperature_integer, 
                                    sig_figs = NULL, 
@@ -333,6 +335,7 @@ integer_to_temperature <- function(temperature_integer,
 #' @param sig_figs number of significant digits to use for temperature (default = 3)
 #' @param convert_to_dbar Should pressure be returned in or decibars (TRUE) or pounds per square inch without offset (FALSE)
 #' @export
+#' @author Sean Rohan
 
 integer_to_pressure <- function(pressure_integer,
                                 tvoltage_integer,
@@ -394,6 +397,8 @@ integer_to_pressure <- function(pressure_integer,
 #' @param par1 Constant to convert integer to voltage
 #' @param sig_figs number of significant digits to use for conductivity (default = 6)
 #' @export
+#' @author Sean Rohan
+
 integer_to_conductivity <- function(conductivity_integer, temperature, pressure, condg, condh, condi, condj, cpcor, ctcor, par0 = 256, par1 = 1000, sig_figs = 6) {
   
   condf <- conductivity_integer / par0 / par1
@@ -417,6 +422,8 @@ integer_to_conductivity <- function(conductivity_integer, temperature, pressure,
 #' @param sig_figs number of significant digits to use for conductivity (default = 3)
 #' @param par0 ph_integer conversion constant
 #' @export
+#' @author Sean Rohan
+
 integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs = 3, par0 = 13107) {
   
   ph_voltage <- ph_integer/par0
@@ -442,6 +449,7 @@ integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs
 #' @param end_block ending index for lines of the leader to search
 #' @param make_numeric Logical. Should the tag value be forced to a numeric?
 #' @export
+#' @author Sean Rohan
 
 get_calibration_parameter <- function(header, cal_par, start_block = NULL, end_block = NULL, make_numeric = TRUE) {
   
@@ -471,6 +479,7 @@ get_calibration_parameter <- function(header, cal_par, start_block = NULL, end_b
 #' @param data_list List of data and metadata to write to the cnv file
 #' @param output_path Output path for the cnv file 
 #' @noRd
+#' @author Sean Rohan
 
 write_to_cnv <- function(data_list, output_path) {
   
@@ -545,6 +554,7 @@ write_to_cnv <- function(data_list, output_path) {
 #' @param salinity Salinity (PSU, PSS-78).
 #' @export
 #' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+#' @author Sean Rohan
 
 oxygen_saturation <- function(temperature, salinity) {
   
@@ -584,6 +594,7 @@ oxygen_saturation <- function(temperature, salinity) {
 #' @param salinity Salinity (PSU, PSS-78).
 #' @export
 #' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+#' @author Sean Rohan
 
 convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
   
@@ -616,6 +627,7 @@ convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
 #' @param sig_figs Optional. Significant digits for output.
 #' @noRd
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+#' @author Sean Rohan
  
 integer_to_dissolved_oxygen <- function(do_integer,
                                         temperature,
@@ -661,6 +673,7 @@ integer_to_dissolved_oxygen <- function(do_integer,
 }
 
 
+
 #' Tau correction for dissolved oxygen voltage
 #' 
 #' Tau correction following Edwards et al. (2010).
@@ -673,13 +686,19 @@ integer_to_dissolved_oxygen <- function(do_integer,
 #' @param tau20 Tau correction calibration parameter Tau20.
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+#' @author Sean Rohan
 
 tau_par <- function(temperature, pressure, tau20, d0, d1, d2) {
   tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
 }
 
+
+
 #' Oxygen integer to raw voltage
+#' 
+#' @param ox_integer  Integer value of dissolved oxygen decoded from hex
 #' @noRd
+#' @author Sean Rohan
 
 integer_to_ox_voltage <- function(ox_integer) {
   return(ox_integer/13107)

@@ -26,6 +26,7 @@
 #' @param instrument_values Optional. A list of attribute values for the instrument variable.
 #' @param global_attributes A list of global attributes (i.e., non-dimensional) as 1L character, numeric, or date vectors, where names of list objects are the names of attributes.
 #' @export
+#' @author Sean Rohan
 
 df_to_ncdf <- function(x,
                        output_filename,
@@ -371,6 +372,7 @@ df_to_ncdf <- function(x,
 #' @param vec A vector of any type.
 #' @param pkg Package to format output for, either RNetCDF or ncdf4
 #' @export
+#' @author Sean Rohan
 
 vec_to_nc_class <- function(vec, pkg = "RNetCDF") {
   
@@ -421,6 +423,7 @@ vec_to_nc_class <- function(vec, pkg = "RNetCDF") {
 #' @param vars Variables to apply function to. Automatically assigned when NULL (default)
 #' @return A data.frame with variables calculated and race_metadata if provided (x@@metadata$race_metadata)
 #' @export
+#' @author Sean Rohan
 
 calc_bottom_mean_oce <- function(x, 
                        prefix = "mean_bottom_", 
@@ -469,6 +472,7 @@ calc_bottom_mean_oce <- function(x,
 #' @param output_path Output file path (.rds) where file should be saved.
 #' @return data.frame containing metadata for all deployments.
 #' @export
+#' @author Sean Rohan
 
 make_metadata_file <- function(rds_dir_path = here::here("output", "gapctd"), 
                                in_pattern = "_qc.rds", 
@@ -511,6 +515,7 @@ make_metadata_file <- function(rds_dir_path = here::here("output", "gapctd"),
 #' @param precision Precision to use for variables as a named numeric vector.
 #' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).
 #' @export
+#' @author Sean Rohan
 
 make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv", processing_method), full.names = TRUE, pattern = "final.rds")),
                           metadata_files = c(list.files(path = here::here("metadata"), full.names = TRUE)), 
@@ -770,6 +775,7 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
 #' @param output_file Output filepath for netCDF file.
 #' @param precision Precision to use for variables as a named numeric vector.
 #' @export
+#' @author Sean Rohan
 
 make_oce_table <- function(cast_files,
                            precision = c(temperature = 4,
@@ -904,5 +910,99 @@ make_oce_table <- function(cast_files,
   if(grepl(pattern = ".rds", x = output_file, ignore.case = TRUE)) {
     saveRDS(object = cast_df, file = output_file)
   }
+  
+}
+
+
+
+#' Write CTD data to a text file
+#' 
+#' @param x A data.frame twith column names that correspond with names in column_descriptions
+#' @param column_description A named character vector with descriptions of the values in each output column.
+#' @param ctd_unit CTD instrument model (character vector)
+#' @param auxiliary_sensors Names of auxiliary sensors, such as dissolved oxygen and pH sensors (character vector)
+#' @param dataset_name Name of the data set (character vector)
+#' @param cruise_name Name of the cruise (character vector)
+#' @param creator_name Name of the person who created the data set (character vector)
+#' @param creator_email Email address for the person who created the data set (character vector)
+#' @param creator_institution Name of the institution for the cruise/data set creator (character vector)
+#' @param collaborators Names of contributors/collaborators (character vector)
+#' @param references Any relevant references for the data set (character vector)
+#' @param dataset_doi Digital object identifier for the data set (character vector)
+#' @param ncei_accession_number NCEI Accession Number for the data product (character or numeric vector)
+#' @param processing_info Additional information about data processing, e.g. gapctd version used for processing (character vector)
+#' @param publisher_url URL for the dataset creator, e.g., https://github.com/afsc-gap-products/gapctd (character vector)
+#' @export
+#' @author Sean Rohan
+
+make_text_table <- function(x, 
+                            output_file,
+                            column_descriptions = c(
+                              "vessel" = "vessel: AFSC/RACE vessel code",
+                              "cruise" = "cruise: AFSC/RACE cruise code",
+                              "haul" = "haul: AFSC/RACE haul number",
+                              "stationid" = "stationid: AFSC/RACE station code",
+                              "serial_number" = "serial_number: Primary instrument serial number",
+                              "cast_direction" = "cast_directon: Cast direction",
+                              "datetime" = "datetime: date and time in Alaska Daylight Time [UTC-9:00]",
+                              "depth" = "depth: depth [m], down is positive",
+                              "pressure" = "pressure: pressure, strain gauge [db]",
+                              "conductivity" = "conductivity: conductivity [S/m]",
+                              "temperature" = "temperature: temperature [ITS-90, degrees C]",
+                              "salinity" = "salinity: salinity [PSS-78]",
+                              "sound_speed" = "sound_speed: Chen-Millero sound speed [m/s]",
+                              "oxygen" = "oxygen: dissolved oxygen [ml/l]",
+                              "pH" = "ph: pH",
+                              "flag" = "flag: data quality flag"
+                            ), 
+                            ctd_unit, 
+                            auxiliary_sensors,
+                            dataset_name, 
+                            cruise_name, 
+                            creator_name, 
+                            creator_email,
+                            creator_institution,
+                            collaborators = NULL, 
+                            references, 
+                            dataset_doi, 
+                            ncei_accession_number, 
+                            processing_info, 
+                            publisher_url) {
+  
+  stopifnot("make_text_table: One or more columns in x is missing a metadata description in column_descriptions." = all(names(x) %in% names(column_descriptions)))
+  
+  header_lines <- c(
+    paste0("# Dataset name: ", dataset_name),
+    paste0("# Cruise name: ", cruise_name),
+    paste0("# Created by: ", creator_name, " <", creator_email, ">, ", paste(collaborators)),
+    paste0("# Institution: ", creator_institution),
+    paste0("# Creation date: ", as.POSIXct(Sys.time(), format = "%Y-%m-%d %H:%M:%S")),
+    paste0("# Sampling instrument(s): ", ctd_unit),
+    paste0("# Auxillary sensors: ", paste(auxiliary_sensors, collapse = ", ")),
+    paste0("# Reference: ", references),
+    paste0("# Dataset citation: ", dataset_doi),
+    paste0("# NCEI Accession Number: ", ncei_accession_number),
+    paste0("# Processing method: ", processing_info),
+    paste0("# Website: ", publisher_url)
+  )
+  
+  column_lines <- c("\n#\n# Fields:", paste0("# ", unname(column_descriptions[names(x)])))
+  
+  column_lines <- paste(column_lines, collapse = "\n")
+  
+  full_header <- c(paste(paste(header_lines, collapse = "\n"), column_lines, collapse = "\n"), "\n")
+  
+  message("make_text_table: Writing header to ", output_file)
+  writeLines(full_header, con = output_file)
+  
+  length_header <- length(readLines(con = output_file))
+  
+  message("make_text_table: Writing ", nrow(x), " lines of data to ", output_file)
+  suppressWarnings(write.table(x, file = output_file, append = TRUE, row.names = FALSE, sep = ",", quote = FALSE))
+  
+  # Checking output
+  stopifnot("make_text_table: Error loading data " = nrow(read.csv(output_file, skip = length_header)) == nrow(x))
+  stopifnot("make_text_table: Some columns in x not written to output. Check that column names in x match names in column_description." =
+              all(names(x) %in% names(read.csv(output_file, skip = length_header, nrow = 1))))
   
 }

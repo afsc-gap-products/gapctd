@@ -9,6 +9,7 @@
 #' @param exclude_bottom Pressure width to exclude near-bottom. This is used because it can takes awhile for the CTD to start ascending when the net approaches or leaves the seafloor, but the contact between the net and the seafloor generally does not cause influential flow reversals.
 #' @return oce object with flags updated to denote scans for which speeds were below the threshold.
 #' @export
+#' @author Sean Rohan
 
 slowdown <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, exclude_bottom = 2) {
   
@@ -64,6 +65,7 @@ slowdown <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, excl
 #' @param window Numeric vector of windows (i.e. number of scans to use to calculate medians)
 #' @return oce object with channels filtered
 #' @export
+#' @author Sean Rohan
 
 median_filter <- function(x, variables = c("temperature", "conductivity"), window = c(5,5)) {
   
@@ -109,6 +111,7 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 #' @param method Method to use for conductivity cell thermal mass correction. Currently only "seabird" (i.e. equation in SBE Data Processing)
 #' @return oce object with correction applied to conductivity.
 #' @export
+#' @author Sean Rohan
 
 conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = "seabird") {
   
@@ -149,6 +152,7 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 #' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
 #' @return Returns an oce object with offsets applied.
 #' @export
+#' @author Sean Rohan
 
 align_var <- function(x, variables = "temperature", offset = -0.5, interp_method = "linear", na_rm = FALSE) {
   
@@ -202,6 +206,7 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
 #' @param precision Numeric vector indicating how many significant digits to use for each channel.
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @export
+#' @author Sean Rohan
 
 lowpass_filter <- function(x,
                            variables = c("temperature", "conductivity", "pressure"),
@@ -265,6 +270,7 @@ lowpass_filter <- function(x,
 #' @param x oce object
 #' @param precision Optional named numeric vector with precision (decimal places) for variables.
 #' @export
+#' @author Sean Rohan
 
 derive_eos <- function(x, precision = NULL) {
   
@@ -330,6 +336,7 @@ derive_eos <- function(x, precision = NULL) {
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
 #' Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+#' @author Sean Rohan
 
 derive_oxygen <- function(x, cal_rds_path = NULL, tau_correction = TRUE, aa = NA, bb = NA, cc = NA, ee = NA, soc = NA,
                           Voffset = NA, tau20 = NA, d0 = NA, d1 = NA, d2 = NA, sig_digits = 4) {
@@ -416,6 +423,7 @@ derive_oxygen <- function(x, cal_rds_path = NULL, tau_correction = TRUE, aa = NA
 #' @param missing_latitude Latitude in decimal degrees to use for depth estimation if oce object does not contain latitude.
 #' @return oce object with variables binned and 'flag' column removed.
 #' @export
+#' @author Sean Rohan
 
 bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, exclude_bad_flag = TRUE, interpolate_missing = TRUE, missing_latitude = 55) {
   
@@ -521,6 +529,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
 #' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
 #' @return An oce object that only includes variables that were collected within the time/scan interval.
 #' @export
+#' @author Sean Rohan
 
 section_oce <- function(x, by = "timeS", start = NULL, end = NULL, cast_direction = NULL) {
   

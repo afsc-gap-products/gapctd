@@ -5,6 +5,7 @@
 #' @param haul_data_path Path to haul data rds file. If "auto" uses, the HAUL_DATA rds file in /output/
 #' @param oxygen_alignment_offset_values Vector of oxygen alignment offset values to test.
 #' @noRd
+#' @author Sean Rohan
 
 wrapper_align_oxygen <- function(rds_dir_path = "auto", in_pattern = "_best.rds", haul_data_path = "auto", oxygen_alignment_offset_values = -2:-7) {
   
@@ -53,6 +54,7 @@ wrapper_align_oxygen <- function(rds_dir_path = "auto", in_pattern = "_best.rds"
 #' @param racebase_tzone Time zone for racebase data.
 #' @param output_path Used when mode = 'align'. Optional output path for rds file. Overwrites input file if not provided.
 #' @noRd
+#' @author Sean Rohan
 
 align_oxygen <- function(x,
                          alignment = c(-2:-7),
@@ -220,6 +222,7 @@ align_oxygen <- function(x,
 #' @param out_pattern Filename suffix to append to the output file with corrected oxygen data added.
 #' @param in_pattern Filename suffix for the input best rds files. Default is _best.rds
 #' @noRd
+#' @author Sean Rohan
 
 select_best_oxygen_method <- function(ox_align_path = "auto", haul_data_path = "auto", out_pattern = "_best_oxygen.rds", in_pattern = "_best.rds") {
   

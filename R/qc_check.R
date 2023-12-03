@@ -8,6 +8,7 @@
 #' @param time_diff_max Maximum allowable time difference between on-bottom event and cast time.
 #' @return Returns oce object with metadata$flags field updated with flags
 #' @export
+#' @author Sean Rohan
 
 qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max = 45) {
   
@@ -42,6 +43,7 @@ qc_check <- function(x, prop_max_flag = 0.1, prop_min_bin = 0.875, time_diff_max
 #' @param bin_var Which channel to use for binning measurements for plotting ("depth" or "pressure").
 #' @return An oce object with flagged scans/bins interpolated and derived quantities recalculated. Replaced scans/bins have flag = 7.
 #' @export
+#' @author Sean Rohan
 
 qc_flag_interpolate <- function(x, review = "density", bin_var = "depth") {
   
@@ -287,6 +289,7 @@ qc_flag_interpolate <- function(x, review = "density", bin_var = "depth") {
 #' @param bin_var Name of variable that was used to bin data ("depth" or "pressure").
 #' @return rds files with flagged conductivity and temperature removed and interpolated; derived quantities recalculated.
 #' @export
+#' @author Sean Rohan
 
 wrapper_flag_interpolate <- function(rds_dir_path,
                                      in_pattern = NULL,

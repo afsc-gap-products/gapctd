@@ -5,6 +5,7 @@
 #' @param rds_dir_path Filepath to directory containing .rds files.
 #' @import ggplot2
 #' @export
+#' @author Sean Rohan
 
 select_best_method <- function(rds_dir_path) {
   
@@ -112,6 +113,7 @@ select_best_method <- function(rds_dir_path) {
 #' @param out_pattern Character vector to append to filename. Default = "_final.rds" 
 #' @return Writes accepted profiles to rds_dir_path with out_pattern appended.
 #' @export
+#' @author Sean Rohan
 
 review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.rds", out_pattern = "_final.rds") {
   
@@ -235,6 +237,7 @@ review_profiles <- function(rds_dir_path, threshold = -1e-5, in_pattern = "_qc.r
 #' @param in_pattern Character vector search pattern for input files.
 #' @param out_pattern Character vector to append to filename. Default = "_final.rds" 
 #' @export
+#' @author Sean Rohan
 
 review_oxygen_ph_profiles <- function(rds_dir_path, 
                                       in_pattern = "_final_ts.rds", 

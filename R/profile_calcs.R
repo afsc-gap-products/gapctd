@@ -9,6 +9,7 @@
 #' @param temp_threshold Threshold temperature difference.
 #' @param na_rm Should NA values be omitted?
 #' @export
+#' @author Sean Rohan
 
 profile_bld_from_t <- function(temperature,
                                z,
@@ -66,6 +67,7 @@ profile_bld_from_t <- function(temperature,
 #' @param threshold Density threshold
 #' @param na_rm Should NA values be omitted?
 #' @export 
+#' @author Sean Rohan
 
 profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref_depth = 5, na_rm = TRUE) {
   
@@ -99,14 +101,16 @@ profile_bld <- function(rho, z, totdepth = NULL, threshold = 0.1, ref_depth = 5,
 
 #' Calculate density difference between reference depth and 30 m below mixed-layer depth (or bottom)
 #' 
+#' Calculate density difference between the reference depth (5 m) and MLD + buffer (30 m below mld), following Cokelet (2016)
+#' 
 #' @param rho Density vector
 #' @param z Depth vector (positive depths)
 #' @param mld Vector of mixed layer depth
 #' @param ref_depth Reference depth for calculating mixed layer density.
 #' @param mld.buffer Depth difference between upper and lower
 #' @export 
+#' @author Sean Rohan
 
-# Calculate density difference between the reference depth (5 m) and MLD + buffer (30 m below mld), following Cokelet (2016)
 profile_cokelet_density_diff <- function(rho, z, mld, ref_depth = 5, mld.buffer = 30) {
   rho.upper <- NA
   rho.lower <- NA
@@ -135,6 +139,7 @@ profile_cokelet_density_diff <- function(rho, z, mld, ref_depth = 5, mld.buffer 
 #' @param assign_inversion Substitutes maximum depth when temperature deep in the water column is higher than reference. Rare occurrence that may be an artifact of the survey sampling scheme.
 #' @param na_rm Should NA values be omitted?
 #' @export 
+#' @author Sean Rohan
 
 profile_mld_from_t <- function(temperature,
                                  z,
@@ -179,6 +184,7 @@ profile_mld_from_t <- function(temperature,
 #' @param mld Mixed layer depth
 #' @param ref_depth Reference depth for upper layer density
 #' @export 
+#' @author Sean Rohan
 
 profile_pycnocline <- function(rho, z, mld = NULL, ref_depth = 5) {
   
@@ -221,6 +227,7 @@ profile_pycnocline <- function(rho, z, mld = NULL, ref_depth = 5) {
 #' @param z Depth vector
 #' @param mld Mixed layer depth
 #' @export 
+#' @author Sean Rohan
 
 profile_tsrho_by_layer <- function(t, s, rho, z, mld) {
   if(mld >= max(z)){

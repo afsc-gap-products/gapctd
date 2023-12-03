@@ -6,6 +6,7 @@
 #' @param var vector of variables
 #' @param ref_depth Reference depth for estimating 1L numeric vector
 #' @export
+#' @author Sean Rohan
 
 calc_fixed_depth_var <- function(depth, var, ref_depth) {
   
