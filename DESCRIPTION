@@ -28,7 +28,7 @@ Depends: R(>= 4.1),
          lubridate
 Imports: RODBC,
          getPass,
-         RNetCDF, ncdf4
+         RNetCDF
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
