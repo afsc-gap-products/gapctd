@@ -37,7 +37,11 @@ make_text_table(
 )
 }
 \arguments{
-\item{x}{A data.frame twith column names that correspond with names in column_descriptions}
+\item{x}{A data.frame with column names that correspond with names in column_descriptions}
+
+\item{output_file}{Output filepath for text file.}
+
+\item{column_descriptions}{A named character vector with descriptions of the values in each output column.}
 
 \item{ctd_unit}{CTD instrument model (character vector)}
 
@@ -64,11 +68,9 @@ make_text_table(
 \item{processing_info}{Additional information about data processing, e.g. gapctd version used for processing (character vector)}
 
 \item{publisher_url}{URL for the dataset creator, e.g., https://github.com/afsc-gap-products/gapctd (character vector)}
-
-\item{column_description}{A named character vector with descriptions of the values in each output column.}
 }
 \description{
-Write CTD data to a text file
+Writes data to a csv file with metadata in a header.
 }
 \author{
 Sean Rohan
