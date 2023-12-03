@@ -5,9 +5,16 @@ FUNCTIONALITY CHANGES
 
 - Removed SBE Data Processing workflow functions from the package
   due to lack of capacity to support parallel development. However,
-  processing methods will be implemented 
+  processing methods will be implemented.
+  
+BUG FIX
+
+- Replaced instances where the default buoyancy frequency threshold
+  for density inversion checks was -1e-4 with the correct default
+  value of -1e-5, based on PMEL protocols.
 
 IMPROVEMENTS
+
 - Removed purrr, tibble, and stringr from dependencies and imports.
 
 
