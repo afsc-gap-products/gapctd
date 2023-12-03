@@ -29,3 +29,6 @@ Returns a data.frame containing haul data. Also saves haul data to an rds file.
 \description{
 Retrieves vessel, cruise, haul, event times, locations, bottom depth, gear temperature, surface temperature, performance, haul type, and haul start time from racebase and race_data.
 }
+\author{
+Sean Rohan and Cecilia O'Leary
+}

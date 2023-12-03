@@ -29,3 +29,6 @@ oce object with flags updated to denote scans for which speeds were below the th
 \description{
 Flags slowdowns and reversals in profiles based on minimum speed.
 }
+\author{
+Sean Rohan
+}

@@ -35,3 +35,6 @@ A named numerical vector of the optimal alpha_C or beta_C. The input values are 
 \description{
 Estimate optimal cell thermal mass correction parameters by minimizing the area between downcast and upcast temperature-salinity curves. Or, if only upcast or downcast is provided, optimization based on minimizing the gradient of the salinity profile
 }
+\author{
+Sean Rohan
+}

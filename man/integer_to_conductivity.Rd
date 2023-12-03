@@ -47,3 +47,6 @@ integer_to_conductivity(
 \description{
 Convert SBE integer to conductivity
 }
+\author{
+Sean Rohan
+}

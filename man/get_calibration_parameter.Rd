@@ -26,3 +26,6 @@ get_calibration_parameter(
 \description{
 Extract variable from xmlcon file text
 }
+\author{
+Sean Rohan
+}

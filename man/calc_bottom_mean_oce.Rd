@@ -21,3 +21,6 @@ A data.frame with variables calculated and race_metadata if provided (x@metadata
 \description{
 Apply function to selected variables in an oce object and return a data frame.
 }
+\author{
+Sean Rohan
+}

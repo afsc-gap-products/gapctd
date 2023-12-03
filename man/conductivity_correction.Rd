@@ -23,3 +23,6 @@ oce object with correction applied to conductivity.
 \description{
 Discrete time filter to correct thermal inertia errors in conductivity cell measurements.
 }
+\author{
+Sean Rohan
+}

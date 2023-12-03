@@ -23,3 +23,6 @@ Profiles (in "_full.rds" files) processed using CTM parameters estimated for ind
 \description{
 Visually inspect plots and decide if raw files should be reprocessed using cell thermal mass correction parameters for individual profiles instead of the parameters estimated for both casts. Profiles selected for additional CTM are processed using split_ctm.
 }
+\author{
+Sean Rohan
+}

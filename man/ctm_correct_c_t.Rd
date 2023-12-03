@@ -18,3 +18,6 @@ ctm_correct_c_t(a, b, temperature, precision = 6)
 \description{
 Calculate thermal inertia adjustment factors for SBE19 conductivity cell using temperature and parameters a and b, using the same method as the Thermal Mass Correction module in SBE Data Processing software.
 }
+\author{
+Sean Rohan
+}

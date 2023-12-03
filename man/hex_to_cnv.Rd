@@ -33,3 +33,6 @@ hex_to_cnv(
 \description{
 This function decodes hexadecimal-formatted Sea-Bird CTD files to cnv files.
 }
+\author{
+Sean Rohan
+}

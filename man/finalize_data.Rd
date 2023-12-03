@@ -12,3 +12,6 @@ finalize_data(rds_dir_path = here::here("output", processing_method))
 \description{
 Move good and bad profiles to final directories (R workflow)
 }
+\author{
+Sean Rohan
+}

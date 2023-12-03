@@ -23,3 +23,6 @@ When return_sf = TRUE, an sf object (POLYGON) of the area between T-S curves. Wh
 \description{
 Calculate area between temperature-salinity curves (R workflow)
 }
+\author{
+Sean Rohan
+}

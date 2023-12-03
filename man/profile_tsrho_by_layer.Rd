@@ -20,3 +20,6 @@ profile_tsrho_by_layer(t, s, rho, z, mld)
 \description{
 Calculate temperature, salinity, and density for each layer
 }
+\author{
+Sean Rohan
+}

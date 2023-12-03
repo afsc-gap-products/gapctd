@@ -14,3 +14,6 @@ derive_eos(x, precision = NULL)
 \description{
 Derive salinity, absolute salinity, sound speed, density, and buoyancy frequency.
 }
+\author{
+Sean Rohan
+}

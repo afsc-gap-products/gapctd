@@ -29,3 +29,6 @@ rds files with flagged conductivity and temperature removed and interpolated; de
 \description{
 Visually inspect and interpolate errors. See documentation for gapctd:::qc_flag_interpolate()
 }
+\author{
+Sean Rohan
+}

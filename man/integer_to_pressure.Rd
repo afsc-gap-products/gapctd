@@ -62,3 +62,6 @@ integer_to_pressure(
 \description{
 Convert SBE integer to pressure
 }
+\author{
+Sean Rohan
+}

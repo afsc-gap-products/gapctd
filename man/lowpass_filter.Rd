@@ -26,3 +26,6 @@ lowpass_filter(
 \description{
 Low-pass filter variables based on time using the filter from SBE data processing.
 }
+\author{
+Sean Rohan
+}

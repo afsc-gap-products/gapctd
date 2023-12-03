@@ -32,3 +32,6 @@ profile_mld_from_t(
 \description{
 Based on the temperature recorded at a specified reference depth, calculates the mixed layer depth using only temperature.
 }
+\author{
+Sean Rohan
+}

@@ -29,3 +29,6 @@ integer_to_ph(
 \description{
 Convert SBE integer to pH
 }
+\author{
+Sean Rohan
+}

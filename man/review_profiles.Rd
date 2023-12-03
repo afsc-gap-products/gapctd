@@ -26,3 +26,6 @@ Writes accepted profiles to rds_dir_path with out_pattern appended.
 \description{
 Visually inspect profile data to evaluate whether they are acceptable. Profiles that are acceptable will be copied to a review directory. Unacceptable profiles will be removed from the directory and may need to be re-evaluated using wrapper_flag_interpolate() or other remedial measures. This function skips profiles that have already been reviewed and accepted.
 }
+\author{
+Sean Rohan
+}

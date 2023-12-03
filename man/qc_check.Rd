@@ -21,3 +21,6 @@ Returns oce object with metadata$flags field updated with flags
 \description{
 Assign quality control/quality assurance flag to profile based on whether the data are complete.
 }
+\author{
+Sean Rohan
+}

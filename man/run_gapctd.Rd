@@ -39,6 +39,8 @@ A list of oce objects at stages of processing specified in return_stage.
 Run gapctd modules in the order described in Rohan et al. (2023) to process data from an oce object.
 }
 \references{
-Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
 Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
+}
+\author{
+Sean Rohan
 }

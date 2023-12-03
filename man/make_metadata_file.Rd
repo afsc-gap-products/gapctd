@@ -23,3 +23,6 @@ data.frame containing metadata for all deployments.
 \description{
 Calculates means of bottom variables using calc_bottom_mean_oce and retrieves metadata from .rds files, and combines bottom and metadata for all casts in rds_dir_path.
 }
+\author{
+Sean Rohan
+}

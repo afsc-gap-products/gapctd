@@ -21,3 +21,6 @@ make_oce_table(
 \description{
 Write cast data to an oce or rds file
 }
+\author{
+Sean Rohan
+}

@@ -20,3 +20,6 @@ review_oxygen_ph_profiles(
 \description{
 Run after selecting temperature/salinity/density profiles.
 }
+\author{
+Sean Rohan
+}

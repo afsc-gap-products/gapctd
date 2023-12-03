@@ -50,3 +50,6 @@ integer_to_temperature(
 \description{
 Convert SBE integer to ITS-90 temperature
 }
+\author{
+Sean Rohan
+}

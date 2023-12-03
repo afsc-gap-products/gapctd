@@ -16,3 +16,6 @@ ctm_par_a(alpha = 0.04, beta = 1/8, f_n = 0.25)
 \description{
 Calculate Sea-Bird conductivity cell thermal mass correction parameter a, which is used to apply thermal inertia correction to conductivity measurements.
 }
+\author{
+Sean Rohan
+}

@@ -32,3 +32,6 @@ A named numeric vector containing the estimated optimal offset ("best_offset") a
 \description{
 Estimate optimal alignment parameter for a channel (e.g. "temperature") within a range of candidate alignment offsets. The 'best' alignment is taken to be the one that maximizes the correlation between channels.
 }
+\author{
+Sean Rohan
+}

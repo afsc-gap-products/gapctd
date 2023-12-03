@@ -6,7 +6,7 @@
 \usage{
 check_density_inversion(
   x,
-  threshold = -1e-04,
+  threshold = -1e-05,
   threshold_method = "bv",
   correct_inversion = TRUE
 )
@@ -25,4 +25,7 @@ oce object with density inversions flaggd and/or interpolated
 }
 \description{
 Check density inversion (R workflow)
+}
+\author{
+Sean Rohan
 }

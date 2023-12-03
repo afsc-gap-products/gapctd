@@ -23,3 +23,6 @@ Area between T-S curves, Z-S curves, or path distance of salinity curve as a 1L 
 \description{
 Calculates area between temperature and salinity curves when upcast and downcast data are provided. Calculates path distance for salinity if only downcast or upcast is provided.
 }
+\author{
+Sean Rohan
+}

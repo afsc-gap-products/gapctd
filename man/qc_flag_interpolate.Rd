@@ -19,3 +19,6 @@ An oce object with flagged scans/bins interpolated and derived quantities recalc
 \description{
 Visually inspect plots of depth versus salinity, and depth versus pressure. Flag data for removal in a GUI and interpolate missing data. Write interpolated data to output/manual_flag
 }
+\author{
+Sean Rohan
+}

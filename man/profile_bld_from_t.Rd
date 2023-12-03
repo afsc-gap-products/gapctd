@@ -29,3 +29,6 @@ profile_bld_from_t(
 \description{
 Based on the temperature recorded at a specified difference from the maximum depth for a profile.
 }
+\author{
+Sean Rohan
+}

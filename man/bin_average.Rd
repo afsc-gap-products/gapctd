@@ -35,3 +35,6 @@ oce object with variables binned and 'flag' column removed.
 \description{
 Calculate averages for variables by depth or pressure bin.
 }
+\author{
+Sean Rohan
+}

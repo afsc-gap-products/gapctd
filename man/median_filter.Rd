@@ -23,3 +23,6 @@ oce object with channels filtered
 \description{
 Applies a median window filter to variables.
 }
+\author{
+Sean Rohan
+}

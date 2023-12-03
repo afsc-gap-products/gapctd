@@ -18,3 +18,6 @@ profile_pycnocline(rho, z, mld = NULL, ref_depth = 5)
 \description{
 Find the depth of the pycnocline as the depth where density is changing the fastest
 }
+\author{
+Sean Rohan
+}

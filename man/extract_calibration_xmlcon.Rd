@@ -12,3 +12,6 @@ extract_calibration_xmlcon(xmlcon_path)
 \description{
 Retrives calibration parameters for temperature, conductivity, pressure, oxygen, and pH sensors from an instrument configuration (.xmlcon) file.
 }
+\author{
+Sean Rohan
+}

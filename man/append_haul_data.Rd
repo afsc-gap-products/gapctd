@@ -19,3 +19,6 @@ A data.frame with haul metadata and cast times.
 \description{
 Find haul metadata for a file and appends to oce object.
 }
+\author{
+Sean Rohan
+}

@@ -15,3 +15,6 @@ An RODBC class ODBC connection.
 \description{
 A function that accepts a data source name, username, and password to establish returns an Oracle DataBase Connection (ODBC) as an RODBC class in R.
 }
+\author{
+Sean Rohan
+}

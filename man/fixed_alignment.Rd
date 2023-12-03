@@ -26,3 +26,6 @@ fixed_alignment(
 \description{
 Calculate alignment correlation for fixed parameters
 }
+\author{
+Sean Rohan
+}

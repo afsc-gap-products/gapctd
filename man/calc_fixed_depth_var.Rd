@@ -16,3 +16,6 @@ calc_fixed_depth_var(depth, var, ref_depth)
 \description{
 Algorithm used since 2013 to estimate temperature at 1-m (RACE_DATA.TEMPERATURE_METHOD.TEMPERATURE_METHOD_ID = 14) from temperature-depth recorders deployed on RACE bottom trawl surveys. Returns the variable value corresponding with the first depth value at or shallower than the reference depth. If no depth values are equal to the reference depth, the variable value is estimated by interpolating from the variable values above and below the reference depth.
 }
+\author{
+Sean Rohan
+}

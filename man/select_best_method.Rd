@@ -12,3 +12,6 @@ select_best_method(rds_dir_path)
 \description{
 Simultaneously review multiple temperature, salinity, and density profiles from downcasts and upcasts that were contained in .rds files that were processed using different methods (e.g., Typical, Typical CTM, TSA, MSG) then select the best profile. Renames the rds file with the best profile by replacing the method with the suffix ("_best.rds"). Run after wrapper_run_gapctd().
 }
+\author{
+Sean Rohan
+}

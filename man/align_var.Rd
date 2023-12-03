@@ -29,3 +29,6 @@ Returns an oce object with offsets applied.
 \description{
 Offset variables in time to account for lags in sensor responses. Variables are interpolated so offsets do not need to be multiples of the scan interval.
 }
+\author{
+Sean Rohan
+}

@@ -23,3 +23,6 @@ An oce object that only includes variables that were collected within the time/s
 \description{
 Extract scans within a time or scan interval from an oce object. Time- is time elapsed since measurements started.
 }
+\author{
+Sean Rohan
+}

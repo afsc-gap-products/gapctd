@@ -18,5 +18,8 @@ profile_cokelet_density_diff(rho, z, mld, ref_depth = 5, mld.buffer = 30)
 \item{mld.buffer}{Depth difference between upper and lower}
 }
 \description{
-Calculate density difference between reference depth and 30 m below mixed-layer depth (or bottom)
+Calculate density difference between the reference depth (5 m) and MLD + buffer (30 m below mld), following Cokelet (2016)
+}
+\author{
+Sean Rohan
 }

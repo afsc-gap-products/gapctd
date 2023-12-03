@@ -80,3 +80,6 @@ df_to_ncdf(
 \description{
 Write 2D and/or 3D data from a data frame to a netCDF version-4 file using the RNetCDF package.
 }
+\author{
+Sean Rohan
+}

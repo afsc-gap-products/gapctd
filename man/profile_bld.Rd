@@ -29,3 +29,6 @@ profile_bld(
 \description{
 Calculate bottom layer depth using a threshold method
 }
+\author{
+Sean Rohan
+}

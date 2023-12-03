@@ -20,3 +20,6 @@ Bad files moved to /bad_cnv/
 \description{
 Remove deployment rds files that contain bottom, upcast, and/or bottom ctd objects based on QA/QC flags.
 }
+\author{
+Sean Rohan
+}

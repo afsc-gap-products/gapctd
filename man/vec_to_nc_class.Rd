@@ -14,3 +14,6 @@ vec_to_nc_class(vec, pkg = "RNetCDF")
 \description{
 Supports numeric, integer, and character classes.
 }
+\author{
+Sean Rohan
+}

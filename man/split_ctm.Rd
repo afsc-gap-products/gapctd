@@ -17,3 +17,6 @@ An upcast and downcast rds file if both casts were found in the rds file. Moves 
 \description{
 Reads-in an rds file containing data that has been processed using the full gapctd workflow and uses the file name and estimated CTM parameters to reprocess data using the best upcast and downcast parameters.
 }
+\author{
+Sean Rohan
+}

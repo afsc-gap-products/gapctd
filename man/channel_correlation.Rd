@@ -32,3 +32,6 @@ Correlation coefficient (1L numeric)
 \description{
 Calculate correlation coefficient between two channels (e.g. temperature and conductivity)
 }
+\author{
+Sean Rohan
+}

@@ -17,3 +17,6 @@ oce object with metadata fields updated with latitude, longitude, ship, bottom d
 \description{
 Assign metadata fields from x@metadata@race_metadata to the object.
 }
+\author{
+Sean Rohan
+}
