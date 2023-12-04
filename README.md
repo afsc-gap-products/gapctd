@@ -14,7 +14,7 @@ This package contains functions to process CTD data that are collected during Al
 
 Functions in this package extensively leverage functionality from the [_oce_ R package for Oceanographic Analysis](https://dankelley.github.io/oce/).
 
-_Please submit an issue if you find an error or encounter unexpected function behavior._
+**Please submit an issue if you find an error or encounter unexpected function behavior.**
 
 # Installation 
 
