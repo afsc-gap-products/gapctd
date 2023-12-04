@@ -31,11 +31,10 @@ install_github("afsc-gap-products/gapctd")
 - [Data processing modules](./doc/data_processing_modules.md)
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
-- [Data file structure](./doc/ctd_data_files.md)
 
 #  Data products
 
-Data products from 2021-2023 NOAA/AFSC/RACE Groundfish Assessment Program bottom trawl surveys of the Bering Sea, Gulf of Alaska, and Aleutian Islands will be uploaded to the National Centers for Environmental Information for download by early 2024. Links to the data product, including download links, will be updated here when the data products are available.
+Data products from 2021-2023 NOAA/AFSC/RACE Groundfish Assessment Program bottom trawl surveys of the Bering Sea, Gulf of Alaska, and Aleutian Islands will be uploaded to the National Centers for Environmental Information by early 2024. Links to the data product, including download links, will be updated here when the data products are available.
 
 # References
 
