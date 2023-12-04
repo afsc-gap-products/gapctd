@@ -455,7 +455,7 @@
 # interval = seconds: 0.25
 # start_time = Jun 24 2021 06:58:37 [Instrument's time stamp, header]
 # bad_flag = -9.990e-29
-# gapctd_date = Dec 03 2023 17:32:50, gapctd 2.1.0
+# gapctd_date = Dec 03 2023 17:54:04, gapctd 2.1.0
 # gapctd_in = C:/Users/sean.rohan/AppData/Local/R/win-library/4.3/gapctd/extdata/example/2021_06_24_0001.hex
 # file_type = ascii
 *END*

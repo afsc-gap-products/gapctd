@@ -25,6 +25,7 @@ install_github("afsc-gap-products/gapctd")
 
 # Documentation and usage
 
+- [Convert hexadecimal (.hex) files to .cnv](./doc/convert_hex_files.md)
 - [Data processing modules](./doc/data_processing_modules.md)
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
