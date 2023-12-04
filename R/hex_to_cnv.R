@@ -6,8 +6,8 @@
 #' @param output_path Path to the output file location for a .cnv file
 #' @param xmlcon_path Optional. Path to config file. Must be provided if .hex file does not contain configuration file parameters.
 #' @param sample_interval Sampling interval for scans; 0.25 for a typical SBE19plus V2 deployment.
-#' @param output_channels Named vector of output channels and their names. Do not change from default unless additional channels of data are added.
-#' @param output_sig_digits Significant digits after the decimal place for output channels. Do not change from default unless additional channels of data are added or sensor precision changes.
+#' @param output_channels Optional. Named vector of output channels and their names. Do not use unless outputs are are not the defaults.
+#' @param output_sig_digits Optional. Significant digits after the decimal place for output channels. Only change if a subset of channels. Do not use unless outputs are are not the defaults.
 #' @export
 #' @author Sean Rohan
 
@@ -15,16 +15,27 @@ hex_to_cnv <- function(hex_path,
                        output_path,
                        xmlcon_path = NULL,
                        sample_interval = 0.25,
-                       output_channels = c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
-                                           "temperature" = "tv290C: Temperature [ITS-90, deg C]",
-                                           "pressure" = "prdM: Pressure, Strain Gauge [db]",
-                                           "conductivity" = "c0S/m: Conductivity [S/m]",
-                                           "flag" = "flag:  0.000e+00"),
-                       output_sig_digits = c("time_elapsed" = 3,
-                                             "temperature" = 4,
-                                             "pressure" = 3,
-                                             "conductivity" = 6,
-                                             "flag" = 1)) {
+                       output_channels = NULL,
+                       output_sig_digits = NULL) {
+  
+  if(is.null(output_channels)) {
+    
+    output_channels <- c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
+                         "temperature" = "tv290C: Temperature [ITS-90, deg C]",
+                         "pressure" = "prdM: Pressure, Strain Gauge [db]",
+                         "conductivity" = "c0S/m: Conductivity [S/m]",
+                         "oxygen_voltage" = "sbeox0V: Oxygen raw, SBE 43 [V]",
+                         "ph" = "ph: pH",
+                         "flag" = "flag:  0.000e+00")
+    
+    output_sig_digits <- c("time_elapsed" = 3,
+                           "temperature" = 4,
+                           "pressure" = 3,
+                           "conductivity" = 6,
+                           "oxygen_voltage" = 4,
+                           "ph" = 3,
+                           "flag" = 1)
+  }
   
   # Convert bytes to unsigned integers
   hex_extract_raw_uint <- function(x, start, size, big_endian, scale = 1, offset = 0) {
@@ -128,25 +139,9 @@ hex_to_cnv <- function(hex_path,
     # index_calibration_pars <- 1:40
     index_channels <- 1:7
   }
-  
-  # Setup output channels and significant digits if not provided as arguments.
-  if(is.null(output_channels)) {
     
-    output_channels <- c("time_elapsed" = "timeS: Time, Elapsed [seconds]",
-                         "temperature" = "tv290C: Temperature [ITS-90, deg C]",
-                         "pressure" = "prdM: Pressure, Strain Gauge [db]",
-                         "conductivity" = "c0S/m: Conductivity [S/m]",
-                         "oxygen_voltage" = "sbeox0V: Oxygen raw, SBE 43 [V]",
-                         "ph" = "ph: pH",
-                         "flag" = "flag:  0.000e+00")[index_channels]
-    
-    output_sig_digits <- c("time_elapsed" = 3,
-                           "temperature" = 4,
-                           "pressure" = 3,
-                           "conductivity" = 6,
-                           "oxygen_voltage" = 4,
-                           "ph" = 3,
-                           "flag" = 1)[index_channels]
+    output_channels <- output_channels[index_channels]
+    output_sig_digits <- output_sig_digits[index_channels]
     
     message(
       paste0("hex_to_cnv: ", 
@@ -155,7 +150,6 @@ hex_to_cnv <- function(hex_path,
              paste(names(output_channels), collapse = ", "), ")"
       )
     )
-  }
   
   values_int <- list()
   
@@ -257,8 +251,6 @@ hex_to_cnv <- function(hex_path,
   
   message("hex_to_cnv: Writing data to cnv.\n")
   write_to_cnv(data_list = cnv_dat, output_path = output_path)
-  
-  return(cnv_dat)
   
 }
 

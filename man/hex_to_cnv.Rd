@@ -9,12 +9,8 @@ hex_to_cnv(
   output_path,
   xmlcon_path = NULL,
   sample_interval = 0.25,
-  output_channels = c(time_elapsed = "timeS: Time, Elapsed [seconds]", temperature =
-    "tv290C: Temperature [ITS-90, deg C]", pressure =
-    "prdM: Pressure, Strain Gauge [db]", conductivity = "c0S/m: Conductivity [S/m]", flag
-    = "flag:  0.000e+00"),
-  output_sig_digits = c(time_elapsed = 3, temperature = 4, pressure = 3, conductivity =
-    6, flag = 1)
+  output_channels = NULL,
+  output_sig_digits = NULL
 )
 }
 \arguments{
@@ -26,9 +22,9 @@ hex_to_cnv(
 
 \item{sample_interval}{Sampling interval for scans; 0.25 for a typical SBE19plus V2 deployment.}
 
-\item{output_channels}{Named vector of output channels and their names. Do not change from default unless additional channels of data are added.}
+\item{output_channels}{Optional. Named vector of output channels and their names. Do not use unless outputs are are not the defaults.}
 
-\item{output_sig_digits}{Significant digits after the decimal place for output channels. Do not change from default unless additional channels of data are added or sensor precision changes.}
+\item{output_sig_digits}{Optional. Significant digits after the decimal place for output channels. Only change if a subset of channels. Do not use unless outputs are are not the defaults.}
 }
 \description{
 This function decodes hexadecimal-formatted Sea-Bird CTD files to cnv files.
