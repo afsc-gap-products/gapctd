@@ -2,12 +2,12 @@
 % Please edit documentation in R/sbe_modules.R
 \name{derive_eos}
 \alias{derive_eos}
-\title{Derive EOS and GSW (R workflow)}
+\title{Derive EOS and GSW}
 \usage{
 derive_eos(x, precision = NULL)
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{precision}{Optional named numeric vector with precision (decimal places) for variables.}
 }

@@ -2,12 +2,12 @@
 % Please edit documentation in R/sbe_modules.R
 \name{section_oce}
 \alias{section_oce}
-\title{Section (R workflow)}
+\title{Section}
 \usage{
 section_oce(x, by = "timeS", start = NULL, end = NULL, cast_direction = NULL)
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{by}{Sectioning variable as a character vector ("timeS", "scan", "datetime")}
 
@@ -18,10 +18,10 @@ section_oce(x, by = "timeS", start = NULL, end = NULL, cast_direction = NULL)
 \item{cast_direction}{Cast direction ("downcast", "upcast", "bottom)}
 }
 \value{
-An oce object that only includes variables that were collected within the time/scan interval.
+An ctd object that only includes variables that were collected within the time/scan interval.
 }
 \description{
-Extract scans within a time or scan interval from an oce object. Time- is time elapsed since measurements started.
+Extract scans within a time or scan interval from an ctd object. Time- is time elapsed since measurements started.
 }
 \author{
 Sean Rohan

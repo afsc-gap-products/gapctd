@@ -2,12 +2,12 @@
 % Please edit documentation in R/sbe_modules.R
 \name{conductivity_correction}
 \alias{conductivity_correction}
-\title{Conductivity cell thermal inertia correction (R workflow)}
+\title{Conductivity cell thermal inertia correction}
 \usage{
 conductivity_correction(x, alpha_C, beta_C, freq_n = 0.25, method = "seabird")
 }
 \arguments{
-\item{x}{oce object that includes timeS, temperature, and conductivity channels.}
+\item{x}{ctd object that includes timeS, temperature, and conductivity channels.}
 
 \item{alpha_C}{Alpha parameter for conductivity correction (1L numeric)}
 
@@ -18,7 +18,7 @@ conductivity_correction(x, alpha_C, beta_C, freq_n = 0.25, method = "seabird")
 \item{method}{Method to use for conductivity cell thermal mass correction. Currently only "seabird" (i.e. equation in SBE Data Processing)}
 }
 \value{
-oce object with correction applied to conductivity.
+ctd object with correction applied to conductivity.
 }
 \description{
 Discrete time filter to correct thermal inertia errors in conductivity cell measurements.
