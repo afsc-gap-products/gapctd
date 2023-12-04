@@ -6,6 +6,8 @@ FUNCTIONALITY CHANGES
 - Removed SBE Data Processing workflow functions from the package
   due to lack of capacity to support parallel development. However,
   processing methods will be implemented.
+- hex_to_cnv() now expects default arguments for output_channels
+  and output_sig_digits.
   
 BUG FIX
 
