@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{bin_average}
 \alias{bin_average}
-\title{Bin average: Average variables by depth/pressure bin (R workflow)}
+\title{Bin average: Average variables by depth/pressure bin}
 \usage{
 bin_average(
   x,
@@ -15,7 +15,7 @@ bin_average(
 )
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{by}{Grouping variable as a character vector ("depth" or "pressure")}
 
@@ -27,10 +27,10 @@ bin_average(
 
 \item{interpolate_missing}{Interpolate variables when there are no good data for a depth/pressure bin.}
 
-\item{missing_latitude}{Latitude in decimal degrees to use for depth estimation if oce object does not contain latitude.}
+\item{missing_latitude}{Latitude in decimal degrees to use for depth estimation if ctd object does not contain latitude.}
 }
 \value{
-oce object with variables binned and 'flag' column removed.
+ctd object with variables binned and 'flag' column removed.
 }
 \description{
 Calculate averages for variables by depth or pressure bin.

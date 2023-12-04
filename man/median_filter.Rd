@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{median_filter}
 \alias{median_filter}
-\title{Median window filter (R workflow)}
+\title{Median window filter}
 \usage{
 median_filter(
   x,
@@ -11,14 +11,14 @@ median_filter(
 )
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{variables}{Character vector of data variable names to filter.}
 
 \item{window}{Numeric vector of windows (i.e. number of scans to use to calculate medians)}
 }
 \value{
-oce object with channels filtered
+ctd object with channels filtered
 }
 \description{
 Applies a median window filter to variables.

@@ -1,5 +1,10 @@
-gapctd 2.1.0 (December 2, 2023)
+gapctd 2.1.0 (December 4, 2023)
 ----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added a window_filter() function the implements SBEDP methods 
+  for boxcar, cosine, triangle, and Gaussian window filters.
 
 FUNCTIONALITY CHANGES
 

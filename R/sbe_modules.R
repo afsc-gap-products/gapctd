@@ -1,69 +1,11 @@
-#' Flag slowdowns and reversals (R workflow)
-#' 
-#' Flags slowdowns and reversals in profiles based on minimum speed.
-#' 
-#' @param x oce object
-#' @param min_speed Numeric vector (1L). Threshold below which observations should be flagged.
-#' @param window Numeric vector (1L). Number of samples to use to calculate speeds for each observation.
-#' @param cast_direction Character vector ("downcast", "upcast") denoting the cast direction.
-#' @param exclude_bottom Pressure width to exclude near-bottom. This is used because it can takes awhile for the CTD to start ascending when the net approaches or leaves the seafloor, but the contact between the net and the seafloor generally does not cause influential flow reversals.
-#' @return oce object with flags updated to denote scans for which speeds were below the threshold.
-#' @export
-#' @author Sean Rohan
-
-slowdown <- function(x, min_speed = 0.1, window = 5, cast_direction = NULL, exclude_bottom = 2) {
-  
-  if(is.null(x)) {
-    return(x)
-  }
-  
-  half_window <- (window-1)/2
-  pressure <- x@data$pressure
-  max_pressure <- max(pressure, na.rm = TRUE)
-  timeS <- x@data$timeS
-  n_pressure <- length(pressure)
-  velocity <- numeric(length = length(pressure))
-  
-  for(ii in (half_window+1):(n_pressure-half_window)) {
-    
-    velocity[ii] <- mean(diff(pressure[(ii-half_window):(ii+half_window)])/diff(timeS[(ii-half_window):(ii+half_window)]))
-    
-  }
-  
-  if(is.null(cast_direction)) {
-    speed <- abs(velocity)
-    flag <- ifelse(speed > min_speed, 0, -9)
-  }
-  
-  if(cast_direction == "downcast") {
-    flag <- ifelse(velocity > min_speed, 0, -9)
-  }
-  
-  if(cast_direction == "upcast") {
-    flag <- ifelse(-1 * velocity > min_speed, 0, -9)
-  }
-  
-  flag[(max_pressure - pressure) < exclude_bottom] <- 0
-  
-  x@data$flag <- flag
-  x@data$velocity <- velocity
-  
-  x@processingLog$time <- c(x@processingLog$time, Sys.time())
-  x@processingLog$value <- c(x@processingLog$value, deparse(sys.call()))
-  
-  return(x)
-}
-
-
-
-#' Median window filter (R workflow)
+#' Median window filter
 #' 
 #' Applies a median window filter to variables.
 #' 
-#' @param x oce object
+#' @param x ctd object
 #' @param variables Character vector of data variable names to filter.
 #' @param window Numeric vector of windows (i.e. number of scans to use to calculate medians)
-#' @return oce object with channels filtered
+#' @return ctd object with channels filtered
 #' @export
 #' @author Sean Rohan
 
@@ -100,16 +42,16 @@ median_filter <- function(x, variables = c("temperature", "conductivity"), windo
 
 
 
-#' Conductivity cell thermal inertia correction (R workflow)
+#' Conductivity cell thermal inertia correction
 #' 
 #' Discrete time filter to correct thermal inertia errors in conductivity cell measurements.
 #' 
-#' @param x oce object that includes timeS, temperature, and conductivity channels.
+#' @param x ctd object that includes timeS, temperature, and conductivity channels.
 #' @param alpha_C Alpha parameter for conductivity correction (1L numeric)
 #' @param beta_C Beta parameter for conductivity correction (1L numeric)
 #' @param freq_n Optional. Sampling interval in seconds (1L numeric). Sampling interval is inferred from timeS if not provided.
 #' @param method Method to use for conductivity cell thermal mass correction. Currently only "seabird" (i.e. equation in SBE Data Processing)
-#' @return oce object with correction applied to conductivity.
+#' @return ctd object with correction applied to conductivity.
 #' @export
 #' @author Sean Rohan
 
@@ -141,16 +83,16 @@ conductivity_correction <- function(x, alpha_C, beta_C, freq_n = 0.25, method = 
 
 
 
-#' Align variables in time (R workflow)
+#' Align variables in time
 #' 
 #' Offset variables in time to account for lags in sensor responses. Variables are interpolated so offsets do not need to be multiples of the scan interval.
 #' 
-#' @param x oce object
+#' @param x ctd object
 #' @param variables Character vector of data variable names to offset.
 #' @param offset Numeric vector of offsets (in seconds) to add.
 #' @param interp_method Method for interpolating data when offsets are not a multiple of the scan interval (e.g., interpolation is necessary for a 0.55 second offset if an instrument has a 0.25 second scan interval). See ?approx
 #' @param na_rm Remove scans with NAs in variable channel(s) after alignment.
-#' @return Returns an oce object with offsets applied.
+#' @return Returns an ctd object with offsets applied.
 #' @export
 #' @author Sean Rohan
 
@@ -196,11 +138,11 @@ align_var <- function(x, variables = "temperature", offset = -0.5, interp_method
 
 
 
-#' Low-pass filter (R workflow)
+#' Low-pass filter
 #' 
 #' Low-pass filter variables based on time using the filter from SBE data processing.
 #' 
-#' @param x oce object
+#' @param x ctd object
 #' @param variables Character vector of data variable names to filter.
 #' @param time_constant Numeric vector of time constants for filters (in seconds).
 #' @param precision Numeric vector indicating how many significant digits to use for each channel.
@@ -263,11 +205,11 @@ lowpass_filter <- function(x,
 
 
 
-#' Derive EOS and GSW (R workflow)
+#' Derive EOS and GSW
 #' 
 #' Derive salinity, absolute salinity, sound speed, density, and buoyancy frequency.
 #' 
-#' @param x oce object
+#' @param x ctd object
 #' @param precision Optional named numeric vector with precision (decimal places) for variables.
 #' @export
 #' @author Sean Rohan
@@ -318,7 +260,7 @@ derive_eos <- function(x, precision = NULL) {
 #' 
 #' Tau correction following Edwards et al. (2010). Should be run after dynamic corrections to temperature and conductivity channels.
 #' 
-#' @param x oce object containing raw oxygen voltage data (rawOxygen).
+#' @param x ctd object containing raw oxygen voltage data (rawOxygen).
 #' @param cal_rds_path Optional path to calibration parameter file. 
 #' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
 #' @param aa Calibration parameter A
@@ -332,7 +274,7 @@ derive_eos <- function(x, precision = NULL) {
 #' @param d2 Tau correction calibration parameter D2.
 #' @param tau20 Tau correction calibration parameter Tau20.
 #' @param sig_digits Significant digits for oxygen (ml/l).
-#' @return oce object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
+#' @return ctd object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
 #' @export
 #' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
 #' Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
@@ -410,18 +352,18 @@ derive_oxygen <- function(x, cal_rds_path = NULL, tau_correction = TRUE, aa = NA
 
 
 
-#' Bin average: Average variables by depth/pressure bin (R workflow)
+#' Bin average: Average variables by depth/pressure bin
 #' 
 #' Calculate averages for variables by depth or pressure bin.
 #'
-#' @param x oce object
+#' @param x ctd object
 #' @param by Grouping variable as a character vector ("depth" or "pressure")
 #' @param bin_width Width of bins to use for binning.
 #' @param exclude_surface Depth or pressure (down is positive) as numeric vector (1L). Scans will be excluded from binning if they are shallower this threshold.
 #' @param exclude_bad_flag Logical indicating whether to remove scans with a bad (negative) flag.
 #' @param interpolate_missing Interpolate variables when there are no good data for a depth/pressure bin.
-#' @param missing_latitude Latitude in decimal degrees to use for depth estimation if oce object does not contain latitude.
-#' @return oce object with variables binned and 'flag' column removed.
+#' @param missing_latitude Latitude in decimal degrees to use for depth estimation if ctd object does not contain latitude.
+#' @return ctd object with variables binned and 'flag' column removed.
 #' @export
 #' @author Sean Rohan
 
@@ -486,7 +428,7 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
   if(by == "pressure") {
     
     if(is.na(x@metadata$latitude)) {
-      warning(paste0("bin_average: No latitude in metadata for oce object. Using missing_latitude (", 
+      warning(paste0("bin_average: No latitude in metadata for ctd object. Using missing_latitude (", 
                      missing_latitude,  
                      ") instead"))
     }
@@ -518,16 +460,16 @@ bin_average <- function(x, by = "depth", bin_width = 1, exclude_surface = 0.5, e
 
 
 
-#' Section (R workflow)
+#' Section
 #' 
-#' Extract scans within a time or scan interval from an oce object. Time- is time elapsed since measurements started.
+#' Extract scans within a time or scan interval from an ctd object. Time- is time elapsed since measurements started.
 #' 
-#' @param x oce object
+#' @param x ctd object
 #' @param by Sectioning variable as a character vector ("timeS", "scan", "datetime")
 #' @param start Numeric or POSIXct. Start time or scan to include.
 #' @param end Numeric or POSIXct. End time or scan to include.
 #' @param cast_direction Cast direction ("downcast", "upcast", "bottom)
-#' @return An oce object that only includes variables that were collected within the time/scan interval.
+#' @return An ctd object that only includes variables that were collected within the time/scan interval.
 #' @export
 #' @author Sean Rohan
 

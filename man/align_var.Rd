@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{align_var}
 \alias{align_var}
-\title{Align variables in time (R workflow)}
+\title{Align variables in time}
 \usage{
 align_var(
   x,
@@ -13,7 +13,7 @@ align_var(
 )
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{variables}{Character vector of data variable names to offset.}
 
@@ -24,7 +24,7 @@ align_var(
 \item{na_rm}{Remove scans with NAs in variable channel(s) after alignment.}
 }
 \value{
-Returns an oce object with offsets applied.
+Returns an ctd object with offsets applied.
 }
 \description{
 Offset variables in time to account for lags in sensor responses. Variables are interpolated so offsets do not need to be multiples of the scan interval.

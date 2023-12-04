@@ -2,7 +2,7 @@
 % Please edit documentation in R/sbe_modules.R
 \name{lowpass_filter}
 \alias{lowpass_filter}
-\title{Low-pass filter (R workflow)}
+\title{Low-pass filter}
 \usage{
 lowpass_filter(
   x,
@@ -13,7 +13,7 @@ lowpass_filter(
 )
 }
 \arguments{
-\item{x}{oce object}
+\item{x}{ctd object}
 
 \item{variables}{Character vector of data variable names to filter.}
 

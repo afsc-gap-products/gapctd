@@ -22,7 +22,7 @@ derive_oxygen(
 )
 }
 \arguments{
-\item{x}{oce object containing raw oxygen voltage data (rawOxygen).}
+\item{x}{ctd object containing raw oxygen voltage data (rawOxygen).}
 
 \item{cal_rds_path}{Optional path to calibration parameter file.}
 
@@ -51,7 +51,7 @@ derive_oxygen(
 \item{sig_digits}{Significant digits for oxygen (ml/l).}
 }
 \value{
-oce object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
+ctd object with tau correction applied to oxygen voltage channel (oxygenRaw). Returns the input unchanged if no oxygen channel is detected.
 }
 \description{
 Tau correction following Edwards et al. (2010). Should be run after dynamic corrections to temperature and conductivity channels.
