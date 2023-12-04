@@ -86,7 +86,8 @@ Salinity is then recalculated.
 ``` r
 dc_2 <-   gapctd::lowpass_filter(dc_1,
                                  variables = c("temperature", "conductivity", "pressure"),
-                                 time_constant = c(0.5, 0.5, 1))
+                                 time_constant = c(0.5, 0.5, 1),
+                                 freq_n = 0.25) # scan interval
 dc_2@data$salinity <- oce::swSCTp(dc_2) # Calculate salinity
 ```
 
@@ -133,24 +134,27 @@ dc_4@data$salinity <- oce::swSCTp(dc_4)
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-## Loop edit
+## Slowdown
 
-The `loop_edit()` module is based on the SBEDP Loop Edit (loopedit)
-module that flags slowdowns and reversals in scan data based on a
-threshold.
+The `slowdown()` module flags (but does not remove) scans where the CTD
+slowed below a user-specified speed threshold. To account for variable
+profiling speeds in trawl-mounted CTDs, the function also excludes the
+surface and bottom from flagging. This module is similar SBEDP module
+‘loop edit.’
 
 ``` r
-dc_5 <- gapctd::loop_edit(dc_4,
+dc_5 <- gapctd::slowdown(dc_4,
                           min_speed = 0.1, 
                           window = 5, 
-                          cast_direction = "downcast")
+                          cast_direction = "downcast",
+                         exclude_bottom = 2)
 ```
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-Note that `loop_edit()` flags slowdowns and reversals but does not
-remove them. As such, the plots above are identical even though
-slowdowns and reversals were flagged in the data:
+Note that `slowdown()` flags slowdowns and reversals but does not remove
+them. As such, the plots above are identical even though slowdowns and
+reversals were flagged in the data:
 
 ``` r
 dc_4@data$flag[409:415]
@@ -169,13 +173,13 @@ dc_5@data$flag[409:415]
 The `derive_eos()` module uses functions from the oce package to
 calculate the following variables from scan data:
 
-| Variable          | Description                                     | Method  | `oce` function       |
-|-------------------|-------------------------------------------------|---------|----------------------|
-| depth             | Depth \[m\]                                     | EOS-80  | swDepth()            |
-| salinity          | Practical salinity \[PSS-78\]                   | EOS-80  | swSCTp(eos=“unesco”) |
-| density           | In-situ density \[kg m^-3\]                     | EOS-80  | swRho()              |
-| absolute_salinity | Absolute salinity                               | TEOS-10 | swSCTp(eos=“gsw”)    |
-| N2                | Square of buoyancy frequency \[radians^2 s^-2\] |         | swN2()               |
+| Variable          | Description                         | Method  | `oce` function       |
+|-------------------|-------------------------------------|---------|----------------------|
+| depth             | Depth \[m\]                         | EOS-80  | swDepth()            |
+| salinity          | Practical salinity \[PSS-78\]       | EOS-80  | swSCTp(eos=“unesco”) |
+| density           | In-situ density \[kg m^-3\]         | EOS-80  | swRho()              |
+| absolute_salinity | Absolute salinity                   | TEOS-10 | swSCTp(eos=“gsw”)    |
+| N2                | Squared buoyancy frequency \[s^-2\] |         | swN2()               |
 
 ``` r
 dc_6 <- gapctd::derive_eos(dc_5)
@@ -214,24 +218,23 @@ dc_7 <- gapctd::bin_average(dc_6, by = "depth", bin_width = 1)
 
 ![](data_processing_modules_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
-# Linking modules with pipe operators
+# Using pipe operators
 
-To declutter the workspace, the entire workflow can be run using pipe
-operators (native `|>` or magrittr `%>%` instead of producing output at
-every step. This is because each module accepts and returns a `ctd`
-object.
+The whole processing workflow can be run using pipe operators (native
+`|>` or magrittr `%>%`).
 
 ``` r
 dc_8 <- dc |>
   gapctd::median_filter(variables = c("temperature", "conductivity"),
                         window = c(5,5)) |>
   gapctd::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
-                         time_constant = c(0.5, 0.5, 1)) |>
+                         time_constant = c(0.5, 0.5, 1),
+                         freq_n = 0.25) |>
   gapctd::align_var(variables = "temperature", 
                     offset = -0.5) |>
   gapctd::conductivity_correction(alpha_C = 0.04, 
                                   beta_C = 1/8) |>
-  gapctd::loop_edit(min_speed = 0.1, 
+  gapctd::slowdown(min_speed = 0.1, 
                     window = 5, 
                     cast_direction = "downcast") |>
   gapctd::derive_eos() |>
@@ -262,18 +265,19 @@ dc@metadata$startTime <- lubridate::force_tz(dc@metadata$startTime,
 
 dc_9 <- dc |>
   gapctd:::append_haul_data(haul_df = ex_haul) |>
-  gapctd::median_filter(variables = c("temperature", "conductivity"),
-                        window = c(5,5)) |>
-  gapctd::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
-                         time_constant = c(0.5, 0.5, 1)) |>
-  gapctd::align_var(variables = "temperature", 
-                    offset = -0.5) |>
   gapctd:::assign_metadata_fields(cast_direction = "downcast") |>
   gapctd:::section_oce(by = "datetime",
                        cast_direction = "downcast") |>
+  gapctd::median_filter(variables = c("temperature", "conductivity"),
+                        window = c(5,5)) |>
+  gapctd::lowpass_filter(variables = c("temperature", "conductivity", "pressure"),
+                         time_constant = c(0.5, 0.5, 1),
+                         freq_n = 0.25) |>
+  gapctd::align_var(variables = "temperature", 
+                    offset = -0.5) |>
   gapctd::conductivity_correction(alpha_C = 0.04, 
                                   beta_C = 1/8) |>
-  gapctd::loop_edit(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
+  gapctd::slowdown(min_speed = 0.1, window = 5, cast_direction = "downcast") |>
   gapctd::derive_eos() |>
   gapctd::bin_average(by = "depth", bin_width = 1)
 
