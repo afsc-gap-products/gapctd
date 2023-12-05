@@ -1,3 +1,185 @@
+#' Convert CTD data from .hex to BTD and BTH
+#'
+#' This function converts a CTD  hexadecimal (.hex) file to bathythermic data (.btd) and bathythermic header files (.bth). If you are unable to convert your file, please contact sean.rohan@@noaa.gov.
+#'
+#' @param filepath_hex Required. Filepath to the SBE19plus hexadecimal (.hex) file from a single cast as a character vector (e.g. "C:/CTD/202301_162_L1/sbe19plus01908091_05_04_0001.hex")/.
+#' @param filepath_xmlcon Required. Filepath to the instrument configuration file (.xmlcon) for the CTD (e.g. serial number 8091 would use the file with 8091 in the name ("C:/CTD/xmlcon configuration files/SBE19plusV2_8091.xmlcon").
+#' @param dirpath_output Optional. The default is the local working directory but may be specified with a string.
+#' @param latitude Required. Latitude in decimal degrees (approximate).
+#' @param VESSEL Required. The vessel number (e.g., 94).
+#' @param CRUISE Required. The cruise number (e.g., 201901).
+#' @param HAUL Required. The haul number (e.g. 150).
+#' @param MODEL_NUMBER Optional. The model number of the CTD .
+#' @param VERSION_NUMBER Optional. The version number of the CTD.
+#' @param SERIAL_NUMBER Optional. The serial number of the CTD.
+#' @param instrument_timezone Time zone for the instrument data. Do not change unless the instrument is not setup for Alaska Time
+#' @param filename_add Optional. Default = "new". This string will be added to BTD and BTH outputs. This can help prevent accidentally overwriting BTH and BTD files.
+#' @return .BTH and .BTD files to the dirpath_output directory.
+#' @noRd
+#' @references https://github.com/afsc-gap-products/gapctd
+
+convert_ctd_btd <- function(filepath_hex,
+                            dirpath_output = "./",
+                            filepath_xmlcon = NULL,
+                            latitude = NA,
+                            VESSEL = NA,
+                            CRUISE = NA,
+                            HAUL = NA,
+                            MODEL_NUMBER = NA,
+                            VERSION_NUMBER = NA,
+                            SERIAL_NUMBER = NA,
+                            instrument_timezone = "America/Anchorage",
+                            filename_add = "new"
+) {
+  
+  format_date <- function(x, ...) {
+    tmp <- format(x, ...)
+    tmp <- sub("^[0]+", "", tmp)
+    tmp <- sub('/0', "/", tmp)
+    return(tmp)
+  }
+  
+  if(is.na(VESSEL)){ VESSEL <- readline("Type vessel code:  ") }
+  if(is.na(CRUISE)){ CRUISE <- readline("Type cruise number:  ") }
+  if(is.na(HAUL)){ HAUL <- readline("Type haul number:  ") }
+  if(is.na(MODEL_NUMBER)){ MODEL_NUMBER <- readline("Type model number (optional):  ") }
+  if(is.na(VERSION_NUMBER)){ VERSION_NUMBER <- readline("Type version number (optional):  ") }
+  if(is.na(SERIAL_NUMBER)){ SERIAL_NUMBER <- readline("Type serial number of CTD (optional):  ") }
+  
+  if(!file.exists(filepath_hex)) {
+    stop(paste0("convert_ctd_btd: Hexadecimal file (.hex) file not found at ", filepath_hex))
+  }
+  
+  if(!file.exists(filepath_xmlcon)) {
+    stop(paste0("convert_ctd_btd: Configuration file (.xmcon) not found at ", filepath_xmlcon))
+  }
+  
+  HAUL <- as.numeric(HAUL)
+  shaul <- numbers0(x = HAUL, number_places = 4)
+  
+  filepath_cnv <- paste0(getwd(), "/", gsub(pattern = ".hex", replacement = ".cnv", x = basename(filepath_hex)))
+  
+  hex_to_cnv(hex_path = filepath_hex,
+             xmlcon_path = filepath_xmlcon,
+             output_path = filepath_cnv)
+  
+  message("convert_ctd_btd: Intermediate data file (.cnv) saved to ", filepath_cnv)
+  
+  data0 <- readLines(filepath_cnv)
+  
+  # Extract CTD date/time from cnv
+  cast_start_line <- data0[grep(pattern = "* cast", x = data0)]
+  
+  cast_start_time <- regmatches(cast_start_line,
+                                regexpr("\\b\\d{1,2} \\w{3} \\d{4} \\d{2}:\\d{2}:\\d{2}\\b",
+                                        cast_start_line)
+  )
+  
+  cast_start_time <- as.POSIXlt(cast_start_time,
+                                format = "%d %b %Y %H:%M:%S",
+                                tz = instrument_timezone)
+  
+  # Get data channels -- can add channels in the future if needed
+  data_channel_lines <- data0[grep(pattern = "# name ", x = data0)]
+  
+  data_channel_index <- c(grep(pattern = "times", x = tolower(data_channel_lines)),
+                          grep(pattern = "pressure", x = tolower(data_channel_lines)),
+                          grep(pattern = "temperature", x = tolower(data_channel_lines))
+  )
+  
+  scan_data <- read.table(file = filepath_cnv,
+                          skip = grep(pattern = "*END*", x = data0))[, data_channel_index]
+  
+  names(scan_data) <- c("time_elapsed", "pressure", "temperature")
+  
+  scan_data$time_elapsed <- floor(scan_data$time_elapsed)
+  
+  scan_data <- stats::aggregate.data.frame(x = scan_data[, c("temperature", "pressure")],
+                                           by = list(time_elapsed = scan_data$time_elapsed),
+                                           FUN = mean,
+                                           na.rm = TRUE)
+  
+  scan_data$date_time <- cast_start_time + scan_data$time_elapsed
+  
+  scan_data$date_time <- format(scan_data$date_time, format = "%m/%d/%Y %H:%M:%S")
+  
+  HOST_TIME <- LOGGER_TIME <- LOGGING_END <- format(max(scan_data$date_time),
+                                                    format = "%m/%d/%Y %H:%M:%S")
+  
+  LOGGING_START <- format(min(scan_data$date_time),
+                          format = "%m/%d/%Y %H:%M:%S")
+  
+  DATE_TIME <- format_date(
+    format(
+      scan_data$date_time,
+      format = "%m/%d/%Y %H:%M:%S")
+  )
+  
+  TEMPERATURE <- scan_data$temperature
+  DEPTH <- calc_depth_from_pressure(latitude = latitude,
+                                    pressure = scan_data$pressure)
+  SAMPLE_PERIOD <- 3
+  NUMBER_CHANNELS <- 2
+  NUMBER_SAMPLES <- 0
+  MODE <- 2
+  
+  new_btd <- cbind(VESSEL,CRUISE,HAUL,SERIAL_NUMBER,DATE_TIME,TEMPERATURE,DEPTH)
+  new_btd[which(is.na(new_btd))] <- ""
+  new_btd <- data.frame(new_btd)
+  
+  new_bth <- cbind(VESSEL, CRUISE, HAUL, MODEL_NUMBER, VERSION_NUMBER, SERIAL_NUMBER, HOST_TIME,
+                   LOGGER_TIME, LOGGING_START, LOGGING_END, SAMPLE_PERIOD, NUMBER_CHANNELS,
+                   NUMBER_SAMPLES, MODE)
+  
+  new_bth <- data.frame(new_bth)
+  
+  filename <- paste0(dirpath_output, "/", paste(c(paste0("HAUL", shaul), filename_add), collapse = "_"))
+  
+  utils::write.csv(x = new_btd,
+                   file = paste0(filename, ".BTD"),
+                   quote = FALSE,
+                   row.names = FALSE,
+                   eol="\n")
+  
+  utils::write.csv(x = new_bth,
+                   file = paste0(filename, ".BTH"),
+                   quote = FALSE,
+                   row.names = FALSE)
+  
+  message(paste0("Baththermic data (.BTD) and header (.BTD) files written to: ", dirpath_output))
+  
+}
+
+
+
+#' Convert pressure to depth
+#'
+#' UNESCO (1983) conversion code adapted from the swDepth() function from the oce R package (Kelley et al., 2022)
+#'
+#' @param latitude Latitude in decimal degrees north
+#' @param pressure Pressure in decibars
+#' @noRd
+#' @references UNESCO 1983. Algorithms for computation of fundamental properties of seawater, 1983. Unesco Tech. Pap. in Mar. Sci., No. 44, 53 pp.
+#' Kelley, D., Richards, C., and Layton, C. 2022. oce: An R package for oceanographic analysis. Journal of Open Source Software 7(71): 3594. https://doi.org/10.21105/joss.03594
+
+calc_depth_from_pressure <- function(latitude, pressure) {
+  
+  latitude <- latitude * atan2(1, 1)/45
+  
+  x <- sin(latitude)^2
+  
+  gr <- 9.780318 * (1 + (0.0052788 + 2.36e-05 * x) * x) +
+    1.092e-06 * pressure
+  
+  res <- (((-1.82e-15 * pressure + 2.279e-10) * pressure -
+             2.2512e-05) * pressure + 9.72659) * pressure/gr
+  
+  return(res)
+  
+}
+
+
+
 #' Convert SBE19plus V2 hex files to cnv
 #'
 #' This function decodes hexadecimal-formatted Sea-Bird CTD files to cnv files.
@@ -433,6 +615,166 @@ integer_to_ph <- function(ph_integer, ph_offset, ph_slope, temperature, sig_figs
 
 
 
+#' Calculate oxygen saturation (ml/l)
+#' 
+#' Calculate oxygen saturation as a function of temperature and salinity based on oxygen solubility from Garcia and Gordon (1992).
+#' 
+#' @param temperature Temperature (degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
+#' @export
+#' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+#' @author Sean Rohan
+
+oxygen_saturation <- function(temperature, salinity) {
+  
+  # Constants
+  A0 <- 2.00856
+  A1 <- 3.22400
+  A2 <- 3.99063
+  A3 <- 4.80299
+  A4 <- 9.78188e-01
+  A5 <- 1.71069
+  B0 <- -6.24097e-03
+  B1 <- -6.93498e-03
+  B2 <- -6.90358e-03
+  B3 <- -4.29155e-03
+  C0 <- -3.11680e-07
+  
+  Ts <- log((298.15 - temperature) / (273.15 + temperature))
+  
+  A <- ((((A5 * Ts + A4) * Ts + A3) * Ts + A2) * Ts + A1) * Ts + A0
+  
+  B <- ((B3 * Ts + B2) * Ts + B1) * Ts + B0
+  
+  O2 <- exp(A + salinity*(B + salinity*C0))
+  
+  return(O2)
+  
+}
+
+
+
+#' Calculate oxygen saturation (percent) from dissolved oxygen (ml/l)
+#' 
+#' Dissolved oxygen divided by oxygen saturation calculated following Garcia and Gordon (1992)
+#' 
+#' @param oxygen Dissolved oxygen in ml/l
+#' @param temperature Temperature (IPTS-68, degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
+#' @export
+#' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
+#' @author Sean Rohan
+
+convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
+  
+  oxsol <- oxygen_saturation(temperature = temperature,
+                             salinity = salinity)
+  
+  return(oxygen/oxsol)
+}
+
+
+
+#' Convert SBE integer to dissolved oxygen (ml/l)
+#' 
+#' @param do_integer Integer value of dissolved oxygen decoded from hex
+#' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
+#' @param temperature Temperature (IPTS-68, degrees Celsius).
+#' @param salinity Salinity (PSU, PSS-78).
+#' @param pressure Pressure (dbar).
+#' @param Voffset Voltage channel offset.
+#' @param a Calibration parameter A.
+#' @param b Calibration parameter b.
+#' @param c Calibration equation parameter C.
+#' @param e Calibration equation parameter E.
+#' @param soc Calibration equation parameter Soc.
+#' @param d0 Optional. Tau correction calibration parameter D0.
+#' @param d1 Optional. Tau correction calibration parameter D1.
+#' @param d2 Optional. Tau correction calibration parameter D2.
+#' @param d0 Optional. Tau correction calibration parameter Tau20.
+#' @param sample_interval Sample interval in seconds (default = 0.25).
+#' @param sig_figs Optional. Significant digits for output.
+#' @noRd
+#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+#' @author Sean Rohan
+
+integer_to_dissolved_oxygen <- function(do_integer,
+                                        temperature,
+                                        pressure,
+                                        salinity,
+                                        a,
+                                        b,
+                                        c,
+                                        e,
+                                        soc,
+                                        Voffset,
+                                        tau,
+                                        tau20 = NULL,
+                                        d0 = NULL,
+                                        d1 = NULL,
+                                        d2 = NULL,
+                                        sample_interval = 0.25,
+                                        tau_correction = FALSE,
+                                        sig_figs = 4
+) {
+  
+  do_voltage <- do_integer/13107
+  
+  oxsol <- oxygen_saturation(temperature = temperature,
+                             salinity = salinity)
+  
+  tau <- 0
+  dVdt <- c(0, diff(do_voltage)/sample_interval)
+  
+  if(tau_correction) {
+    tau <- DO_tau_correction(temperature, pressure, tau20, d0, d1, d2)
+  }
+  
+  temperature_K <- temperature + 273.15
+  
+  oxygen_mll <- soc * (do_voltage + Voffset + tau * dVdt) * (1 + a * temperature + b * temperature^2 + c * temperature^3) * oxsol * exp(e*pressure/temperature_K)
+  
+  if(is.numeric(sig_figs)) {
+    oxygen_mll <- round(oxygen_mll, digits = sig_figs)
+  }
+  
+  return(oxygen_mll)
+}
+
+
+
+#' Tau correction for dissolved oxygen voltage
+#' 
+#' Tau correction following Edwards et al. (2010).
+#' 
+#' @param temperature Temperature in degrees C
+#' @param pressure Pressure in dbar
+#' @param d0 Tau correction calibration parameter D0.
+#' @param d1 Tau correction calibration parameter D1.
+#' @param d2 Tau correction calibration parameter D2.
+#' @param tau20 Tau correction calibration parameter Tau20.
+#' @export
+#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
+#' @author Sean Rohan
+
+tau_par <- function(temperature, pressure, tau20, d0, d1, d2) {
+  tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
+}
+
+
+
+#' Oxygen integer to raw voltage
+#' 
+#' @param ox_integer  Integer value of dissolved oxygen decoded from hex
+#' @noRd
+#' @author Sean Rohan
+
+integer_to_ox_voltage <- function(ox_integer) {
+  return(ox_integer/13107)
+}
+
+
+
 #' Extract variable from xmlcon file text
 #' 
 #' @param header Character vector of lines from an xmlcon file
@@ -538,160 +880,76 @@ write_to_cnv <- function(data_list, output_path) {
 
 
 
-#' Calculate oxygen saturation (ml/l)
+#' Extract calibration parameters from xmlcon to a list
 #' 
-#' Calculate oxygen saturation as a function of temperature and salinity based on oxygen solubility from Garcia and Gordon (1992).
+#' Retrives calibration parameters for temperature, conductivity, pressure, oxygen, and pH sensors from an instrument configuration (.xmlcon) file.
 #' 
-#' @param temperature Temperature (degrees Celsius).
-#' @param salinity Salinity (PSU, PSS-78).
+#' @param xmlcon_path Path to an xmlcon file.
 #' @export
-#' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
 #' @author Sean Rohan
 
-oxygen_saturation <- function(temperature, salinity) {
+extract_calibration_xmlcon <- function(xmlcon_path) {
   
-  # Constants
-  A0 <- 2.00856
-  A1 <- 3.22400
-  A2 <- 3.99063
-  A3 <- 4.80299
-  A4 <- 9.78188e-01
-  A5 <- 1.71069
-  B0 <- -6.24097e-03
-  B1 <- -6.93498e-03
-  B2 <- -6.90358e-03
-  B3 <- -4.29155e-03
-  C0 <- -3.11680e-07
+  lines <- readLines(con = xmlcon_path)
   
-  Ts <- log((298.15 - temperature) / (273.15 + temperature))
+  data_channels <- c("temperature", "conductivity", "pressure", "oxygen", "ph")
+  channel_tag_start <- c("<TemperatureSensor", "<ConductivitySensor", "<PressureSensor ", "<!-- Coefficients for Sea-Bird equation", "<pH_Sensor")
+  channel_tag_end <- c("</TemperatureSensor", "</ConductivitySensor", "</PressureSensor>", "</OxygenSensor", "</pH_Sensor")
   
-  A <- ((((A5 * Ts + A4) * Ts + A3) * Ts + A2) * Ts + A1) * Ts + A0
+  calibration_params <- list(temperature = c("A0" = -9e9, "A1" = -9e9, "A2" = -9e9, "A3" = -9e9, "Slope" = -9e9, "Offset" = -9e9),
+                             conductivity = c("A" = -9e9, "B" = -9e9, "C" = -9e9, "D" = -9e9, "M" = -9e9, "G" = -9e9, "H" = -9e9, "I" = -9e9, "J" = -9e9, "CPcor" = -9e9, "CTcor" = -9e9),
+                             pressure = c("PA0" = -9e9, "PA1" = -9e9, "PA2" = -9e9, "PTEMPA0" = -9e9, "PTEMPA1" = -9e9, "PTEMPA2" = -9e9, "PTCA0" = -9e9, "PTCA1" = -9e9, "PTCA2" = -9e9, "PTCB0" = -9e9, "PTCB1" = -9e9, "PTCB2" = -9e9, "Offset" = -9e9),
+                             oxygen = c("Soc" = -9e9, "offset" = -9e9, "A" = -9e9, "B" = -9e9, "C" = -9e9, "D0" = -9e9, "D1" = -9e9, "D2" = -9e9, "E" = -9e9, "Tau20" = -9e9, "H1" = -9e9, "H2" = -9e9, "H3" = -9e9),
+                             ph = c("Slope" = -9e9, "Offset" = -9e9))
   
-  B <- ((B3 * Ts + B2) * Ts + B1) * Ts + B0
+  omit <- numeric()
   
-  O2 <- exp(A + salinity*(B + salinity*C0))
+  calibration_df <- data.frame()
   
-  return(O2)
-  
-}
-
-
-
-#' Calculate oxygen saturation (percent) from dissolved oxygen (ml/l)
-#' 
-#' Dissolved oxygen divided by oxygen saturation calculated following Garcia and Gordon (1992)
-#' 
-#' @param oxygen Dissolved oxygen in ml/l
-#' @param temperature Temperature (IPTS-68, degrees Celsius).
-#' @param salinity Salinity (PSU, PSS-78).
-#' @export
-#' @references Garcia, H.E., Gordon, L.I., 1992. Oxygen solubility in seawater: Better fitting equations. Limnol. Oceanogr. 37, 1307–1312. https://doi.org/10.4319/lo.1992.37.6.1307
-#' @author Sean Rohan
-
-convert_do_to_o2sat <- function(oxygen, temperature, salinity) {
-  
-  oxsol <- oxygen_saturation(temperature = temperature,
-                                      salinity = salinity)
-  
-  return(oxygen/oxsol)
-}
-
-
-
-#' Convert SBE integer to dissolved oxygen (ml/l)
-#' 
-#' @param do_integer Integer value of dissolved oxygen decoded from hex
-#' @param tau_correction Should the tau correction (Edwards et al., 2010) be used to account for time-dynamic errors in oxygen?
-#' @param temperature Temperature (IPTS-68, degrees Celsius).
-#' @param salinity Salinity (PSU, PSS-78).
-#' @param pressure Pressure (dbar).
-#' @param Voffset Voltage channel offset.
-#' @param a Calibration parameter A.
-#' @param b Calibration parameter b.
-#' @param c Calibration equation parameter C.
-#' @param e Calibration equation parameter E.
-#' @param soc Calibration equation parameter Soc.
-#' @param d0 Optional. Tau correction calibration parameter D0.
-#' @param d1 Optional. Tau correction calibration parameter D1.
-#' @param d2 Optional. Tau correction calibration parameter D2.
-#' @param d0 Optional. Tau correction calibration parameter Tau20.
-#' @param sample_interval Sample interval in seconds (default = 0.25).
-#' @param sig_figs Optional. Significant digits for output.
-#' @noRd
-#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
-#' @author Sean Rohan
- 
-integer_to_dissolved_oxygen <- function(do_integer,
-                                        temperature,
-                                        pressure,
-                                        salinity,
-                                        a,
-                                        b,
-                                        c,
-                                        e,
-                                        soc,
-                                        Voffset,
-                                        tau,
-                                        tau20 = NULL,
-                                        d0 = NULL,
-                                        d1 = NULL,
-                                        d2 = NULL,
-                                        sample_interval = 0.25,
-                                        tau_correction = FALSE,
-                                        sig_figs = 4
-) {
-  
-  do_voltage <- do_integer/13107
-  
-  oxsol <- oxygen_saturation(temperature = temperature,
-                                      salinity = salinity)
-  
-  tau <- 0
-  dVdt <- c(0, diff(do_voltage)/sample_interval)
-  
-  if(tau_correction) {
-    tau <- DO_tau_correction(temperature, pressure, tau20, d0, d1, d2)
+  for(ii in 1:length(data_channels)) {
+    
+    cal_pars <- numeric(length = length(calibration_params[[data_channels[ii]]]))
+    
+    if(!any(grepl(pattern = channel_tag_start[ii], x = lines))) {
+      message(paste0("xmlcon_to_df: Skpping ", data_channels[ii], ". Sensor calibration parameters not detected in xmlcon file."))
+      omit <- c(omit, ii)
+      next
+    }
+    
+    serial_number <- get_calibration_parameter(header = lines, 
+                                               cal_par = "SerialNumber", 
+                                               start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                               end_block = channel_tag_end[ii])
+    
+    calibration_date <- get_calibration_parameter(header = lines, 
+                                                  cal_par = "CalibrationDate", 
+                                                  start_block = ifelse(data_channels[ii] == "oxygen", "<OxygenSensor", channel_tag_start[ii]), 
+                                                  end_block = channel_tag_end[ii],
+                                                  make_numeric = FALSE)
+    
+    calibration_df <- rbind(calibration_df,
+                                       data.frame(
+                                         channel = data_channels[ii],
+                                         serial_number = serial_number,
+                                         calibration_date = as.Date(calibration_date, format = "%d-%b-%y")
+                                       )
+    )
+    
+    for(jj in 1:length(calibration_params[[data_channels[ii]]])) {
+      calibration_params[[data_channels[ii]]][jj] <- get_calibration_parameter(header = lines, 
+                                                                               cal_par = names(calibration_params[[data_channels[ii]]][jj]), 
+                                                                               start_block = channel_tag_start[ii], 
+                                                                               end_block = channel_tag_end[ii])
+    }
+    
   }
   
-  temperature_K <- temperature + 273.15
+  calibration_params$calibration <- calibration_df
   
-  oxygen_mll <- soc * (do_voltage + Voffset + tau * dVdt) * (1 + a * temperature + b * temperature^2 + c * temperature^3) * oxsol * exp(e*pressure/temperature_K)
-  
-  if(is.numeric(sig_figs)) {
-    oxygen_mll <- round(oxygen_mll, digits = sig_figs)
+  if(length(omit) > 0) {
+    calibration_params[omit] <- NULL
   }
   
-  return(oxygen_mll)
-}
-
-
-
-#' Tau correction for dissolved oxygen voltage
-#' 
-#' Tau correction following Edwards et al. (2010).
-#' 
-#' @param temperature Temperature in degrees C
-#' @param pressure Pressure in dbar
-#' @param d0 Tau correction calibration parameter D0.
-#' @param d1 Tau correction calibration parameter D1.
-#' @param d2 Tau correction calibration parameter D2.
-#' @param tau20 Tau correction calibration parameter Tau20.
-#' @export
-#' @references Edwards, B., Murphy, D., Janzen, C., Larson, A.N., 2010. Calibration, response, and hysteresis in deep-sea dissolved oxygen measurements. J. Atmos. Ocean. Technol. 27, 920–931. https://doi.org/10.1175/2009JTECHO693.1
-#' @author Sean Rohan
-
-tau_par <- function(temperature, pressure, tau20, d0, d1, d2) {
-  tau <- tau20 * d0 * exp(d1 * pressure + d2 * (temperature-20))
-}
-
-
-
-#' Oxygen integer to raw voltage
-#' 
-#' @param ox_integer  Integer value of dissolved oxygen decoded from hex
-#' @noRd
-#' @author Sean Rohan
-
-integer_to_ox_voltage <- function(ox_integer) {
-  return(ox_integer/13107)
+  return(calibration_params)
+  
 }
