@@ -1,4 +1,4 @@
-# Generate data products using make_oce_ncdf()
+# Generate data products
 
 library(gapctd)
 
@@ -42,7 +42,41 @@ processing_info <- paste0("CTD data processed using gapctd ", packageVersion(pkg
 ncei_accession_number <- ""
 publisher_url <- "https://github.com/afsc-gap-products/gapctd"
 auxiliary_sensors <- c("Sea-Bird SBE18 pH sensor", "Sea-Bird SBE43 dissolved oxygen sensor")
+text_output_columns <- c("vessel", 
+                   "cruise", 
+                   "haul", 
+                   "stationid", 
+                   "serial_number", 
+                   "cast_direction", 
+                   "timeS", 
+                   "depth", 
+                   "pressure", 
+                   "temperature", 
+                   "conductivity", 
+                   "salinity", 
+                   "sound_speed", 
+                   "oxygen",
+                   "pH",
+                   "flag")
 
+column_descriptions <- c(
+  "vessel" = "vessel: AFSC/RACE vessel code",
+  "cruise" = "cruise: AFSC/RACE cruise code",
+  "haul" = "haul: AFSC/RACE haul number",
+  "stationid" = "stationid: AFSC/RACE station code",
+  "serial_number" = "serial_number: Primary instrument serial number",
+  "cast_direction" = "cast_directon: Cast direction",
+  "datetime" = "datetime: date and time in Alaska Daylight Time [UTC-9:00]",
+  "depth" = "depth: depth [m], down is positive",
+  "pressure" = "pressure: pressure, strain gauge [db]",
+  "conductivity" = "conductivity: conductivity [S/m]",
+  "temperature" = "temperature: temperature [ITS-90, degrees C]",
+  "salinity" = "salinity: salinity [PSS-78]",
+  "sound_speed" = "sound_speed: Chen-Millero sound speed [m/s]",
+  "oxygen" = "oxygen: dissolved oxygen [ml/l]",
+  "pH" = "ph: pH",
+  "flag" = "flag: data quality flag"
+)
 
 # Create a netCDF file with cast data and metadata in the working directory.
 gapctd::make_oce_ncdf(
@@ -91,42 +125,10 @@ make_text_table(x = readRDS(here::here("data",
                                        paste0("GAPCTD_", 
                                               year, "_", 
                                               region, 
-                                              ".rds")))[c("vessel", 
-                                                          "cruise", 
-                                                          "haul", 
-                                                          "stationid", 
-                                                          "serial_number", 
-                                                          "cast_direction", 
-                                                          "timeS", 
-                                                          "depth", 
-                                                          "pressure", 
-                                                          "temperature", 
-                                                          "conductivity", 
-                                                          "salinity", 
-                                                          "sound_speed", 
-                                                          "oxygen", 
-                                                          "pH", 
-                                                          "flag")] |>
+                                              ".rds")))[text_output_columns] |>
                   dplyr::rename(datetime = timeS), 
                             output_file = here::here("data", paste0("GAPCTD_", year, "_", region)),
-                            column_descriptions = c(
-                              "vessel" = "vessel: AFSC/RACE vessel code",
-                              "cruise" = "cruise: AFSC/RACE cruise code",
-                              "haul" = "haul: AFSC/RACE haul number",
-                              "stationid" = "stationid: AFSC/RACE station code",
-                              "serial_number" = "serial_number: Primary instrument serial number",
-                              "cast_direction" = "cast_directon: Cast direction",
-                              "datetime" = "datetime: date and time in Alaska Daylight Time [UTC-9:00]",
-                              "depth" = "depth: depth [m], down is positive",
-                              "pressure" = "pressure: pressure, strain gauge [db]",
-                              "conductivity" = "conductivity: conductivity [S/m]",
-                              "temperature" = "temperature: temperature [ITS-90, degrees C]",
-                              "salinity" = "salinity: salinity [PSS-78]",
-                              "sound_speed" = "sound_speed: Chen-Millero sound speed [m/s]",
-                              "oxygen" = "oxygen: dissolved oxygen [ml/l]",
-                              "pH" = "ph: pH",
-                              "flag" = "flag: data quality flag"
-                            ), 
+                            column_descriptions = column_descriptions, 
                             ctd_unit = ctd_unit, 
                             auxiliary_sensors = auxiliary_sensors,
                             dataset_name = dataset_name, 
