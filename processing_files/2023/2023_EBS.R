@@ -24,6 +24,39 @@ metadata_files <- c(
   # list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/metadata/", full.names = TRUE)
 )
 
+# Add data quality flags to leg 3-4 pH data
+
+ph_issue_casts <- c(list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/final_cnv/", full.names = TRUE),
+                    list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/final_cnv/", full.names = TRUE))
+
+for(ii in 1:length(ph_issue_casts)) {
+  
+  load_cast <- readRDS(ph_issue_casts[ii])
+  
+  if(!is.null(load_cast$downcast)) {
+    if(any(!is.na(load_cast$downcast@data$pH))) {
+      load_cast$downcast@data$flag <- rep(-1, length(load_cast$downcast@data[[ii]]))
+    }
+  }
+  
+  if(!is.null(load_cast$upcast)) {
+    if(any(!is.na(load_cast$upcast@data$pH))) {
+      load_cast$upcast@data$flag <- rep(-1, length(load_cast$upcast@data[[ii]]))
+    }
+  }
+  
+  if(!is.null(load_cast$bottom)) {
+    if(any(!is.na(load_cast$bottom@data$pH))) {
+      load_cast$bottom@data$flag <- rep(-1, length(load_cast$bottom@data[[ii]]))
+    }
+  }
+  
+  saveRDS(load_cast, ph_issue_casts[ii])
+  
+}
+
+
+
 
 # Update this section with the relevant metadata
 year <- 2023
