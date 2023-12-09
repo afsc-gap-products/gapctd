@@ -29,6 +29,15 @@ hex_to_cnv(
 \description{
 This function decodes hexadecimal-formatted Sea-Bird CTD files to cnv files.
 }
+\examples{
+# Convert SBE19plus CTD .hex file to .cnv 
+
+library(gapctd)
+
+hex_to_cnv(hex_path = system.file("./extdata/example/SBE19plus_01908106_2023_06_19_0001.hex", package = "gapctd"),
+           xmlcon_path = system.file("./extdata/example/SBE19plusV2_8106_ph_DO_leg2.xmlcon", package = "gapctd"),
+           output_path = "SBE19plus_01908106_2023_06_19_0001_raw.cnv")
+}
 \author{
 Sean Rohan
 }
