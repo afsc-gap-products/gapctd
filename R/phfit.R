@@ -50,8 +50,9 @@ phfit <- function(ph, ph_voltage, temperature) {
 #' @param ph ph of the reference standard
 #' @param temperature Reference standard temperature in degrees celcisus
 #' @param ph_voltage Measured pH channel voltage at the reference standard
-#' @param xmlcon_in_path Filepath to the current CTD configuration file.
-#' @param xmlcon_out_pth Filepath to the output CTD configuration file.
+#' @param xmlcon_in Filepath to the current CTD configuration file.
+#' @param xmlcon_out Filepath to the output CTD configuration file. 
+#' @param ph_serial_number Serial number for the pH sensor (typically four digits.)
 #' @export
 #' @author Sean Rohan
 #' @examples
@@ -65,7 +66,7 @@ phfit <- function(ph, ph_voltage, temperature) {
 #'                temperature = 23)
 
 
-ph_calibration <- function(xmlcon_in, ph_voltage, ph, temperature, ph_serial_number, xmlcon_out = NULL) {
+ph_calibration <- function(ph, temperature, ph_voltage, xmlcon_in, xmlcon_out = NULL, ph_serial_number) {
   
   stopifnot("ph_calibration: The four digit serial number for the pH sensor being calibrated must be provided." = is.numeric(ph_serial_number) & nchar(ph_serial_number) == 4)
   

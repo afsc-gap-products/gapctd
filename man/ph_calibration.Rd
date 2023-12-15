@@ -7,24 +7,26 @@
 This function estimates pH calibration parameters using Sea-Bird's calibration equation.}
 \usage{
 ph_calibration(
-  xmlcon_in,
-  ph_voltage,
   ph,
   temperature,
-  ph_serial_number,
-  xmlcon_out = NULL
+  ph_voltage,
+  xmlcon_in,
+  xmlcon_out = NULL,
+  ph_serial_number
 )
 }
 \arguments{
-\item{ph_voltage}{Measured pH channel voltage at the reference standard}
-
 \item{ph}{ph of the reference standard}
 
 \item{temperature}{Reference standard temperature in degrees celcisus}
 
-\item{xmlcon_in_path}{Filepath to the current CTD configuration file.}
+\item{ph_voltage}{Measured pH channel voltage at the reference standard}
 
-\item{xmlcon_out_pth}{Filepath to the output CTD configuration file.}
+\item{xmlcon_in}{Filepath to the current CTD configuration file.}
+
+\item{xmlcon_out}{Filepath to the output CTD configuration file.}
+
+\item{ph_serial_number}{Serial number for the pH sensor (typically four digits.)}
 }
 \description{
 Fit pH calibration parameters and generate new configuration file
