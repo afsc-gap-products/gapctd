@@ -1,3 +1,24 @@
+gapctd 2.1.1 (December 11, 2023)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added two new functions for conducting pH calibration, phfit()
+  and ph_calibration(). 
+  
+  phfit fits calibration slope and offset
+  parameters to pH calibration data, like the ph fit DOS program
+  included with SBE Data Processing.
+  
+  ph_calibration() runs phfit() then writes calibration param-
+  eters to a new configuration(.xmlcon) file.
+  
+IMPROVEMENTS
+
+- Added new code examples to documentation.
+
+
+
 gapctd 2.1.0 (December 4, 2023)
 ----------------------------------------------------------------
 

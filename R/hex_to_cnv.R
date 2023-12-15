@@ -192,6 +192,14 @@ calc_depth_from_pressure <- function(latitude, pressure) {
 #' @param output_sig_digits Optional. Significant digits after the decimal place for output channels. Only change if a subset of channels. Do not use unless outputs are are not the defaults.
 #' @export
 #' @author Sean Rohan
+#' @examples
+#' # Convert SBE19plus CTD .hex file to .cnv 
+#' 
+#' library(gapctd)
+#' 
+#' hex_to_cnv(hex_path = system.file("./extdata/example/SBE19plus_01908106_2023_06_19_0001.hex", package = "gapctd"),
+#'            xmlcon_path = system.file("./extdata/example/SBE19plusV2_8106_ph_DO_leg2.xmlcon", package = "gapctd"),
+#'            output_path = "SBE19plus_01908106_2023_06_19_0001_raw.cnv")
 
 hex_to_cnv <- function(hex_path,
                        output_path,
@@ -318,7 +326,6 @@ hex_to_cnv <- function(hex_path,
                                   "doxygen_int",
                                   "ph_int"))
     
-    # index_calibration_pars <- 1:40
     index_channels <- 1:7
   }
     

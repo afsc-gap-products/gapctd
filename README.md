@@ -14,8 +14,6 @@ This package contains functions to process CTD data that are collected during Al
 
 Functions in this package extensively leverage functionality from the [_oce_ R package for Oceanographic Analysis](https://dankelley.github.io/oce/).
 
-**Please submit an issue if you find an error or encounter unexpected function behavior.**
-
 # Installation 
 
 This package is not hosted on CRAN and should be installed through GitHub. To install this package:
@@ -32,9 +30,13 @@ install_github("afsc-gap-products/gapctd")
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
 
-#  Data products
+#  Data product access
 
-Data products from 2021-2023 NOAA/AFSC/RACE Groundfish Assessment Program bottom trawl surveys of the Bering Sea, Gulf of Alaska, and Aleutian Islands will be uploaded to the National Centers for Environmental Information by early 2024. Links to the data product, including download links, will be updated here when the data products are available.
+CTD data collected by the NOAA/AFSC/RACE Groundfish Assessment Program are archived with the [National Centers for Environmental Information (NCEI)](https://www.ncei.noaa.gov/). Visit the data product links below to access download links and data product metadata from NCEI.
+
+- [Aleutian Islands](https://doi.org/10.25921/zha7-tt11) (NCEI Accession 0286095)
+- [Eastern Bering Sea and Northern Bering Sea](https://doi.org/10.25921/rkh7-7a49) (NCEI Accession 0286094)
+- Gulf of Alaska (TBD)
 
 # References
 
