@@ -1,3 +1,12 @@
+gapctd 2.1.2 (January 17, 2024)
+----------------------------------------------------------------
+
+BUG FIX
+
+- Fix error in lowpass_filter() automatic freq_n selection when
+  freq_n is NULL.
+
+
 gapctd 2.1.1 (December 11, 2023)
 ----------------------------------------------------------------
 
