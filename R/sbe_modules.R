@@ -176,7 +176,9 @@ lowpass_filter <- function(x,
     return(new_var)
   }
   
-  freq_n <- ifelse(is.numeric(freq_n), freq_n, mode(diff(x@data$timeS)))
+  freq_n <- ifelse(is.numeric(freq_n), 
+                   freq_n, 
+                   as.numeric(names(table(diff(x@data$timeS)))[which.max(table(diff(x@data$timeS)))]))
   
   for(ii in 1:length(variables)) {
     
