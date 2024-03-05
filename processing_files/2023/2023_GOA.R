@@ -21,7 +21,7 @@ year <- 2023
 region <- "GOA"
 data_set_name <- "CTD Data from AFSC 2023 Gulf of Alaska Bottom Trawl Survey"
 cruise_name <- "2023 Gulf of Alaska Bottom Trawl Survey"
-ctd_team <- "Nicole Charriere, Cecilia O'Leary, Nate Raring, Bethany Riggle" # Do not list yourself!
+ctd_team <- "Bethany Riggle, Nicole Charriere, Cecilia O'Leary, Nate Raring" # Do not list yourself!
 creator_name <- "Sean Rohan"
 creator_email <- "sean.rohan@noaa.gov"
 dataset_doi <- ""
