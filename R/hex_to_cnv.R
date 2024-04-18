@@ -146,7 +146,10 @@ convert_ctd_btd <- function(filepath_hex,
                    quote = FALSE,
                    row.names = FALSE)
   
-  message(paste0("Baththermic data (.BTD) and header (.BTD) files written to: ", dirpath_output))
+  message(paste0("Baththermic data (.BTD) and header (.BTD) files written to: \n",
+                 filename,
+                 ".BTD",
+                 "\n", filename, ".BTH"))
   
 }
 

@@ -36,7 +36,7 @@ CTD data collected by the NOAA/AFSC/RACE Groundfish Assessment Program are archi
 
 - [Aleutian Islands](https://doi.org/10.25921/zha7-tt11) (NCEI Accession 0286095)
 - [Eastern Bering Sea and Northern Bering Sea](https://doi.org/10.25921/rkh7-7a49) (NCEI Accession 0286094)
-- Gulf of Alaska (TBD)
+- [Gulf of Alaska](https://www.ncei.noaa.gov/archive/accession/0291232) (NCEI Accession 0291232)
 
 # References
 
