@@ -3,23 +3,25 @@ library(gapctd)
 
 # Replace this with paths to cast rds files that should be included in the data product.
 cast_files <- c(
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_AP/final_cnv/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_AP_2/final_cnv/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_OEX/final_cnv/", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKP_8102/final_cnv/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKP_8103/final_cnv/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_OEX_8099/final_cnv/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_OEX_8104/final_cnv/", full.names = TRUE)
 )
 
 # Replace this with paths to metadata rds files that should be included in the data product.
 metadata_files <- c(
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_AP/metadata", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_AP_2/metadata", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2021_OEX/metadata", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKP_8102/metadata/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKP_8103/metadata/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_OEX_8099/metadata/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_OEX_8104/metadata/", full.names = TRUE)
 )
 
 
 # Update this section with the relevant metadata
 year <- 2023
 region <- "GOA"
-data_set_name <- "CTD Data from AFSC 2023 Gulf of Alaska Bottom Trawl Survey"
+dataset_name <- "CTD Data from AFSC 2023 Gulf of Alaska Bottom Trawl Survey"
 cruise_name <- "2023 Gulf of Alaska Bottom Trawl Survey"
 ctd_team <- "Bethany Riggle, Nicole Charriere, Cecilia O'Leary, Nate Raring" # Do not list yourself!
 creator_name <- "Sean Rohan"
@@ -90,7 +92,7 @@ gapctd::make_oce_ncdf(
                            license = "http://www.usa.gov/publicdomain/label/1.0/",
                            metadata_link = "",
                            instrument = "CTD",
-                           Conventions = c("CF-1.8"),
+                           Conventions = "CF-1.8",
                            standard_name_vocabulary = "CF Standard Name Table v79",
                            source = processing_info 
   )
