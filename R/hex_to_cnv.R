@@ -5,7 +5,7 @@
 #' @param filepath_hex Required. Filepath to the SBE19plus hexadecimal (.hex) file from a single cast as a character vector (e.g. "C:/CTD/202301_162_L1/sbe19plus01908091_05_04_0001.hex")/.
 #' @param filepath_xmlcon Required. Filepath to the instrument configuration file (.xmlcon) for the CTD (e.g. serial number 8091 would use the file with 8091 in the name ("C:/CTD/xmlcon configuration files/SBE19plusV2_8091.xmlcon").
 #' @param dirpath_output Optional. The default is the local working directory but may be specified with a string.
-#' @param latitude Required. Latitude in decimal degrees (approximate).
+#' @param latitude Required. Latitude in decimal degrees.
 #' @param VESSEL Required. The vessel number (e.g., 94).
 #' @param CRUISE Required. The cruise number (e.g., 201901).
 #' @param HAUL Required. The haul number (e.g. 150).
@@ -39,6 +39,7 @@ convert_ctd_btd <- function(filepath_hex,
     return(tmp)
   }
   
+  if(is.na(latitude)){ latitude <- readline("Type latitude in decimal degrees:  ") }
   if(is.na(VESSEL)){ VESSEL <- readline("Type vessel code:  ") }
   if(is.na(CRUISE)){ CRUISE <- readline("Type cruise number:  ") }
   if(is.na(HAUL)){ HAUL <- readline("Type haul number:  ") }
@@ -53,6 +54,8 @@ convert_ctd_btd <- function(filepath_hex,
   if(!file.exists(filepath_xmlcon)) {
     stop(paste0("convert_ctd_btd: Configuration file (.xmcon) not found at ", filepath_xmlcon))
   }
+  
+  stopifnot("convert_ctd_btd: latitude must be numeric." = is.numeric(latitude))
   
   HAUL <- as.numeric(HAUL)
   shaul <- numbers0(x = HAUL, number_places = 4)
