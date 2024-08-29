@@ -24,14 +24,14 @@ calc_fixed_depth_var <- function(depth, var, ref_depth) {
   
   if(sel_depth == ref_depth) {
     return(sel_var)
-  } else {
-    pos <- which(depth[1:(length(depth)-1)] <= ref_depth & depth[2:(length(depth))] <= ref_depth) |>
-      min()
-    sel_var <- var[(pos-1):pos]
-    sel_depth <- depth[(pos-1):pos]
-    sel_var <- sel_var[1] + ( ( ( sel_var[2] - sel_var[1]) / ( sel_depth[2] - sel_depth[1]) ) * ( ref_depth - sel_depth[1]) )
-    
-    return(sel_var)
   }
+  
+  pos <- min(which(depth[1:(length(depth)-1)] <= ref_depth & 
+                     depth[2:(length(depth))] <= ref_depth))
+  sel_var <- var[(pos-1):pos]
+  sel_depth <- depth[(pos-1):pos]
+  sel_var <- sel_var[1] + ( ( ( sel_var[2] - sel_var[1]) / ( sel_depth[2] - sel_depth[1]) ) * ( ref_depth - sel_depth[1]) )
+  
+  return(sel_var)
   
 }
