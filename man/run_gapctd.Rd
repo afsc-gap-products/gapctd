@@ -8,7 +8,7 @@ run_gapctd(
   x,
   haul_df,
   return_stage = "full",
-  ctd_tz = "America/Anchorage",
+  ctd_tzone = "America/Anchorage",
   ctm_pars = list(),
   align_pars = c(),
   cal_rds_path = NULL,
@@ -22,7 +22,7 @@ run_gapctd(
 
 \item{return_stage}{Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full"). Can return multiple stages simultaneously. Default = "full"}
 
-\item{ctd_tz}{timezone for CTD as a character vector or numeric that is valid for POSIXct.}
+\item{ctd_tzone}{timezone for CTD as a character vector or numeric that is valid for POSIXct.}
 
 \item{ctm_pars}{Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.}
 

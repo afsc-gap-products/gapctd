@@ -1,3 +1,16 @@
+gapctd 2.1.5 (September 4, 2024)
+----------------------------------------------------------------
+
+BUG FIX
+
+- Add numbers0() function from GAPsurvey package. Needed to run
+  convert_ctd_btd() using only gapctd functions.
+  
+IMPROVEMENTS
+
+- Added option to set instrument timezone in wrapp_run_gapctd().
+
+
 gapctd 2.1.4 (August 29, 2024)
 ----------------------------------------------------------------
 

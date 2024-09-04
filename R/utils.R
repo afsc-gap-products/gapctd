@@ -323,3 +323,35 @@ offset_list_to_vector <- function(offset_list, variables) {
   return(out)
   
 }
+
+
+#' Make numbers the same length preceded by 0s
+#'
+#' @param x a single or vector of values that need to be converted from something like 1 to "001"
+#' @param number_places default = NA. If equal to NA, the function will take use the longest length of a value provided in x (example 1). If equal to a number, it will make sure that every number is the same length of number_places (example 2) or larger (if a value of x has more places than number_places(example 3)).
+#'
+#' @noRd
+#' @return A string of the values in x preceeded by "0"s
+#'
+#' @examples
+#' # example 1
+#' numbers0(x = c(1,11,111))
+#' # example 2
+#' numbers0(x = c(1,11,111), number_places = 4)
+#' # example 3
+#' numbers0(x = c(1,11,111), number_places = 2)
+numbers0 <- function (x, number_places = NA) {
+  x<-as.numeric(x)
+  xx <- rep_len(x = NA, length.out = length(x))
+  if (is.na(number_places)){
+    number_places <- max(nchar(x))
+  }
+  for (i in 1:length(x)) {
+    xx[i] <- paste0(ifelse(number_places<nchar(x[i]),
+                           "",
+                           paste(rep_len(x = 0,
+                                         length.out = number_places-nchar(x[i])),
+                                 collapse = "")), as.character(x[i]))
+  }
+  return(xx)
+}

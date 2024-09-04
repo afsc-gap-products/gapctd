@@ -11,7 +11,8 @@ wrapper_run_gapctd(
   vessel = NULL,
   cruise = NULL,
   channel = NULL,
-  racebase_tzone = "America/Anchorage"
+  racebase_tzone = "America/Anchorage",
+  ctd_tzone = "America/Anchorage"
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ wrapper_run_gapctd(
 \item{channel}{Optional. RODBC channel; only used when haul_df = NULL.}
 
 \item{racebase_tzone}{Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()}
+
+\item{ctd_tzone}{Time zone for CTD events. Passed to run_gapctd().}
 }
 \value{
 Writes rds files with cast data to /output/[processing_method]
