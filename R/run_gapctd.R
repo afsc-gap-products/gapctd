@@ -9,6 +9,7 @@
 #' @param cruise Optional. Cruise code as a numeric vector (>= 1L). 
 #' @param channel Optional. RODBC channel; only used when haul_df = NULL.
 #' @param racebase_tzone Time zone for events and start_time in racebase/race_data tables. Passed to get_haul_data()
+#' @param ctd_tzone Time zone for CTD events. Passed to run_gapctd().
 #' @return Writes rds files with cast data to /output/[processing_method]
 #' @export
 
@@ -18,7 +19,8 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
                                vessel = NULL,
                                cruise = NULL,
                                channel = NULL,
-                               racebase_tzone = "America/Anchorage") {
+                               racebase_tzone = "America/Anchorage",
+                               ctd_tzone = "America/Anchorage") {
   
   # Internal function to write CTD data to output files if the outputs contain data
   gapctd_write_rds <- function(x, out_path, in_path, gapctd_method, exclude_bottom = FALSE) {
@@ -146,7 +148,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     # Create files with just upcasts or downcast
     ctd_split <- gapctd::run_gapctd(x = ctd_dat, 
                                     haul_df = haul_df, 
-                                    ctd_tz = "America/Anchorage",
+                                    ctd_tzone = "America/Anchorage",
                                     return_stage = "split",
                                     cal_rds_path = cal_rds_path)
     
@@ -165,7 +167,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
     if(all(c("downcast", "upcast") %in% names(ctd_split))) {
       ctd_tsa <- try(gapctd::run_gapctd(x = ctd_dat, 
                                         haul_df = haul_df, 
-                                        ctd_tz = "America/Anchorage",
+                                        ctd_tzone = "America/Anchorage",
                                         return_stage = "full", # w/ Density inversion check and completeness check
                                         align_pars = list(),
                                         ctm_pars = list(),
@@ -198,7 +200,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       
       ctd_downcast_msg <- gapctd::run_gapctd(x = sel_downcast, 
                                              haul_df = haul_df, 
-                                             ctd_tz = "America/Anchorage",
+                                             ctd_tzone = "America/Anchorage",
                                              return_stage = "full",
                                              align_pars = list(),
                                              ctm_pars = msg_pars_dc,
@@ -214,7 +216,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       
       ctd_upcast_msg <- gapctd::run_gapctd(x = sel_upcast, 
                                            haul_df = haul_df, 
-                                           ctd_tz = "America/Anchorage",
+                                           ctd_tzone = "America/Anchorage",
                                            return_stage = "full", 
                                            align_pars = list(),
                                            ctm_pars = msg_pars_uc,
@@ -246,7 +248,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       # Typical CTM: Estimate temperature alignment, use manufacturer-recommended CTM parameters
       ctd_typical_ctm <- gapctd::run_gapctd(x = ctd_dat, 
                                             haul_df = haul_df, 
-                                            ctd_tz = "America/Anchorage",
+                                            ctd_tzone = "America/Anchorage",
                                             return_stage = "full", # w/ Density inversion check and completeness check
                                             align_pars = list(),
                                             ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
@@ -261,7 +263,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
       # Typical: Manufacturer-recommended alignment and CTM parameters
       ctd_typical <- gapctd::run_gapctd(x = ctd_dat, 
                                         haul_df = haul_df, 
-                                        ctd_tz = "America/Anchorage",
+                                        ctd_tzone = "America/Anchorage",
                                         return_stage = "full", # w/ Density inversion check and completeness check
                                         align_pars = list(temperature = -0.5),
                                         ctm_pars = list(alpha_C = 0.04, beta_C = 1/8),
@@ -305,7 +307,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 #' @param x oce object
 #' @param haul_df data.frame containing haul data from RACEBASE that includes metadata for the cnv file.
 #' @param return_stage Character vector denoting which stages of processing should be included in the output (options "typical", "split", "align", "tmcorrect", "full"). Can return multiple stages simultaneously. Default = "full"
-#' @param ctd_tz timezone for CTD as a character vector or numeric that is valid for POSIXct.
+#' @param ctd_tzone timezone for CTD as a character vector or numeric that is valid for POSIXct.
 #' @param ctm_pars Used for remedial cell thermal mass corrections. Optional list of parameters to use for cell thermal mass correction. Must contain alpha_C and beta_C.
 #' @param align_pars A list object with alignment parameters for a variable, e.g., list(temperature = -0.5)
 #' @param cal_rds_path Filepath to RDS containing calibration parameters. Required for oxygen data processing.
@@ -315,7 +317,7 @@ wrapper_run_gapctd <- function(cnv_dir_path = here::here("cnv"),
 #' @references Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p.
 #' @author Sean Rohan
 
-run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anchorage", ctm_pars = list(), align_pars = c(),
+run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tzone = "America/Anchorage", ctm_pars = list(), align_pars = c(),
                        cal_rds_path = NULL, cor_var = "conductivity") {
   
   stopifnot("run_gapctd: Invalid return_stage. Must be one of 'split', 'median_filter', 'lowpass_filter', 'align', 'ctmcorrect', 'slowdown', 'bin_average', or 'full'" = 
@@ -335,7 +337,7 @@ run_gapctd <- function(x, haul_df, return_stage = "full", ctd_tz = "America/Anch
   
   # Force timezone to AKDT (America/Anchorage)
   x@metadata$startTime <- lubridate::force_tz(x@metadata$startTime, 
-                                              tz = ctd_tz)
+                                              tz = ctd_tzone)
   
   
   # Append haul data -------------------------------------------------------------------------------
@@ -586,9 +588,38 @@ get_haul_data <- function(channel, vessel, cruise, out_path = NULL, tzone = "Ame
   
   haul_dat <- RODBC::sqlQuery(channel = channel,
                               query =   paste0(
-                                "select a.vessel, a.cruise, a.haul, a.bottom_depth, a.stationid, a.gear_depth, a.gear_temperature, a.surface_temperature, a.performance, a.haul_type, a.start_time, a.start_latitude, a.start_longitude, a.end_latitude, a.end_longitude, c.date_time, c.event_type_id, e.name
-from racebase.haul a, race_data.cruises b, race_data.events c, race_data.hauls d, race_data.event_types e
-where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), ") and a.vessel = b.vessel_id and a.cruise = b.cruise and c.haul_id = d.haul_id and d.haul = a.haul and d.cruise_id = b.cruise_id and c.event_type_id = e.event_type_id and c.event_type_id in (3,6,7)")) |>
+                                "select a.vessel, 
+                                a.cruise, 
+                                a.haul, 
+                                a.bottom_depth, 
+                                a.stationid, 
+                                a.gear_depth, 
+                                a.gear_temperature, 
+                                a.surface_temperature, 
+                                a.performance, 
+                                a.haul_type, 
+                                a.start_time, 
+                                a.start_latitude, 
+                                a.start_longitude, 
+                                a.end_latitude, 
+                                a.end_longitude, 
+                                c.date_time, 
+                                c.event_type_id, 
+                                e.name
+                                from racebase.haul a, 
+                                race_data.cruises b, 
+                                race_data.events c, 
+                                race_data.hauls d, 
+                                race_data.event_types e 
+                                where a.vessel = ", vessel, 
+                                "and a.cruise in (", paste(cruise, collapse = ","), 
+                                ") and a.vessel = b.vessel_id 
+                                and a.cruise = b.cruise 
+                                and c.haul_id = d.haul_id 
+                                and d.haul = a.haul 
+                                and d.cruise_id = b.cruise_id 
+                                and c.event_type_id = e.event_type_id 
+                                and c.event_type_id in (3,6,7)")) |>
     dplyr::mutate(DATE_TIME = lubridate::force_tz(DATE_TIME, tzone = "UTC"),
                   START_TIME = lubridate::force_tz(START_TIME, tzone = tzone))
   
@@ -623,12 +654,12 @@ where a.vessel = ", vessel, "and a.cruise in (", paste(cruise, collapse = ","), 
 #' 
 #' @param x oce object
 #' @param haul_df data.frame containing haul metadata
-#' @param ctd_tz timezone for the ctd as a character vector or numeric
+#' @param ctd_tzone timezone for the ctd as a character vector or numeric
 #' @return A data.frame with haul metadata and cast times.
 #' @export
 #' @author Sean Rohan
 
-append_haul_data <- function(x, haul_df, ctd_tz = "America/Anchorage") {
+append_haul_data <- function(x, haul_df, ctd_tzone = "America/Anchorage") {
   # Assign CTD timezone in oce metadata
   delta_time <- abs(difftime(haul_df$START_TIME, 
                              x@metadata$startTime,

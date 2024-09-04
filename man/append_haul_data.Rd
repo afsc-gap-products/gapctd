@@ -4,14 +4,14 @@
 \alias{append_haul_data}
 \title{Find cast times and metadata for a haul (R workflow)}
 \usage{
-append_haul_data(x, haul_df, ctd_tz = "America/Anchorage")
+append_haul_data(x, haul_df, ctd_tzone = "America/Anchorage")
 }
 \arguments{
 \item{x}{oce object}
 
 \item{haul_df}{data.frame containing haul metadata}
 
-\item{ctd_tz}{timezone for the ctd as a character vector or numeric}
+\item{ctd_tzone}{timezone for the ctd as a character vector or numeric}
 }
 \value{
 A data.frame with haul metadata and cast times.

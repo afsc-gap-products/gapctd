@@ -1,7 +1,7 @@
 Package: gapctd
 Type: Package
 Title: Process CTD data from bottom trawl surveys
-Version: 2.1.4
+Version: 2.1.5
 Authors@R: c(person("Sean", "Rohan", 
               email = "sean.rohan@noaa.gov", 
               role = c("aut", "cre")),
