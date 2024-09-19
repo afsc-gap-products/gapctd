@@ -1,3 +1,19 @@
+gapctd 2.1.6 (September 19, 2024)
+----------------------------------------------------------------
+
+IMPROVEMENTS
+
+- Added vessel metadata field to netCDF outputs generated using
+  make_oce_ncdf(vessel_attributes = [data.frame]), where the 
+  input data.frame includes the following fields:
+    - vessel: AFSC/RACE vessel code
+    - vessel_name: Name of the vessel
+    - imo: International Maritime Organization (IMO) code
+    - call_sign: Vessel's maritime call sign
+    - flag: Flag country of the vessel
+    - year_built: Year the vessel was built
+    
+
 gapctd 2.1.5 (September 4, 2024)
 ----------------------------------------------------------------
 

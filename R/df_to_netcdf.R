@@ -126,7 +126,7 @@ df_to_ncdf <- function(x,
   ncout <- RNetCDF::create.nc(filename = output_filename,
                               format = "netcdf4")
   
-  message(paste0("Adding index for ", length(unique(x$index)), " samples/locations."))
+  message("Adding index for ", length(unique(x$index)), " samples/locations.\n")
   # Define dimensions (index)
   RNetCDF::dim.def.nc(ncfile = ncout,
                       dimname = "index", 
@@ -154,7 +154,7 @@ df_to_ncdf <- function(x,
         dim_vals <- sort(dim_vals)
       }
       
-      message(paste0("Adding 3D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii]))
+      message("Adding 3D dimension ", dim_names_3d[ii], " with units ", dim_units_3d[ii], "\n")
       
       RNetCDF::dim.def.nc(ncfile = ncout,
                           dimname = dim_names_3d[ii], 
@@ -202,7 +202,7 @@ df_to_ncdf <- function(x,
   
   for(jj in 1:length(combined_var_dim_names_2d)) {
     
-    message(paste0("Adding 2D variable ", combined_var_dim_names_2d[jj], " with units ", combined_var_dim_units_2d[jj]))
+    message("Adding 2D variable ", combined_var_dim_names_2d[jj], " with units ", combined_var_dim_units_2d[jj], "\n")
     
     var_vals <- (x |> dplyr::select(match(x = c("index", 
                                                 combined_var_dim_names_2d[jj]), 
@@ -255,7 +255,7 @@ df_to_ncdf <- function(x,
     # Define 3D variables and assign to list
     for(kk in 1:length(var_names_3d)) {
       
-      message(paste0("Adding 3D variable ", var_names_3d[kk], " with units ", var_units_3d[kk]))
+      message("Adding 3D variable ", var_names_3d[kk], " with units ", var_units_3d[kk], "\n")
       
       val_matrix <- dplyr::select(x, match(c(var_names_3d[kk], 
                                              dim_names_3d, 
@@ -271,7 +271,7 @@ df_to_ncdf <- function(x,
       mat_type <- try(vec_to_nc_class(vec = val_matrix[!is.na(val_matrix)]), silent = TRUE)
       
       if(class(mat_type) == "try-error") {
-        message(paste0("val_matrix class", print(class(val_matrix)), "not supported. Returning object for inspection."))
+        message("val_matrix class", print(class(val_matrix)), "not supported. Returning object for inspection.\n")
         return(val_matrix)
       }
       
@@ -332,7 +332,7 @@ df_to_ncdf <- function(x,
 
   # Add instrument attributes
   if(!is.null(instrument_attributes) & !is.null(instrument_values)) {
-    message("Adding instrument attributes")
+    message("Adding instrument attributes.\n")
     RNetCDF::var.def.nc(ncfile = ncout, 
                         varname = "instrument", 
                         vartype = vec_to_nc_class(vec = "NC_STRING"),
@@ -349,7 +349,7 @@ df_to_ncdf <- function(x,
   
   # Add global attributes to NetCDF object
   for(mm in 1:length(global_attributes)) {
-    message(c("Adding global attribute ", names(global_attributes)[mm]))
+    message(c("Adding global attribute ", names(global_attributes)[mm], "\n"))
     RNetCDF::att.put.nc(ncfile = ncout,
                         variable = "NC_GLOBAL",
                         name = names(global_attributes)[mm],
@@ -514,6 +514,7 @@ make_metadata_file <- function(rds_dir_path = here::here("output", "gapctd"),
 #' @param output_file Output filepath for netCDF file.
 #' @param precision Precision to use for variables as a named numeric vector.
 #' @param global_attributes List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).
+#' @param vessel_attributes data.frame containing vessel metadata
 #' @export
 #' @author Sean Rohan
 
@@ -549,7 +550,13 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                                                    instrument = "CTD",
                                                    Conventions = "CF-1.8",
                                                    standard_name_vocabulary = "CF Standard Name Table v79",
-                                                   source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd")))) {
+                                                   source = paste0("CTD data processed using gapctd ", packageVersion(pkg = "gapctd"))),
+                          vessel_attributes = data.frame(vessel = c(94, 134, 148, 162, 176),
+                                                         vessel_name = c("Vesteraalen", "Northwest Explorer", "Ocean Explorer", "Alaska Knight", "Alaska Provider"),
+                                                         imo = c(8010219, 7926538, 8412297, 9037769, 8213225),
+                                                         call_sign = c("WDJ3586", "WCZ9007", "WCZ9006", "WDD6948", "WDG2215"),
+                                                         flag = c("USA", "USA", "USA", "USA", "USA"),
+                                                         year_built = c(1979, 1979, 1984, 1993, 1982))) {
   
   req_attributes <- c("title", "references", "id", "cdm_data_type", "cruise", "institution", "contributor_name",
                       "creator_name", "creator_institution", "creator_email","publisher", "publisher_type", 
@@ -700,6 +707,12 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
     dplyr::select(vessel, ctd_serial_number, ctd_calibration_date) |>
     unique()
   
+  if(!is.null(vessel_attributes)) {
+    instrument_df <- dplyr::left_join(instrument_df, 
+                                      vessel_attributes, 
+                                      by = "vessel")
+  }
+  
   # Set up global attributes list
   g_attributes <- list(references = global_attributes$references,
                        id = global_attributes$id,
@@ -729,7 +742,7 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
   convert_index <- which(!(unlist(sapply(all_profiles, 
                                          FUN = function(x) class(x)[1])) %in% c("numeric", "integer", "character", "logical", "matrix", "factor")))
   
-  message(paste0("make_oce_ncdf: Converting ", paste(names(all_profiles)[convert_index], sep = ", ") ," to character." ))
+  message("make_oce_ncdf: Converting ", paste(names(all_profiles)[convert_index], sep = ", ") ," to character.\n" )
   for(ii in convert_index) {
     all_profiles[, ii] <- as.character(all_profiles[, ii])
   }
@@ -759,11 +772,16 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                                                                     "Interpolated value. Density inversion error detected based on buoyancy frequency and corrected using automatic removal and interpolation of point.",
                                                                     "Interpolated value. Point mannually flagged and removed during visual inspection then estimated through interpolation.")),
                      var_units_3d = c("s", "dbar", "degree_C", "1", "g kg-1", "kg m-3", "s-2", "S m-1)", "m s-1", "1", "ml l-1", "1"),
-                     instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel"),
+                     instrument_attributes = c("make_model", "serial_number", "calibration_date", "vessel", "vessel_name", "imo", "call_sign", "flag", "year_built"),
                      instrument_values = list(make_model = "Sea-Bird SBE19plus V2",
                                               serial_number = instrument_df$ctd_serial_number,
                                               calibration_date = instrument_df$ctd_calibration_date,
-                                              vessel = instrument_df$vessel),
+                                              vessel = instrument_df$vessel,
+                                              vessel_name = instrument_df$vessel_name,
+                                              imo = instrument_df$imo,
+                                              call_sign = instrument_df$call_sign,
+                                              flag = instrument_df$flag,
+                                              year_built = instrument_df$year_built),
                      global_attributes = g_attributes)
   
 }
@@ -996,12 +1014,12 @@ make_text_table <- function(x,
   
   full_header <- c(paste(paste(header_lines, collapse = "\n"), column_lines, collapse = "\n"), "\n")
   
-  message("make_text_table: Writing header to ", output_file)
+  message("make_text_table: Writing header to ", output_file, "\n")
   writeLines(full_header, con = output_file)
   
   length_header <- length(readLines(con = output_file))
   
-  message("make_text_table: Writing ", nrow(x), " lines of data to ", output_file)
+  message("make_text_table: Writing ", nrow(x), " lines of data to ", output_file, "\n")
   suppressWarnings(write.table(x, file = output_file, append = TRUE, row.names = FALSE, sep = ",", quote = FALSE))
   
   # Checking output

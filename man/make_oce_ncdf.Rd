@@ -24,7 +24,12 @@ make_oce_ncdf(
     "These data may be redistributed and used without restriction.", metadata_link =
     "[DOI]", instrument = "CTD", Conventions = "CF-1.8", standard_name_vocabulary =
     "CF Standard Name Table v79", source = paste0("CTD data processed using gapctd ",
-    packageVersion(pkg = "gapctd")))
+    packageVersion(pkg = "gapctd"))),
+  vessel_attributes = data.frame(vessel = c(94, 134, 148, 162, 176), vessel_name =
+    c("Vesteraalen", "Northwest Explorer", "Ocean Explorer", "Alaska Knight",
+    "Alaska Provider"), imo = c(8010219, 7926538, 8412297, 9037769, 8213225), call_sign =
+    c("WDJ3586", "WCZ9007", "WCZ9006", "WDD6948", "WDG2215"), flag = c("USA", "USA",
+    "USA", "USA", "USA"), year_built = c(1979, 1979, 1984, 1993, 1982))
 )
 }
 \arguments{
@@ -37,6 +42,8 @@ make_oce_ncdf(
 \item{precision}{Precision to use for variables as a named numeric vector.}
 
 \item{global_attributes}{List of global attributes that is passed to gapctd::df_to_netcdf(global_attributes).}
+
+\item{vessel_attributes}{data.frame containing vessel metadata}
 }
 \description{
 Read-in files from /accepted_profiles/ and /metadata/ subdirectories and create a netCDF file. Combines data from multiple vessels from the same cruise. Must provide the following global_attributes to the function in a list: references, id, cdm_data_type, cruise, institution, contributor_name, creator_name, creator_institution, creator_email,publisher, publisher_type, publisher_url, geospatial_bounds_crs, license, metadata_link, instrument, standard_name_vocabulary, Conventions, source.
