@@ -681,7 +681,7 @@ make_oce_ncdf <- function(cast_files = c(list.files(path = here::here("final_cnv
                     sea_floor_dissolved_oxygen = mean_bottom_oxygen)
   }
   
-  message("make_oce_ncdf: Profile columns found: ", names(all_profiles))
+  message("make_oce_ncdf: Profile columns found: ", paste(names(all_profiles), collapse = ", "))
   
   # Define spatial extent of data set using WKT polygon
   geospatial_bounds <- cbind(
