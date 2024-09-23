@@ -24,7 +24,8 @@ cruise_name <- "2021 Eastern Bering Sea Continental Shelf and Northern Bering Se
 ctd_team <- "Nicole Charriere, Cecilia O'Leary, Nate Raring, Bethany Riggle" # Do not list yourself!
 creator_name <- "Sean Rohan"
 creator_email <- "sean.rohan@noaa.gov"
-dataset_doi <- ""
+dataset_citation <- "Rohan, S.K., Charriere, N.E., Riggle, B., O'Leary, C.A., Raring, N.W. (2024). Water temperature, salinity, and others taken by trawl-mounted CTD from chartered fishing vessels during the 2021-2024 Alaska Fisheries Science Center Eastern and Northern Bering Sea Annual Summer Bottom Trawl Surveys (NCEI Accession 0286094). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. https://doi.org/10.25921/rkh7-7a49. Accessed [date]."
+dataset_doi <- "10.25921/rkh7-7a49"
 ctd_unit <- "Sea-Bird SBE19plus V2 SeaCAT"
 references <- "Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p. https://doi.org/10.25923/8ape-q461"
 creator_institution <- "NOAA Alaska Fisheries Science Center"
@@ -75,8 +76,9 @@ gapctd::make_oce_ncdf(
   metadata_files = metadata_files,
   output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".nc")),
   global_attributes = list(title = dataset_name, 
-                           references = references,
+                           dataset_citation = dataset_citation,
                            id = dataset_doi,
+                           references = references,
                            cdm_data_type = "Point",
                            cruise = cruise_name,
                            institution = creator_institution,

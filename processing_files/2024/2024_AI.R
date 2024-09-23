@@ -24,7 +24,7 @@ metadata_files <- c(
 year <- 2024
 region <- "AI"
 dataset_name <- "Water temperature, salinity, and others taken by trawl-mounted CTD from chartered fishing vessels Alaska Provider and Ocean Explorer during the 2024 Alaska Fisheries Science Center Aleutian Islands Biennial Summer Bottom Trawl Survey"
-cruise_name <- "2022 Aleutian Islands Bottom Trawl Survey"
+cruise_name <- "2024 Aleutian Islands Bottom Trawl Survey"
 ctd_team <- "Bethany Riggle, Nicole Charriere, Nate Raring" # Do not list yourself!
 creator_name <- "Sean Rohan" # your name
 creator_email <- "sean.rohan@noaa.gov" # your email
@@ -54,7 +54,7 @@ text_output_columns <- c("vessel",
                    "flag")
 
 column_descriptions <- c(
-  "vessel" = "vessel: AFSC/RACE vessel code (148: Ocean Explorer, 176: Alaska Provider)",
+  "vessel" = "vessel: AFSC/RACE vessel code",
   "cruise" = "cruise: AFSC/RACE cruise code",
   "haul" = "haul: AFSC/RACE haul number",
   "stationid" = "stationid: AFSC/RACE station code",

@@ -2,8 +2,8 @@ library(ncdf4)
 
 print(con)
 
-# nc_path = here::here("data", "GAPCTD_2024_EBS.nc")
-# region = "sebs"
+nc_path = here::here("data", "GAPCTD_2021_EBS.nc")
+region = "sebs"
 
 nc_path = here::here("data", "GAPCTD_2024_AI.nc")
 region = "ai"

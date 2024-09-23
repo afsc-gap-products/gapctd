@@ -9,8 +9,8 @@ cast_files <- c(
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/final_cnv/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/final_cnv/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8101/final_cnv/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/final_cnv/", full.names = TRUE)#,
-  # list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/final_cnv/", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/final_cnv/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/final_cnv/", full.names = TRUE)
 )
 
 # Replace this with paths to metadata rds files that should be included in the data product.
@@ -20,40 +20,40 @@ metadata_files <- c(
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/metadata/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/metadata/", full.names = TRUE),
   list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8101/metadata/", full.names = TRUE),
-  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/metadata/", full.names = TRUE)#,
-  # list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/metadata/", full.names = TRUE)
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg13/metadata/", full.names = TRUE),
+  list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_NWX_8100_leg4/metadata/", full.names = TRUE)
 )
 
 # Add data quality flags to leg 3-4 pH data
 
-ph_issue_casts <- c(list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/final_cnv/", full.names = TRUE),
-                    list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/final_cnv/", full.names = TRUE))
-
-for(ii in 1:length(ph_issue_casts)) {
-  
-  load_cast <- readRDS(ph_issue_casts[ii])
-  
-  if(!is.null(load_cast$downcast)) {
-    if(any(!is.na(load_cast$downcast@data$pH))) {
-      load_cast$downcast@data$flag <- rep(-1, length(load_cast$downcast@data[[ii]]))
-    }
-  }
-  
-  if(!is.null(load_cast$upcast)) {
-    if(any(!is.na(load_cast$upcast@data$pH))) {
-      load_cast$upcast@data$flag <- rep(-1, length(load_cast$upcast@data[[ii]]))
-    }
-  }
-  
-  if(!is.null(load_cast$bottom)) {
-    if(any(!is.na(load_cast$bottom@data$pH))) {
-      load_cast$bottom@data$flag <- rep(-1, length(load_cast$bottom@data[[ii]]))
-    }
-  }
-  
-  saveRDS(load_cast, ph_issue_casts[ii])
-  
-}
+# ph_issue_casts <- c(list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_leg34/final_cnv/", full.names = TRUE),
+#                     list.files(path = "C:/Users/sean.rohan/Work/afsc/WIP/2023_AKK_8106_end_leg4/final_cnv/", full.names = TRUE))
+# 
+# for(ii in 1:length(ph_issue_casts)) {
+#   
+#   load_cast <- readRDS(ph_issue_casts[ii])
+#   
+#   if(!is.null(load_cast$downcast)) {
+#     if(any(!is.na(load_cast$downcast@data$pH))) {
+#       load_cast$downcast@data$flag <- rep(-1, length(load_cast$downcast@data[[ii]]))
+#     }
+#   }
+#   
+#   if(!is.null(load_cast$upcast)) {
+#     if(any(!is.na(load_cast$upcast@data$pH))) {
+#       load_cast$upcast@data$flag <- rep(-1, length(load_cast$upcast@data[[ii]]))
+#     }
+#   }
+#   
+#   if(!is.null(load_cast$bottom)) {
+#     if(any(!is.na(load_cast$bottom@data$pH))) {
+#       load_cast$bottom@data$flag <- rep(-1, length(load_cast$bottom@data[[ii]]))
+#     }
+#   }
+#   
+#   saveRDS(load_cast, ph_issue_casts[ii])
+#   
+# }
 
 
 
@@ -66,8 +66,8 @@ cruise_name <- "2023 Eastern Bering Sea Continental Shelf and Northern Bering Se
 ctd_team <- "Nicole Charriere, Bethany Riggle, Cecilia O'Leary, Nate Raring" # Do not list yourself!
 creator_name <- "Sean Rohan" # your name
 creator_email <- "sean.rohan@noaa.gov" # your email
-dataset_citation <- ""
-dataset_doi <- ""
+dataset_citation <- "Rohan, S.K., Charriere, N.E., Riggle, B., O'Leary, C.A., Raring, N.W. (2024). Water temperature, salinity, and others taken by trawl-mounted CTD from chartered fishing vessels during the 2021-2024 Alaska Fisheries Science Center Eastern and Northern Bering Sea Annual Summer Bottom Trawl Surveys (NCEI Accession 0286094). [indicate subset used]. NOAA National Centers for Environmental Information. Dataset. https://doi.org/10.25921/rkh7-7a49. Accessed [date]."
+dataset_doi <- "10.25921/rkh7-7a49"
 ctd_unit <- "Sea-Bird SBE19plus V2 SeaCAT"
 references <- "Rohan, S. K., Charriere, N. E., Riggle, B., O’Leary, C. A., and Raring, N. W. 2023. A flexible approach for processing data collected using trawl-mounted CTDs during Alaska bottom-trawl surveys. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-475, 43 p. https://doi.org/10.25923/8ape-q461"
 creator_institution <- "NOAA Alaska Fisheries Science Center"
@@ -117,8 +117,9 @@ gapctd::make_oce_ncdf(
   metadata_files = metadata_files,
   output_file = here::here("data", paste0("GAPCTD_", year, "_", region, ".nc")),
   global_attributes = list(title = dataset_name, 
-                           references = references,
+                           dataset_citation = dataset_citation,
                            id = dataset_doi,
+                           references = references,
                            cdm_data_type = "Point",
                            cruise = cruise_name,
                            institution = creator_institution,
