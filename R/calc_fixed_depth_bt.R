@@ -11,8 +11,7 @@
 calc_fixed_depth_var_bt <- 
   function(depth,
            var,
-           ref_depth, 
-           min_depth = 0) {
+           ref_depth) {
     
     # Case when there's no data or surface data are missing
     if(min(depth) > (ref_depth + 5) | length(depth) < 1) {
@@ -20,8 +19,8 @@ calc_fixed_depth_var_bt <-
     }
     
     # Select only data from below the surface
-    var <- var[depth >= min_depth]
-    depth <- depth[depth >= min_depth]
+    var <- var[depth >= 0]
+    depth <- depth[depth >= 0]
     
     # Case where there's no data shallower than the reference depth, but data within 5 m
     if(length(depth) > 1 & min(depth) > ref_depth) {

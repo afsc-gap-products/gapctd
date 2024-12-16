@@ -4,7 +4,7 @@
 \alias{calc_fixed_depth_var_bt}
 \title{Estimate value of a profile variable at a fixed depth}
 \usage{
-calc_fixed_depth_var_bt(depth, var, ref_depth, min_depth = 0)
+calc_fixed_depth_var_bt(depth, var, ref_depth)
 }
 \arguments{
 \item{depth}{Numeric vector of depth values}
