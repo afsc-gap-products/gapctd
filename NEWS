@@ -1,3 +1,12 @@
+gapctd 2.1.7 (December 16, 2024)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added calc_fixed_depth_var() function to implement RACE/GAP 
+  bathythermic surface temperature algorithm.
+  
+
 gapctd 2.1.6 (September 19, 2024)
 ----------------------------------------------------------------
 
