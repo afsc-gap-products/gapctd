@@ -1,6 +1,6 @@
 make_pre_2020_summary <- function() {
   
-  nc_files <- list.files(here::here("data", "EBS"), pattern = "Bottom_Trawl_Survey_CTD", full.names = TRUE)
+  nc_files <- list.files(system.file("extdata", "nc", package = "gapctd"), pattern = "Bottom_Trawl_Survey_CTD", full.names = TRUE)
   
   bottom_dat <- data.frame()
   
@@ -42,7 +42,7 @@ make_pre_2020_summary <- function() {
 
 make_post_2020_summary <- function() {
   
-  nc_files <- list.files(here::here("data", "EBS"), pattern = "GAPCTD", full.names = TRUE)
+  nc_files <- list.files(here::here("data"), pattern = "_EBS.nc", full.names = TRUE)
   
   bottom_dat <- data.frame()
   
@@ -75,11 +75,11 @@ library(gapctd)
 library(coldpool)
 library(akgfmaps)
 
-sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
+sebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
                                          set.crs = coldpool::ebs_proj_crs)
-panel_extent <- data.frame(y = c(52, 64),
-                           x = c(-175, -156)) %>%
-  akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
+# panel_extent <- data.frame(y = c(52, 64),
+#                            x = c(-175, -156)) %>%
+#   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
 
 channel <- coldpool::get_connected(schema = "AFSC")
 
@@ -125,13 +125,14 @@ for(kk in sal_years) {
                                  lon.col = "longitude",
                                  interpolation.crs = "EPSG:3338",
                                  cell.resolution = c(5000, 5000),
-                                 select.region = "sebs")
+                                 select.region = "ebs",
+                                 methods = "ste")
 }
 
 
 ste_files <- list.files(here::here("output", "raster", "sebs", "bottom_sal_psu"), 
            pattern = "ste",
-           full.names = TRUE)?
+           full.names = TRUE)
   
 
 psu_stack <- coldpool::make_raster_stack(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/sebs/bottom_sal_psu/",
