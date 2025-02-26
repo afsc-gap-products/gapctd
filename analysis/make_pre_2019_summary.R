@@ -75,7 +75,7 @@ library(gapctd)
 library(coldpool)
 library(akgfmaps)
 
-sebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
                                          set.crs = coldpool::ebs_proj_crs)
 # panel_extent <- data.frame(y = c(52, 64),
 #                            x = c(-175, -156)) %>%
@@ -111,7 +111,6 @@ post_2020_ctd_df <- post_2020_ctd_df |>
   dplyr::summarize(date = max(date)) |>
   dplyr::inner_join(post_2020_ctd_df)
 
-
 bottom_temp_sal <- dplyr::bind_rows(pre_2020_ctd_df, post_2020_ctd_df)
 
 sal_years <- unique(bottom_temp_sal$year)
@@ -125,7 +124,7 @@ for(kk in sal_years) {
                                  lon.col = "longitude",
                                  interpolation.crs = "EPSG:3338",
                                  cell.resolution = c(5000, 5000),
-                                 select.region = "ebs",
+                                 select.region = "sebs",
                                  methods = "ste")
 }
 
@@ -136,51 +135,50 @@ ste_files <- list.files(here::here("output", "raster", "sebs", "bottom_sal_psu")
   
 
 psu_stack <- coldpool::make_raster_stack(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/sebs/bottom_sal_psu/",
-                            file_name_contains = "ste_")
+                            file_name_contains = "ste_", 
+                            wrap = FALSE)
 
 
-make_raster_stack <- function(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/sebs/bottom_sal_psu/",
-                              file_name_contains = "ste_",
-                              file_type = ".tif") {
-  
-  file_paths <- dir(file_path, full.names = T)[grep(file_type, dir(file_path, full.names = T))]
-  
-  if(length(file_paths[-grep(".xml", file_paths)]) > 0) {
-    file_paths <- file_paths[-grep(".xml", file_paths)]
-  }
-  
-  if(!is.null(file_name_contains)) {
-    file_paths <- file_paths[grep(file_name_contains, file_paths)]
-  }
-  
-  for(i in 1:length(file_paths)) {
-    if(i == 1) {
-      rstack <- raster::stack(raster::raster(file_paths[i], values = TRUE))
-    } else {
-      rstack <- raster::addLayer(rstack, raster(file_paths[i], values = TRUE))
-    }
-  }
-  
-  return(rstack)
-}
+# make_raster_stack <- function(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/sebs/bottom_sal_psu/",
+#                               file_name_contains = "ste_",
+#                               file_type = ".tif") {
+#   
+#   file_paths <- dir(file_path, full.names = T)[grep(file_type, dir(file_path, full.names = T))]
+#   
+#   if(length(file_paths[-grep(".xml", file_paths)]) > 0) {
+#     file_paths <- file_paths[-grep(".xml", file_paths)]
+#   }
+#   
+#   if(!is.null(file_name_contains)) {
+#     file_paths <- file_paths[grep(file_name_contains, file_paths)]
+#   }
+#   
+#   for(i in 1:length(file_paths)) {
+#     if(i == 1) {
+#       rstack <- raster::stack(raster::raster(file_paths[i], values = TRUE))
+#     } else {
+#       rstack <- raster::addLayer(rstack, raster(file_paths[i], values = TRUE))
+#     }
+#   }
+#   
+#   return(rstack)
+# }
 
-writeRaster(rstack, 
+writeCDF(psu_stack, 
             "bottom_salinity.nc", 
             overwrite=TRUE, 
-            format="CDF",
             varname = "sea_floor_practical_salinity", 
-            varunit = "1", 
             longname="Bottom practical salinity (PSS-78)", 
-            xname="x",   
-            yname="y",
-            zname="nbands",
-            zunit="numeric")
+            zname="nbands")
 
-ncfile <- RNetCDF::open.nc("bottom_salinity.nc")
+test <- terra::rast("bottom_salinity.nc")
 
-salinity_df <- data.frame()
+# ncfile <- RNetCDF::open.nc("bottom_salinity.nc")
 
-for(ii in 1:dim(rstack)[3]) {
+salinity_df <- as.data.frame(test, xy = TRUE)
+names(salinity_df)[!names(salinity_df) %in% c("x", "y")] <- c(2008:2017, 2021, 2022, 2023, 2024)
+
+for(ii in 1:dim(psu_stack)[3]) {
   ex_df <- expand.grid(x = RNetCDF::var.get.nc(ncfile, variable = "x"),
                        y = RNetCDF::var.get.nc(ncfile, variable = "y"))
   ex_df$z <- as.vector(RNetCDF::var.get.nc(ncfile, variable = "sea_floor_practical_salinity")[,,ii])
