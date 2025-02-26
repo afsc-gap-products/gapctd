@@ -130,12 +130,12 @@ for(kk in sal_years) {
 }
 
 
-ste_files <- list.files(here::here("output", "raster", "ebs", "bottom_sal_psu"), 
+ste_files <- list.files(here::here("output", "raster", "sebs", "bottom_sal_psu"), 
                         pattern = "ste",
                         full.names = TRUE)
 
 
-psu_stack <- coldpool::make_raster_stack(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/ebs/bottom_sal_psu/",
+psu_stack <- coldpool::make_raster_stack(file_path = "C:/Users/sean.rohan/Work/afsc/gapctd/output/raster/sebs/bottom_sal_psu/",
                                          file_name_contains = "ste_",
                                          wrap = FALSE)
 
@@ -176,20 +176,18 @@ psu_df <- tidyr::pivot_longer(psu_df,
   dplyr::mutate(year = readr::parse_number(year))
 
 psu_df <- dplyr::bind_rows(psu_df,
-                           data.frame(x = 1, y = 1, year = 2019, salinity = NA))
-
-sel_years <- c(2017, 2019, 2021, 2022, 2023)
+                           data.frame(x = 1, y = 1, year = 2018:2020, salinity = NA))
 
 panel_extent <- data.frame(y = ebs_layers$plot.boundary$y,
                            x = ebs_layers$plot.boundary$x)
 
 label_2019 <- data.frame(x = mean(panel_extent$x),
                          y = mean(panel_extent$y),
-                         label = "To be\nprocessed",
-                         year = 2019)
+                         label = c("Not\navailable", "Not\navailable", "No\nsurvey"),
+                         year = c(2018:2020))
 
 
-sal_breaks <- c(-Inf, 27:34, Inf)
+sal_breaks <- c(-Inf, 28:33, Inf)
 
 sal_viridis_option <- "E" # viridis turbo palette
 
@@ -220,7 +218,7 @@ map_salinity <- ggplot() +
             fill = "grey70", 
             color = NA) +
     geom_sf(data = ebs_layers$survey.area, fill = "grey75") +
-    geom_tile(data = dplyr::filter(psu_df, year %in% sel_years),
+  geom_tile(data = psu_df,
               aes(x = x, 
                   y = y,
                   fill = cut(salinity, sal_breaks))) +
@@ -230,17 +228,29 @@ map_salinity <- ggplot() +
     geom_sf(data = ebs_layers$bathymetry) +
     geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
                                    y = panel_extent$y[c(1,1,2,2,1)],
-                                   year = 2019),
+                                   year = c(2018)),
                  aes(x = x,
                      y = y),
                  fill = "white") +
+  geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
+                                 y = panel_extent$y[c(1,1,2,2,1)],
+                                 year = c(2019)),
+               aes(x = x,
+                   y = y),
+               fill = "white") +
+  geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
+                                 y = panel_extent$y[c(1,1,2,2,1)],
+                                 year = c(2020)),
+               aes(x = x,
+                   y = y),
+               fill = "white") +
     geom_label(data = label_2019,
                aes(x = x,
                    y = y,
                    label = label),
                label.size = NA) +
     scale_fill_manual(values = sal_colors) +
-    facet_wrap(~year, nrow = 2) +
+    facet_wrap(~year, nrow = 5) +
     scale_x_continuous(name = "Longitude", 
                        breaks = c(-180, -170, -160),
                        limits = ebs_layers$plot.boundary$x) + 
@@ -251,7 +261,7 @@ map_salinity <- ggplot() +
     theme(legend.position = "none", axis.title = element_blank())
 
 
-png(file = here::here("plots", "efh_salinity_2017_2024.png"), width = 5, height = 4, units = "in", res = 300)
+png(file = here::here("plots", "efh_salinity_2008_2024.png"), width = 5, height = 7, units = "in", res = 300)
 cowplot::plot_grid(map_salinity, 
                    sal_map_cbar, 
                    rel_heights = c(0.9, 0.1),
@@ -262,9 +272,9 @@ dev.off()
 png(file = here::here("plots", "ex_salinity_timeseries.png"), width = 6.5, height = 6, units = "in", res = 300)
 print(
   cowplot::plot_grid(
-    ggplot(data = salinity_df |>
+    ggplot(data = psu_df |>
              dplyr::group_by(year) |>
-             dplyr::summarise(mean_salinity = mean(z)),
+             dplyr::summarise(mean_salinity = mean(salinity)),
            aes(x = year,
                y = mean_salinity,
                group = year < 2021)) +
@@ -276,16 +286,16 @@ print(
     ggplot() +
       geom_hline(yintercept = 0, color = "grey70") +
       geom_hline(yintercept = c(-1,1), linetype = 2, color = "grey70") +
-      geom_hline(yintercept = c(-2,2), linetype = 3, color = "grey70") +
-      geom_point(data = salinity_df |>
+      # geom_hline(yintercept = c(-2,2), linetype = 3, color = "grey70") +
+      geom_point(data = psu_df |>
                    dplyr::group_by(year) |>
-                   dplyr::summarise(mean_salinity = mean(z)),
+                   dplyr::summarise(mean_salinity = mean(salinity)),
                  aes(x = year,
                      y = scale(mean_salinity)[,1],
                      group = year < 2021)) +
-      geom_line(data = salinity_df |>
+      geom_line(data = psu_df |>
                   dplyr::group_by(year) |>
-                  dplyr::summarise(mean_salinity = mean(z)),
+                  dplyr::summarise(mean_salinity = mean(salinity)),
                 aes(x = year,
                     y = scale(mean_salinity)[,1],
                     group = year < 2021)) +
@@ -293,4 +303,29 @@ print(
       scale_y_continuous(name = "Salinity anomaly") +
       theme_few(),
     nrow = 2))
+dev.off()
+
+
+png(file = here::here("plots", "ex_salinity_anomaly.png"), width = 6.5, height = 3, units = "in", res = 300)
+print(
+  ggplot() +
+    geom_hline(yintercept = 0, color = "grey70") +
+    geom_hline(yintercept = c(-1,1), linetype = 2, color = "grey70") +
+    # geom_hline(yintercept = c(-2,2), linetype = 3, color = "grey70") +
+    geom_point(data = psu_df |>
+                 dplyr::group_by(year) |>
+                 dplyr::summarise(mean_salinity = mean(salinity)),
+               aes(x = year,
+                   y = scale(mean_salinity)[,1],
+                   group = year < 2021)) +
+    geom_line(data = psu_df |>
+                dplyr::group_by(year) |>
+                dplyr::summarise(mean_salinity = mean(salinity)),
+              aes(x = year,
+                  y = scale(mean_salinity)[,1],
+                  group = year < 2021)) +
+    scale_x_continuous(name = "Year") +
+    scale_y_continuous(name = "Salinity anomaly") +
+    theme_few()
+)
 dev.off()

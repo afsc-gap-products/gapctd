@@ -13,6 +13,10 @@ dirpath <- here::here("analysis", "algorithm_check", "20241216")
 test_hauls <- readxl::read_xlsx(here::here(dirpath,
                                       "Surface_Temp_Algorithm_Testing_R_to_Python_Javascript.xlsx"))
 
+# test_hauls <- data.frame(VESSEL = 176, CRUISE = 202201, HAUL = c(30, 95, 110))
+
+test_hauls <- data.frame(VESSEL = 148, CRUISE = 202201, HAUL = 134)
+
 names(test_hauls) <- toupper(names(test_hauls))
 
 test_hauls$RACEBASE_ST <- -999
@@ -72,11 +76,18 @@ for(ii in 1:nrow(test_hauls)) {
                                                   "and h.haul = ", test_hauls$HAUL[ii], 
                "and c.cruise_id = h.cruise_id;")
     )
-  
-    test_hauls$RACE_DATA_ST[ii] <- 
+    
+    st1 <- try(
       gapctd::calc_fixed_depth_var(depth = upcast_data$DEPTH,
                                    var = upcast_data$TEMPERATURE,
-                                   ref_depth = 1)
+                                   ref_depth = 1), 
+      silent = TRUE)
+  
+    test_hauls$RACE_DATA_ST[ii] <- ifelse(
+      is(st1, "try-error"), 
+      NA, 
+      st1)
+      
     
     test_hauls$RACE_DATA_ST_V2[ii] <- 
       calc_fixed_depth_var_bt(depth = upcast_data$DEPTH,
@@ -86,7 +97,7 @@ for(ii in 1:nrow(test_hauls)) {
   test_hauls$RACEBASE_ST[ii] <- haul$SURFACE_TEMPERATURE
   
   test_hauls$SURFACE_TEMPERATURE_METHOD[ii] <- temperature_methods$SURFACE_TEMPERATURE_METHOD
-  test_hauls$GEAR_TEMPERATURE_METHOD[ii] <- temperature_methods$SURFACE_TEMPERATURE_METHOD
+  test_hauls$GEAR_TEMPERATURE_METHOD[ii] <- temperature_methods$GEAR_TEMPERATURE_METHOD
   test_hauls$N_UPCAST_TEMPERATURE_OBS[ii] <- nrow(upcast_data)
   
 }
