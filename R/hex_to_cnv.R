@@ -39,12 +39,28 @@ convert_ctd_btd <- function(filepath_hex = NULL,
     return(tmp)
   }
 
-  if(is.null(filepath_hex)){filepath_hex <- choose.files(default = "*.hex", caption = "Select .hex file",
-                                                       multi = FALSE, filters = Filters_hex_xmlcon_reorder,
-                                                       index = nrow(Filters_hex_xmlcon_reorder)) }
-  if(is.null(filepath_xmlcon)){filepath_xmlcon <- choose.files(default = "*.xmlcon", caption = "Select .xmlcon file",
-                                                             multi = FALSE, filters = Filters_hex_xmlcon_reorder,
-                                                             index = nrow(Filters_hex_xmlcon_reorder)) }
+###########
+
+if(is.null(filepath_hex)){
+  filepath_hex <- 
+    choose.files(
+      default = "*.hex", 
+      caption = "Select .hex file",
+      multi = FALSE, 
+      filters = matrix(c("HEX file (.hex)","*.hex"),
+                       ncol = 2)
+    ) 
+}
+if(is.null(filepath_xmlcon)){
+  filepath_xmlcon <- 
+    choose.files(
+      default = "*.xmlcon", 
+      caption = "Select .xmlcon file",
+      multi = FALSE, 
+      filters = matrix(c("Sea-Bird Instrument Configuration (.xmlcon)", "*.xmlcon"),
+                       ncol = 2)
+) 
+}
   if(is.na(latitude)){ latitude <- readline("Type latitude in decimal degrees:  ") }
   if(is.na(VESSEL)){ VESSEL <- readline("Type vessel code:  ") }
   if(is.na(CRUISE)){ CRUISE <- readline("Type cruise number:  ") }
