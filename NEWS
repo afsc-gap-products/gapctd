@@ -1,3 +1,15 @@
+gapctd 2.1.8 (March 27, 2025)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added a file selection GUI to convert_ctd_btd().
+
+BUG FIX
+
+- Fixed latitude readline error in convert_ctd_btd().
+  
+
 gapctd 2.1.7 (December 16, 2024)
 ----------------------------------------------------------------
 
