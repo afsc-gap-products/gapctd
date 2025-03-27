@@ -18,8 +18,8 @@
 #' @noRd
 #' @references https://github.com/afsc-gap-products/gapctd
 
-convert_ctd_btd <- function(filepath_hex,
-                            dirpath_output = "./",
+convert_ctd_btd <- function(filepath_hex = NULL,
+                            dirpath_output = NULL,
                             filepath_xmlcon = NULL,
                             latitude = NA,
                             VESSEL = NA,
@@ -38,8 +38,34 @@ convert_ctd_btd <- function(filepath_hex,
     tmp <- sub('/0', "/", tmp)
     return(tmp)
   }
-  
-  if(is.na(latitude)){ latitude <- readline("Type latitude in decimal degrees:  ") }
+
+if(is.null(dirpath_output)){
+  dirpath_output <- paste0(getwd(), "/")
+}
+if(is.null(filepath_hex)){
+  filepath_hex <- 
+    choose.files(
+      default = "*.hex", 
+      caption = "Select .hex file",
+      multi = FALSE, 
+      filters = matrix(c("HEX file (.hex)","*.hex"),
+                       ncol = 2)
+    ) 
+}
+if(is.null(filepath_xmlcon)){
+  filepath_xmlcon <- 
+    choose.files(
+      default = "*.xmlcon", 
+      caption = "Select .xmlcon file",
+      multi = FALSE, 
+      filters = matrix(c("Sea-Bird Instrument Configuration (.xmlcon)", "*.xmlcon"),
+                       ncol = 2)
+) 
+}
+  if(is.na(latitude)){ 
+    latitude <- readline("Type latitude in decimal degrees:  ")
+    latitude <- as.numeric(latitude)
+    }
   if(is.na(VESSEL)){ VESSEL <- readline("Type vessel code:  ") }
   if(is.na(CRUISE)){ CRUISE <- readline("Type cruise number:  ") }
   if(is.na(HAUL)){ HAUL <- readline("Type haul number:  ") }

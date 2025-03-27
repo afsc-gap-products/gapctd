@@ -1,13 +1,15 @@
 Package: gapctd
 Type: Package
 Title: Process CTD data from bottom trawl surveys
-Version: 2.1.7
-Date: 2024-12-16
+Version: 2.1.8
+Date: 2025-03-27
 Authors@R: c(person("Sean", "Rohan", 
               email = "sean.rohan@noaa.gov", 
               role = c("aut", "cre")),
               person("Cecilia", "O'Leary", 
-              role = c("aut")))
+              role = c("aut")),
+              person("Nicole", "Charriere", 
+              role = c("ctb")))
 Maintainer: Sean Rohan <sean.rohan@noaa.gov>
 Description: Package to process SBE19 CTD data from AFSC RACE/Groundfish Assessment Program bottom trawl surveys, where data are collected using trawl-mounted CTDs. The package includes implementations of modules adapted from SBE Data Processing software to streamline data processing and analysis using R.
 License: GPL (>=2)
