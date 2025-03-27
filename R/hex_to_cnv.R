@@ -19,7 +19,7 @@
 #' @references https://github.com/afsc-gap-products/gapctd
 
 convert_ctd_btd <- function(filepath_hex = NULL,
-                            dirpath_output = "./",
+                            dirpath_output = NULL,
                             filepath_xmlcon = NULL,
                             latitude = NA,
                             VESSEL = NA,
@@ -39,8 +39,9 @@ convert_ctd_btd <- function(filepath_hex = NULL,
     return(tmp)
   }
 
-###########
-
+if(is.null(dirpath_output)){
+  dirpath_output <- paste0(getwd(), "/")
+}
 if(is.null(filepath_hex)){
   filepath_hex <- 
     choose.files(
@@ -61,7 +62,10 @@ if(is.null(filepath_xmlcon)){
                        ncol = 2)
 ) 
 }
-  if(is.na(latitude)){ latitude <- readline("Type latitude in decimal degrees:  ") }
+  if(is.na(latitude)){ 
+    latitude <- readline("Type latitude in decimal degrees:  ")
+    latitude <- as.numeric(latitude)
+    }
   if(is.na(VESSEL)){ VESSEL <- readline("Type vessel code:  ") }
   if(is.na(CRUISE)){ CRUISE <- readline("Type cruise number:  ") }
   if(is.na(HAUL)){ HAUL <- readline("Type haul number:  ") }
