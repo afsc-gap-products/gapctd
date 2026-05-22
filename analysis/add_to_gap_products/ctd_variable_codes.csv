@@ -1,0 +1,13 @@
+VARIABLE,VAR_NAME,UNITS,DESCRIPTION
+1,Temperature,degrees Celsius,Temperature in degrees Celsius
+2,Salinity,PSU,Salinity in practical salinity units (EOS80)
+3,Salinity,ppm,Salinity in parts per million (EOS80 approximation)
+4,Absolute Salinity,g/mg,Salinity concentration (TEOS-10)
+5,Pressure,dbar,Pressure in decibars
+6,Dissolved Oxygen,mg/ml,"Dissolved oxygen concentration in mg/ml (Garcia and Gordon, 1992)"
+7,Dissolved Oxygen,mmol/l,Dissolved oxygen concentration in micromoles/ml
+8,pH,pH,pH
+9,Turbidity (FTU),FTU,Formazin turbidity units
+10,Turbidity (NTU),NTU,Nephelometric turbidity units
+11,Fluorescence,,
+12,Conductivity,mS,Conductivity in millisieverts
