@@ -30,13 +30,17 @@ install_github("afsc-gap-products/gapctd")
 - [Batch processing steps](./doc/batch_processing_steps.md)
 - [Batch processing instructions and example](./doc/0_batch_processing.md)
 
-#  Data product access
+# Data product access (2021-2026)
 
-CTD data collected by the NOAA/AFSC/RACE Groundfish Assessment Program are archived with the [National Centers for Environmental Information (NCEI)](https://www.ncei.noaa.gov/). Visit the data product links below to access download links and data product metadata from NCEI.
+Processed CTD data collected by the NOAA/AFSC/RACE Groundfish Assessment Program are archived with the [National Centers for Environmental Information (NCEI)](https://www.ncei.noaa.gov/). Data products containing water column profiles and on-bottom averages of temperature, pressure, depth, salinity, dissolved oxygen, pH, sound speed are provided as yearly netCDF (.nc) files can be downloaded from NCEI using the links below or from this repository.
 
-- [Aleutian Islands](https://doi.org/10.25921/zha7-tt11) (NCEI Accession 0286095)
-- [Eastern Bering Sea and Northern Bering Sea](https://doi.org/10.25921/rkh7-7a49) (NCEI Accession 0286094)
-- [Gulf of Alaska](https://doi.org/10.25921/nhfh-q422) (NCEI Accession 0291232)
+__NCEI:__
+
+- [NCEI Aleutian Islands](https://doi.org/10.25921/zha7-tt11) (NCEI Accession 0286095)
+- [NCEI Eastern Bering Sea and Northern Bering Sea](https://doi.org/10.25921/rkh7-7a49) (NCEI Accession 0286094)
+- [NCEI Gulf of Alaska](https://doi.org/10.25921/nhfh-q422) (NCEI Accession 0291232)
+- [Data products (all regions; this repo)](./data_products/)
+
 
 # References
 
