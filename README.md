@@ -39,7 +39,7 @@ __NCEI:__
 - [NCEI Aleutian Islands](https://doi.org/10.25921/zha7-tt11) (NCEI Accession 0286095)
 - [NCEI Eastern Bering Sea and Northern Bering Sea](https://doi.org/10.25921/rkh7-7a49) (NCEI Accession 0286094)
 - [NCEI Gulf of Alaska](https://doi.org/10.25921/nhfh-q422) (NCEI Accession 0291232)
-- [Data products (all regions; this repo)](./data_products/)
+- [Data products (all regions; this repo)](./data_product/)
 
 
 # References
